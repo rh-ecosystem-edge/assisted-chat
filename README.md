@@ -1,10 +1,10 @@
 # Assisted Chat
 
 This repo builds the images for and runs in a podman pod the following services:
-[ ] llama-stack (Unsupported for now, set `LLAMA_STACK_URL` in .env to use external)
-[x] assisted-service-mcp
-[x] lightspeed-core
-[x] inspector
+- [ ] llama-stack (Unsupported for now, set `LLAMA_STACK_URL` in .env to use external)
+- [x] assisted-service-mcp
+- [x] lightspeed-core
+- [x] inspector
 
 # Pre-requisites
 
@@ -36,6 +36,6 @@ git submodule update
 
 # TODO
 
-[ ] Add llama-stack support
-[ ] Automatically connect Inspector to the MCP
+- [ ] Add llama-stack support
+- [ ] Automatically connect Inspector to the MCP
 
