@@ -10,3 +10,6 @@
 	path = inspector
 	url = https://github.com/omertuc/inspector
 	branch = imager
+[submodule "assisted-installer-ui"]
+	path = assisted-installer-ui
+	url = https://github.com/openshift-assisted/assisted-installer-ui

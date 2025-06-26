@@ -29,6 +29,15 @@ function build_lightspeed_stack() {
     popd
 }
 
+function build_ui() {
+    pushd "${SCRIPT_DIR}/assisted-installer-ui/"
+    git apply ../ui-patch.diff
+    podman build -f apps/assisted-ui/Containerfile -t localhost/local-ai-chat-ui . --build-arg AIUI_APP_GIT_SHA="$(git rev-parse HEAD)" --build-arg AIUI_APP_VERSION=latest
+    git apply -R ../ui-patch.diff
+    popd
+}
+
 build_inspector
 build_assisted_mcp
 build_lightspeed_stack
+build_ui
