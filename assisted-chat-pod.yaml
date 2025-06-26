@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: assisted-chat-pod
+spec:
+  containers:
+    - name: lightspeed-stack
+      image: localhost/local-ai-chat-lightspeed-stack:latest
+      ports:
+        - containerPort: 8080
+        - hostPort: 8080
+      volumeMounts:
+        - mountPath: /app-root/lightspeed-stack.yaml
+          name: config
+          subPath: lightspeed-stack.yaml
+    - name: assisted-service-mcp
+      image: localhost/local-ai-chat-assisted-service-mcp:latest
+    - name: mcp-inspector
+      image: localhost/local-ai-chat-inspector:latest
+      ports:
+        - containerPort: 6274
+        - hostPort: 6274
+  volumes:
+    - name: config
+      hostPath:
+        path: ./config
+        type: Directory

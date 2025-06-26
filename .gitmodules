@@ -1,0 +1,12 @@
+[submodule "assisted-service-mcp"]
+	path = assisted-service-mcp
+	url = https://github.com/openshift-assisted/assisted-service-mcp
+	branch = master
+[submodule "lightspeed-stack"]
+	path = lightspeed-stack
+	url = https://github.com/lightspeed-core/lightspeed-stack
+	branch = main
+[submodule "inspector"]
+	path = inspector
+	url = https://github.com/omertuc/inspector
+	branch = imager
