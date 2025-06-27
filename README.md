@@ -32,6 +32,8 @@ git submodule update
 
 `./run.sh` - Stops the previous podman pod and starts a fresh one
 
+`./query.sh` - Example chat bot query
+
 `./logs.sh` - Follow the logs of the podman pod
 
 `./stop.sh` - Stops the podman pod 
