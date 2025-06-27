@@ -29,6 +29,10 @@ function build_lightspeed_stack() {
     popd
 }
 
+function build_lightspeed_stack_plus_llama_stack() {
+    podman build -f Containerfile.add_llama_to_lightspeed . --tag localhost/local-ai-chat-lightspeed-stack-plus-llama-stack:latest
+}
+
 function build_ui() {
     pushd "${SCRIPT_DIR}/assisted-installer-ui/"
     git apply ../ui-patch.diff
@@ -40,4 +44,5 @@ function build_ui() {
 build_inspector
 build_assisted_mcp
 build_lightspeed_stack
+build_lightspeed_stack_plus_llama_stack
 build_ui

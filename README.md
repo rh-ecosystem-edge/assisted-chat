@@ -1,12 +1,14 @@
 # Assisted Chat
 
 This repo builds the images for and runs in a podman pod the following services:
-- [ ] llama-stack (Unsupported for now, set `LLAMA_STACK_URL` in .env to use external)
 - [x] assisted-service-mcp
-- [x] lightspeed-core
+- [x] lightspeed-core + llama-stack (Same container, built separately)
 - [x] inspector
 
 # Pre-requisites
+
+- OCM offline token (you will be prompted with instructions)
+- Gemini API key (you will be prompted with instructions)
 
 ## Dependencies
 
@@ -34,8 +36,10 @@ git submodule update
 
 `./stop.sh` - Stops the podman pod 
 
+`./rm.sh` - Removes the podman pod
+
 # TODO
 
-- [ ] Add llama-stack support
+- [x] Add llama-stack support
 - [ ] Automatically connect Inspector to the MCP
 
