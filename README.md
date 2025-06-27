@@ -3,6 +3,7 @@
 This repo builds the images for and runs in a podman pod the following services:
 - [x] assisted-service-mcp
 - [x] lightspeed-core + llama-stack (Same container, built separately)
+- [x] assisted UI
 - [x] inspector
 
 # Pre-requisites
