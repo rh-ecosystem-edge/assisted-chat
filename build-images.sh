@@ -12,34 +12,22 @@ if [[ ! -d "${SCRIPT_DIR}/inspector" ||
 fi
 
 function check_redhat_subscription() {
-    echo "Checking Red Hat subscription requirements..."
+    echo "Checking Red Hat subscription requirements... You msut be registered to complete the build successfully."
 
     # Check if subscription-manager is available
     if ! command -v subscription-manager &> /dev/null; then
-        echo "ERROR: subscription-manager is not available. Please install subscription-manager package."
+        echo "ERROR: subscription-manager is not available. This machine is unlikely to be registered so the build will fail."
         exit 1
     fi
 
     # Check subscription status (ask for sudo password upfront)
-    echo "This script requires sudo access to check Red Hat subscription status."
-    echo "Please enter your sudo password when prompted:"
-    sudo -v  # Ask for password and refresh sudo timestamp
-
-    if ! sudo subscription-manager status >/dev/null 2>&1; then
-        echo "ERROR: System is not registered with Red Hat subscription manager."
+    if [[ ! -f /etc/pki/consumer/cert.pem ]]; then
+        echo "ERROR: Could not find /etc/pki/consumer/cert.pem so the system is unlikely to be registered with Red Hat subscription manager."
         echo "Please register your system:"
         echo "  sudo subscription-manager register --username <your-username>"
         echo "  sudo subscription-manager attach --auto"
         echo ""
         echo "Or get a free Red Hat Developer subscription at: https://developers.redhat.com/register"
-        exit 1
-    fi
-
-    # Check if logged into Red Hat container registry
-    if ! podman login --get-login registry.access.redhat.com &> /dev/null; then
-        echo "ERROR: Not logged into Red Hat container registry."
-        echo "Please login to the registry:"
-        echo "  podman login registry.access.redhat.com"
         exit 1
     fi
 
