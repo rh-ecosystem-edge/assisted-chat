@@ -46,9 +46,3 @@ git submodule update
 `./stop.sh` - Stops the podman pod 
 
 `./rm.sh` - Removes the podman pod
-
-# TODO
-
-- [x] Add llama-stack support
-- [ ] Automatically connect Inspector to the MCP
-
