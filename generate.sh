@@ -34,7 +34,7 @@ if [[ -z "$OCM_TOKEN" ]]; then
 fi
 
 mkdir -p "$SCRIPT_DIR/config"
-# shellcheck disable=SC2016 # we want jq to interpret the string, not bash)
-<"lightspeed-stack.template.yaml" python3 -m yq --arg llama_stack_url "$LLAMA_STACK_URL" '.llama_stack.url = $llama_stack_url' |
-    python3 -m yq --yaml-output-grammar-version 1.1 --yaml-roundtrip --yaml-output --indentless-lists >"$SCRIPT_DIR/config/lightspeed-stack.yaml"
+cp "$SCRIPT_DIR/lightspeed-stack.template.yaml" "$SCRIPT_DIR/config/lightspeed-stack.yaml"
+
+
 
