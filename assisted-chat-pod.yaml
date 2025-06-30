@@ -11,7 +11,7 @@ spec:
           value: ${GEMINI_API_KEY}
       ports:
         - containerPort: 8090
-        - hostPort: 8090
+          hostPort: 8090
       volumeMounts:
         - mountPath: /app-root/lightspeed-stack.yaml
           name: config
@@ -30,7 +30,7 @@ spec:
       image: localhost/local-ai-chat-inspector:latest
       ports:
         - containerPort: 6274
-        - hostPort: 6274
+          hostPort: 6274
   volumes:
     - name: config
       hostPath:
