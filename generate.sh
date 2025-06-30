@@ -20,11 +20,6 @@ fi
 
 source "$SCRIPT_DIR/.env"
 
-if [[ -z "$OCM_TOKEN" ]]; then
-    echo "OCM_TOKEN is not set in .env file."
-    exit 1
-fi
-
 mkdir -p "$SCRIPT_DIR/config"
 cp "$SCRIPT_DIR/lightspeed-stack.template.yaml" "$SCRIPT_DIR/config/lightspeed-stack.yaml"
 
