@@ -14,7 +14,7 @@ This repo builds the images for and runs in a podman pod the following services:
     1. Login to container registry: `podman login registry.access.redhat.com`
     2. Register your system: `sudo subscription-manager register --username <your-username>`
   - Verify registration: `subscription-manager status`
-- OCM offline token (you will be prompted with instructions)
+- the `ocm` command (get it [here](https://console.redhat.com/openshift/token))
 - Gemini API key (you will be prompted with instructions)
 
 ## Dependencies

@@ -21,9 +21,6 @@ spec:
           subPath: llama_stack_client_config.yaml
     - name: assisted-service-mcp
       image: localhost/local-ai-chat-assisted-service-mcp:latest
-      env:
-        - name: OFFLINE_TOKEN
-          value: ${OCM_TOKEN}
     - name: ui
       image: localhost/local-ai-chat-ui
     - name: mcp-inspector
