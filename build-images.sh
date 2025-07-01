@@ -15,7 +15,7 @@ function check_redhat_subscription() {
     echo "Checking Red Hat subscription requirements... You msut be registered to complete the build successfully."
 
     # Check if subscription-manager is available
-    if ! command -v subscription-manager &> /dev/null; then
+    if ! command -v subscription-manager &>/dev/null; then
         echo "ERROR: subscription-manager is not available. This machine is unlikely to be registered so the build will fail."
         exit 1
     fi
@@ -51,7 +51,14 @@ function build_assisted_mcp() {
 
 function build_lightspeed_stack() {
     pushd "${SCRIPT_DIR}/lightspeed-stack"
+    if git apply --reverse --check ../lightspeed-stack-patch.diff; then
+        echo "Patch already applied"
+    else
+        git apply ../lightspeed-stack-patch.diff
+    fi
+    uv lock
     podman build -f Containerfile . --tag localhost/local-ai-chat-lightspeed-stack:latest
+    git apply -R ../lightspeed-stack-patch.diff
     popd
 }
 
@@ -61,7 +68,11 @@ function build_lightspeed_stack_plus_llama_stack() {
 
 function build_ui() {
     pushd "${SCRIPT_DIR}/assisted-installer-ui/"
-    git apply ../ui-patch.diff
+    if git apply --reverse --check ../ui-patch.diff; then
+        echo "Patch already applied"
+    else
+        git apply ../ui-patch.diff
+    fi
     podman build -f apps/assisted-ui/Containerfile -t localhost/local-ai-chat-ui . --build-arg AIUI_APP_GIT_SHA="$(git rev-parse HEAD)" --build-arg AIUI_APP_VERSION=latest
     git apply -R ../ui-patch.diff
     popd
