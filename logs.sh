@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-podman pod logs assisted-chat-pod --follow --names --since 0
+podman pod logs --follow --names --since 0 --color assisted-chat-pod
