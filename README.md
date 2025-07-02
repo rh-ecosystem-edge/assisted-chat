@@ -16,10 +16,12 @@ This repo builds the images for and runs in a podman pod the following services:
   - Verify registration: `subscription-manager status`
 - the `ocm` command (get it [here](https://console.redhat.com/openshift/token))
 - Gemini API key (you will be prompted with instructions)
+- An OpenShift pull-secret (https://cloud.redhat.com/openshift/install/pull-secret)
+    - Apply it to podman by copying it to ~/.config/containers/auth.json
 
 ## Dependencies
 
-`dnf install jq fzf`
+`dnf install jq fzf uv`
 
 `pip install yq`
 
