@@ -4,8 +4,8 @@
 	branch = master
 [submodule "lightspeed-stack"]
 	path = lightspeed-stack
-	url = https://github.com/omertuc/lightspeed-stack
-	branch = ownllama
+	url = https://github.com/lightspeed-core/lightspeed-stack.git
+	branch = main
 [submodule "inspector"]
 	path = inspector
 	url = https://github.com/omertuc/inspector

@@ -5,6 +5,8 @@ USER root
 
 ADD ./llama-stack /app-root/llama-stack
 
+RUN python3.12 -m ensurepip
+
 RUN cd /app-root/llama-stack && python3.12 -m pip install --editable .
 
 RUN cd /app-root/ && python3.12 -m pip install .
