@@ -54,6 +54,8 @@ if "$INTERACTIVE_MODE"; then
         if [[ "$user_query" == "exit" ]]; then
             echo "Exiting script."
             break
+        elif [[ "$user_query" == "" ]]; then
+            continue
         fi
         send_curl_query "$user_query"
     done
