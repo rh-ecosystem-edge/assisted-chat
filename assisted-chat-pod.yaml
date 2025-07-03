@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
     - name: lightspeed-stack
-      image: ${LIGHTSPEED_STACK_IMAGE_OVERRIDE}
+      image: localhost/local-ai-chat-lightspeed-stack-plus-llama-stack
       env:
         - name: GEMINI_API_KEY
           value: ${GEMINI_API_KEY}

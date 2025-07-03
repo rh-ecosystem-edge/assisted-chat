@@ -7,7 +7,9 @@ if ! command -v ocm &>/dev/null; then
     exit 1
 fi
 
-if ! OCM_TOKEN=$(ocm token 2>/dev/null); then
+OCM_TOKEN=$(ocm token 2>/dev/null)
+
+if [ $? -ne 0 ]; then
     echo "You are not logged in to OCM. Please run 'ocm login --use-auth-code' and follow the instructions."
     exit 1
 elif [ -z "${OCM_TOKEN}" ]; then

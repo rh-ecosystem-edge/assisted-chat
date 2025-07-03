@@ -48,7 +48,3 @@ git submodule update
 `./stop.sh` - Stops the podman pod 
 
 `./rm.sh` - Removes the podman pod
-
-## Override
-
-* You can set `LIGHTSPEED_STACK_IMAGE_OVERRIDE` in `.env` to your own lightspeed-stack image (e.g. `quay.io/lightspeed-core/lightspeed-stack:latest`) to replace the locally built one used in the pod
