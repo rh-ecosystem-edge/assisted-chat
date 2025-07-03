@@ -14,6 +14,7 @@ podman pod kill assisted-chat-pod >/dev/null || true
 podman pod rm assisted-chat-pod >/dev/null || true
 
 set -a && source .env && set +a
-podman play kube <(envsubst < "$SCRIPT_DIR"/assisted-chat-pod.yaml)
+export LIGHTSPEED_STACK_IMAGE_OVERRIDE=${LIGHTSPEED_STACK_IMAGE_OVERRIDE:-localhost/local-ai-chat-lightspeed-stack-plus-llama-stack}
+podman play kube --build=false <(envsubst < "$SCRIPT_DIR"/assisted-chat-pod.yaml)
 
 "$SCRIPT_DIR/logs.sh"
