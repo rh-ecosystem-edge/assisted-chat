@@ -1,0 +1,306 @@
+---
+parameters:
+- name: IMAGE
+  value: "quay.io/lightspeed-core/lightspeed-stack"
+  description: "Container image for the lightspeed-stack application"
+- name: IMAGE_TAG
+  value: ''
+  required: true
+  description: "Tag of the container image to deploy"
+- name: MCP_SERVER_URL
+  value: "http://assisted-service-mcp:8000/sse"
+  description: "URL for the Model Context Protocol (MCP) server that provides assisted installer functionality"
+- name: REPLICAS_COUNT
+  value: "1"
+  description: "Number of pod replicas to deploy for high availability"
+- name: SERVICE_PORT
+  value: "8090"
+  description: "Port number on which the lightspeed-stack service listens"
+- name: STORAGE_MOUNT_PATH
+  value: "/tmp/data"
+  description: "Container path where the ephemeral volume will be mounted"
+- name: MEMORY_LIMIT
+  value: "2Gi"
+  description: "Maximum memory allocation for the container"
+- name: CPU_LIMIT
+  value: "1000m"
+  description: "Maximum CPU allocation for the container (in millicores)"
+- name: MEMORY_REQUEST
+  value: "1Gi"
+  description: "Initial memory request for the container"
+- name: CPU_REQUEST
+  value: "500m"
+  description: "Initial CPU request for the container (in millicores)"
+- name: GEMINI_API_SECRET_NAME
+  value: "assisted-chat-gemini-secret"
+  description: "Name of the Kubernetes secret containing the Gemini API key"
+
+- name: LIGHTSPEED_NAME
+  value: "assisted-chat"
+  description: "Name identifier for the lightspeed service instance"
+- name: LIGHTSPEED_SERVICE_WORKERS
+  value: "1"
+  description: "Number of worker processes for the lightspeed service"
+- name: LIGHTSPEED_SERVICE_AUTH_ENABLED
+  value: "false"
+  description: "Whether to enable authentication for the lightspeed service"
+- name: LIGHTSPEED_SERVICE_COLOR_LOG
+  value: "true"
+  description: "Whether to use colored output in service logs"
+- name: LIGHTSPEED_SERVICE_ACCESS_LOG
+  value: "true"
+  description: "Whether to enable access logging for HTTP requests"
+- name: LIGHTSPEED_LLAMA_STACK_LIBRARY_CLIENT_CONFIG_PATH
+  value: "llama_stack_client_config.yaml"
+  description: "Path to the Llama Stack client configuration file"
+- name: LIGHTSPEED_FEEDBACK_DISABLED
+  value: "false"
+  description: "Whether to disable user feedback collection functionality"
+- name: LIGHTSPEED_TRANSCRIPTS_DISABLED
+  value: "false"
+  description: "Whether to disable conversation transcript storage"
+
+- name: LLAMA_STACK_OTEL_SERVICE_NAME
+  value: "assisted-chat"
+  description: "Service name for OpenTelemetry tracing and metrics"
+- name: LLAMA_STACK_TELEMETRY_SINKS
+  value: "console,sqlite"
+  description: "Comma-separated list of telemetry output destinations (console, sqlite)"
+- name: LLAMA_STACK_INFERENCE_PROVIDER
+  value: "gemini"
+  description: "Provider identifier for the inference service"
+- name: LLAMA_STACK_INFERENCE_PROVIDER_TYPE
+  value: "remote::gemini"
+  description: "Type specification for the inference provider (remote::gemini for Google Gemini)"
+- name: LLAMA_STACK_DEFAULT_MODEL
+  value: "gemini/gemini-2.5-pro"
+  description: "Default model to use for inference requests"
+- name: LLAMA_STACK_FLASH_MODEL
+  value: "gemini/gemini-2.5-flash"
+  description: "Fast model to use for quick inference requests"
+- name: LLAMA_STACK_SERVER_PORT
+  value: "8321"
+  description: "Port number for the embedded Llama Stack server"
+
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: assisted-chat
+  annotations:
+    description: "OpenShift template for assisted-chat service with lightspeed-stack"
+
+objects:
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: lightspeed-stack-config
+    labels:
+      app: assisted-chat
+      component: lightspeed-stack
+  data:
+    lightspeed-stack.yaml: |
+      name: ${LIGHTSPEED_NAME}
+      service:
+        host: 0.0.0.0
+        port: ${SERVICE_PORT}
+        auth_enabled: ${LIGHTSPEED_SERVICE_AUTH_ENABLED}
+        workers: ${LIGHTSPEED_SERVICE_WORKERS}
+        color_log: ${LIGHTSPEED_SERVICE_COLOR_LOG}
+        access_log: ${LIGHTSPEED_SERVICE_ACCESS_LOG}
+      llama_stack:
+        use_as_library_client: true
+        library_client_config_path: "${LIGHTSPEED_LLAMA_STACK_LIBRARY_CLIENT_CONFIG_PATH}"
+      mcp_servers:
+        - name: mcp::assisted
+          url: "${MCP_SERVER_URL}"
+      user_data_collection:
+        feedback_disabled: ${LIGHTSPEED_FEEDBACK_DISABLED}
+        feedback_storage: "${STORAGE_MOUNT_PATH}/feedback"
+        transcripts_disabled: ${LIGHTSPEED_TRANSCRIPTS_DISABLED}
+        transcripts_storage: "${STORAGE_MOUNT_PATH}/transcripts"
+
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: llama-stack-client-config
+    labels:
+      app: assisted-chat
+      component: lightspeed-stack
+  data:
+    llama_stack_client_config.yaml: |
+      version: 2
+      image_name: starter
+      apis:
+      - agents
+      - datasetio
+      - eval
+      - files
+      - inference
+      - safety
+      - scoring
+      - telemetry
+      - tool_runtime
+      - vector_io
+      providers:
+        inference:
+        - provider_id: ${LLAMA_STACK_INFERENCE_PROVIDER}
+          provider_type: ${LLAMA_STACK_INFERENCE_PROVIDER_TYPE}
+          config:
+            api_key: ${env.GEMINI_API_KEY}
+        vector_io: []
+        files: []
+        safety: []
+        agents:
+        - provider_id: meta-reference
+          provider_type: inline::meta-reference
+          config:
+            persistence_store:
+              type: sqlite
+              namespace: null
+              db_path: ${STORAGE_MOUNT_PATH}/sqlite/agents_store.db
+            responses_store:
+              type: sqlite
+              db_path: ${STORAGE_MOUNT_PATH}/sqlite/responses_store.db
+        telemetry:
+        - provider_id: meta-reference
+          provider_type: inline::meta-reference
+          config:
+            service_name: "${LLAMA_STACK_OTEL_SERVICE_NAME}"
+            sinks: ${LLAMA_STACK_TELEMETRY_SINKS}
+            sqlite_db_path: ${STORAGE_MOUNT_PATH}/sqlite/trace_store.db
+        eval: []
+        datasetio: []
+        scoring:
+        - provider_id: basic
+          provider_type: inline::basic
+          config: {}
+        - provider_id: llm-as-judge
+          provider_type: inline::llm-as-judge
+          config: {}
+        tool_runtime:
+        - provider_id: rag-runtime
+          provider_type: inline::rag-runtime
+          config: {}
+        - provider_id: model-context-protocol
+          provider_type: remote::model-context-protocol
+          config: {}
+      metadata_store:
+        type: sqlite
+        db_path: ${STORAGE_MOUNT_PATH}/sqlite/registry.db
+      inference_store:
+        type: sqlite
+        db_path: ${STORAGE_MOUNT_PATH}/sqlite/inference_store.db
+      models:
+      - metadata: {}
+        model_id: ${LLAMA_STACK_DEFAULT_MODEL}
+        provider_id: ${LLAMA_STACK_INFERENCE_PROVIDER}
+        provider_model_id: ${LLAMA_STACK_DEFAULT_MODEL}
+        model_type: llm
+      - metadata: {}
+        model_id: ${LLAMA_STACK_FLASH_MODEL}
+        provider_id: ${LLAMA_STACK_INFERENCE_PROVIDER}
+        provider_model_id: ${LLAMA_STACK_FLASH_MODEL}
+        model_type: llm
+      shields: []
+      vector_dbs: []
+      datasets: []
+      scoring_fns: []
+      benchmarks: []
+      tool_groups:
+      - toolgroup_id: builtin::rag
+        provider_id: rag-runtime
+      - toolgroup_id: mcp::assisted
+        provider_id: model-context-protocol
+        mcp_endpoint:
+          uri: "${MCP_SERVER_URL}"
+      server:
+        port: ${LLAMA_STACK_SERVER_PORT}
+
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: assisted-chat
+    labels:
+      app: assisted-chat
+  spec:
+    replicas: ${{REPLICAS_COUNT}}
+    selector:
+      matchLabels:
+        app: assisted-chat
+    template:
+      metadata:
+        labels:
+          app: assisted-chat
+      spec:
+        containers:
+        - name: lightspeed-stack
+          image: ${IMAGE}:${IMAGE_TAG}
+          imagePullPolicy: IfNotPresent
+          ports:
+          - name: http
+            containerPort: ${{SERVICE_PORT}}
+            protocol: TCP
+          env:
+          - name: GEMINI_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: ${GEMINI_API_SECRET_NAME}
+                key: api-key
+          - name: LLAMA_STACK_SQLITE_STORE_DIR
+            value: ${STORAGE_MOUNT_PATH}/sqlite
+          - name: LLAMA_STACK_OTEL_SERVICE_NAME
+            value: ${LLAMA_STACK_OTEL_SERVICE_NAME}
+          - name: LLAMA_STACK_TELEMETRY_SINKS
+            value: ${LLAMA_STACK_TELEMETRY_SINKS}
+          resources:
+            limits:
+              memory: ${MEMORY_LIMIT}
+              cpu: ${CPU_LIMIT}
+            requests:
+              memory: ${MEMORY_REQUEST}
+              cpu: ${CPU_REQUEST}
+          volumeMounts:
+          - name: lightspeed-config
+            mountPath: /app-root/lightspeed-stack.yaml
+            subPath: lightspeed-stack.yaml
+          - name: llama-stack-config
+            mountPath: /app-root/llama_stack_client_config.yaml
+            subPath: llama_stack_client_config.yaml
+          - name: data-storage
+            mountPath: ${STORAGE_MOUNT_PATH}
+          livenessProbe:
+            httpGet:
+              path: /v1/liveness
+              port: ${{SERVICE_PORT}}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /v1/readiness
+              port: ${{SERVICE_PORT}}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+        volumes:
+        - name: lightspeed-config
+          configMap:
+            name: lightspeed-stack-config
+        - name: llama-stack-config
+          configMap:
+            name: llama-stack-client-config
+        - name: data-storage
+          emptyDir: {}
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: assisted-chat
+    labels:
+      app: assisted-chat
+  spec:
+    ports:
+    - name: http
+      port: ${{SERVICE_PORT}}
+      targetPort: ${{SERVICE_PORT}}
+      protocol: TCP
+    selector:
+      app: assisted-chat
