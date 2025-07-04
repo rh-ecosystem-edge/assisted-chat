@@ -2,17 +2,14 @@
 
 set -euo pipefail
 
-if ! command -v ocm &>/dev/null; then
-    echo "The 'ocm' command is not installed. Please install the ocm CLI from https://console.redhat.com/openshift/token first"
-    exit 1
-fi
+# Get the script directory to locate utils
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 
-if ! OCM_TOKEN=$(ocm token 2>/dev/null); then
-    echo "You are not logged in to OCM. Please run 'ocm login --use-auth-code' and follow the instructions."
-    exit 1
-elif [ -z "${OCM_TOKEN}" ]; then
-    echo "Received an empty token from the 'ocm token' command."
-    echo "You may need to refresh your OCM login first. Please run 'ocm login --use-auth-code' and follow the instructions."
+# Source the OCM token utility
+source "$SCRIPT_DIR/utils/ocm-token.sh"
+
+# Validate and get OCM token
+if ! get_ocm_token; then
     exit 1
 fi
 
@@ -30,7 +27,7 @@ PROVIDER=$(jq '.models[] | select(.identifier == "'"$MODEL_IDENTIFIER"'") | .pro
 send_curl_query(){
     local query="$1"
     curl --silent \
-        -H "Authorization: Bearer $(ocm token)" \
+        -H "Authorization: Bearer ${OCM_TOKEN}" \
         --show-error \
         'http://localhost:8090/v1/query' \
         --json '{

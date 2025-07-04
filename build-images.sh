@@ -51,14 +51,15 @@ function build_assisted_mcp() {
 
 function build_lightspeed_stack() {
     pushd "${SCRIPT_DIR}/lightspeed-stack"
-    if git apply --reverse --check ../lightspeed-stack-patch.diff; then
-        echo "Patch already applied"
-    else
-        git apply ../lightspeed-stack-patch.diff
-    fi
+    # Comment out the llama-stack dependency in pyproject.toml so it uses the locally installed version
+    # instead
+    sed -i '/^[^#].*llama-stack[[:space:]]*>=/ s/^/# /' pyproject.toml
     uv lock
     podman build -f Containerfile . --tag localhost/local-ai-chat-lightspeed-stack:latest
-    git apply -R ../lightspeed-stack-patch.diff
+    # Undo it
+    sed -i 's/^# \(.*llama-stack[[:space:]]*>=.*\)$/\1/' pyproject.toml
+    # uv.lock is guaranteed to change, and it's annoying to have it as a dirty file, so let's restore it
+    git checkout uv.lock
     popd
 }
 
@@ -82,4 +83,5 @@ build_inspector
 build_assisted_mcp
 build_lightspeed_stack
 build_lightspeed_stack_plus_llama_stack
+
 build_ui
