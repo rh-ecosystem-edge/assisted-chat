@@ -23,6 +23,14 @@ spec:
       image: localhost/local-ai-chat-assisted-service-mcp:latest
     - name: ui
       image: localhost/local-ai-chat-ui
+      env:
+        - name: AIUI_CHATBOT_API_URL
+          value: http://lightspeed-stack:8090
+        - name: AIUI_APP_TOKEN
+          value: ${OCM_TOKEN}
+      ports:
+        - containerPort: 8080
+          hostPort: 8080
     - name: mcp-inspector
       image: localhost/local-ai-chat-inspector:latest
       ports:
