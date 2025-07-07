@@ -13,7 +13,7 @@ spec:
         - containerPort: 8090
           hostPort: 8090
       volumeMounts:
-        - mountPath: /app-root/lightspeed-stack.yaml
+        - mountPath: /app-root/lightspeed-stack.yaml:Z
           name: config
           subPath: lightspeed-stack.yaml
         - mountPath: /app-root/llama_stack_client_config.yaml
