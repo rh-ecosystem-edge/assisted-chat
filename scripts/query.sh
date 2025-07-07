@@ -13,11 +13,6 @@ PROJECT_ROOT=$(dirname "$SCRIPT_DIR")
 # Source the OCM token utility
 source "$PROJECT_ROOT/utils/ocm-token.sh"
 
-# Validate and get OCM token
-if ! get_ocm_token; then
-    exit 1
-fi
-
 INTERACTIVE_MODE=false
 if [[ "${1:-}" == "--interactive" ]]; then
     INTERACTIVE_MODE=true
@@ -45,6 +40,12 @@ echo "Generated conversation ID: $CONVERSATION_ID"
 send_curl_query(){
     local query="$1"
     
+    # Get fresh OCM token for this query
+    if ! get_ocm_token; then
+        echo "Failed to get OCM token for query"
+        return 1
+    fi
+
     # Make the curl request and capture the response
     local response=$(curl --silent \
         -H "Authorization: Bearer ${OCM_TOKEN}" \
