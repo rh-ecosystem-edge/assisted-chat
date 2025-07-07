@@ -50,6 +50,8 @@ spec:
       env:
         - name: GEMINI_API_KEY
           value: ${GEMINI_API_KEY}
+        - name: OCM_TOKEN
+          value: ${OCM_TOKEN}
       volumeMounts:
         - mountPath: /mcpconfig.json
           name: config
