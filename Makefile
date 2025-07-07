@@ -51,6 +51,11 @@ query-interactive:
 	@echo "Querying assisted-chat services in interactive mode..."
 	./scripts/query.sh --interactive
 
+# Attach to mcphost
+mcphost:
+	@echo "Attaching to mcphost..."
+	./scripts/mcphost.sh
+
 # Show help information
 help:
 	@echo "Available targets:"
@@ -63,6 +68,7 @@ help:
 	@echo "  logs          - Show logs for the assisted-chat services"
 	@echo "  query         - Query the assisted-chat services"
 	@echo "  query-interactive - Query the assisted-chat services in interactive mode"
+	@echo "  mcphost       - Attach to mcphost"
 	@echo "  help          - Show this help message"
 	@echo ""
 	@echo "Example usage:"

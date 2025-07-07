@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "assisted": {
+      "transport": "sse",
+      "url": "http://assisted-service-mcp:8000/sse"
+    }
+  }
+}

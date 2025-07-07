@@ -36,6 +36,27 @@ spec:
       ports:
         - containerPort: 6274
           hostPort: 6274
+    - name: mcphost
+      image: quay.io/otuchfel/mcphost:0.9.2 
+      tty: true
+      stdin: true
+      args:
+        - --config
+        - /mcpconfig.json
+        - --model
+        - "google:gemini-2.0-flash"
+        - --system-prompt
+        - /systemprompt.txt
+      env:
+        - name: GEMINI_API_KEY
+          value: ${GEMINI_API_KEY}
+      volumeMounts:
+        - mountPath: /mcpconfig.json
+          name: config
+          subPath: mcphost-mcp.json
+        - mountPath: /systemprompt.txt
+          name: config
+          subPath: mcphost-systemprompt.txt
   volumes:
     - name: config
       hostPath:
