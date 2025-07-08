@@ -245,7 +245,7 @@ objects:
             valueFrom:
               secretKeyRef:
                 name: ${GEMINI_API_SECRET_NAME}
-                key: api-key
+                key: api_key
           - name: LLAMA_STACK_SQLITE_STORE_DIR
             value: ${STORAGE_MOUNT_PATH}/sqlite
           - name: LLAMA_STACK_OTEL_SERVICE_NAME
