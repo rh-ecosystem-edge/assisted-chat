@@ -37,9 +37,14 @@ fi
 
 echo "Generated conversation ID: $CONVERSATION_ID"
 
-send_curl_query(){
+good_http_response() {
+    local status_code="$1"
+    [[ "$status_code" -ge 200 && "$status_code" -lt 300 ]]
+}
+
+send_curl_query() {
     local query="$1"
-    
+
     # Get fresh OCM token for this query
     if ! get_ocm_token; then
         echo "Failed to get OCM token for query"
@@ -47,27 +52,35 @@ send_curl_query(){
     fi
 
     # Make the curl request and capture the response
-    local response=$(curl --silent \
+    tmpfile=$(mktemp)
+    status=$(curl --silent --show-error --output "$tmpfile" --write-out "%{http_code}" \
         -H "Authorization: Bearer ${OCM_TOKEN}" \
-        --show-error \
         'http://localhost:8090/v1/query' \
         --json '{
-      "conversation_id": "'"$CONVERSATION_ID"'",
-      "model": "'"$MODEL_IDENTIFIER"'",
-      "provider": "'"$PROVIDER"'",
-      "query": "'"${query}"'",
-      "system_prompt": "You are a helpful assistant"
-    }')
-    
+    "conversation_id": "'"$CONVERSATION_ID"'",
+    "model": "'"$MODEL_IDENTIFIER"'",
+    "provider": "'"$PROVIDER"'",
+    "query": "'"${query}"'"
+  }')
+    body=$(cat "$tmpfile")
+    rm "$tmpfile"
+
+    if ! good_http_response "$status"; then
+        echo "Error: HTTP status $status"
+        echo "Response body:"
+        echo "$body"
+        return 1
+    fi
+
     # Extract and update conversation_id for next call
-    local new_conversation_id=$(echo "$response" | jq -r '.conversation_id // empty')
+    new_conversation_id=$(echo "$body" | jq -r '.conversation_id // empty')
     if [[ -n "$new_conversation_id" ]]; then
         echo "Updated conversation ID: $new_conversation_id"
         CONVERSATION_ID="$new_conversation_id"
     fi
-    
+
     # Display the response in YAML format with cyan color
-    echo -e "${CYAN}$(echo "$response" | python3 -m yq '.' -y)${RESET}"
+    echo -e "${CYAN}$(echo "$body" | python3 -m yq '.' -y)${RESET}"
 }
 
 if "$INTERACTIVE_MODE"; then
