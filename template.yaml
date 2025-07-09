@@ -50,9 +50,6 @@ parameters:
 - name: LIGHTSPEED_SERVICE_ACCESS_LOG
   value: "true"
   description: "Whether to enable access logging for HTTP requests"
-- name: LIGHTSPEED_LLAMA_STACK_LIBRARY_CLIENT_CONFIG_PATH
-  value: "llama_stack_client_config.yaml"
-  description: "Path to the Llama Stack client configuration file"
 - name: LIGHTSPEED_FEEDBACK_DISABLED
   value: "false"
   description: "Whether to disable user feedback collection functionality"
@@ -109,7 +106,7 @@ objects:
         access_log: ${LIGHTSPEED_SERVICE_ACCESS_LOG}
       llama_stack:
         use_as_library_client: true
-        library_client_config_path: "${LIGHTSPEED_LLAMA_STACK_LIBRARY_CLIENT_CONFIG_PATH}"
+        library_client_config_path: "/app-root/llama_stack_client_config.yaml"
       mcp_servers:
         - name: mcp::assisted
           url: "${MCP_SERVER_URL}"
