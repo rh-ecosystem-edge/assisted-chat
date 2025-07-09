@@ -13,6 +13,12 @@ parameters:
 - name: REPLICAS_COUNT
   value: "1"
   description: "Number of pod replicas to deploy for high availability"
+- name: ROUTE_HOST
+  value: "api.openshift.com"
+  description: "Hostname for the OpenShift route to access the chat interface"
+- name: ROUTE_PATH
+  value: "/api/assisted_chat"
+  description: "Path for the OpenShift route to access the chat interface"
 - name: SERVICE_PORT
   value: "8090"
   description: "Port number on which the lightspeed-stack service listens"
@@ -301,3 +307,22 @@ objects:
       protocol: TCP
     selector:
       app: assisted-chat
+
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    name: assisted-chat
+    labels:
+      app: assisted-chat
+  spec:
+    host: ${ROUTE_HOST}
+    path: ${ROUTE_PATH}
+    to:
+      kind: Service
+      name: assisted-chat
+      weight: 100
+    port:
+      targetPort: http
+    tls:
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
