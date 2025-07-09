@@ -35,19 +35,7 @@ git submodule update
 
 # Usage
 
-`./build-images.sh` - Builds all the images for the various services
-
-`./generate.sh` - Generates the configuration files for the services (for now only lightspeed-stack config). If you didn't populate .env, it will prompt you for the required variables
-
-`./run.sh` - Stops the previous podman pod and starts a fresh one
-
-`./query.sh` - Example chat bot query
-
-`./logs.sh` - Follow the logs of the podman pod
-
-`./stop.sh` - Stops the podman pod 
-
-`./rm.sh` - Removes the podman pod
+`make help`
 
 ## Override
 
