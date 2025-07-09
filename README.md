@@ -21,9 +21,9 @@ This repo builds the images for and runs in a podman pod the following services:
 
 ## Dependencies
 
-`dnf install jq fzf uv`
+`dnf install jq fzf`
 
-`pip install yq`
+`pip install yq uv`
 
 ## Submodules
 
