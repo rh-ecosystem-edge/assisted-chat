@@ -1,75 +1,76 @@
 # Makefile for assisted-chat project
 # This Makefile provides convenient targets for managing the assisted-chat services
 
-.PHONY: all build-images generate run resume stop rm logs query query-interactive help
+.PHONY: all \
+	build-images \
+	build-inspector build-assisted-mcp build-lightspeed-stack build-lightspeed-plus-llama-stack build-ui \
+	generate run resume stop rm logs query query-interactive mcphost help
 
-# Default target
-all: help
+all: help ## Show help information
 
-# Build all container images
-build-images:
+build-images: ## Build all container images
 	@echo "Building container images..."
 	./scripts/build-images.sh
 
-# Generate configuration files
-generate:
+build-inspector: ## Build inspector image
+	@echo "Building inspector image..."
+	./scripts/build-images.sh inspector
+
+build-assisted-mcp: ## Build assisted service MCP image
+	@echo "Building assisted service MCP image..."
+	./scripts/build-images.sh assisted-mcp
+
+build-lightspeed-stack: ## Build lightspeed stack image
+	@echo "Building lightspeed stack image..."
+	./scripts/build-images.sh lightspeed-stack
+
+build-lightspeed-plus-llama-stack: ## Build lightspeed stack plus llama stack image
+	@echo "Building lightspeed stack plus llama stack image..."
+	./scripts/build-images.sh lightspeed-plus-llama-stack
+
+build-ui: ## Build UI image
+	@echo "Building UI image..."
+	./scripts/build-images.sh ui
+
+generate: ## Generate configuration files
 	@echo "Generating configuration files..."
 	./scripts/generate.sh
 
-# Start the assisted-chat services
-run:
+run: ## Start the assisted-chat services
 	@echo "Starting assisted-chat services..."
 	./scripts/run.sh
 
-# Resume the assisted-chat services
-resume:
+resume: ## Resume the assisted-chat services
 	@echo "Resuming assisted-chat services..."
 	./scripts/resume.sh
 
-# Stop the assisted-chat services
-stop:
+stop: ## Stop the assisted-chat services
 	@echo "Stopping assisted-chat services..."
 	./scripts/stop.sh
 
-# Remove/cleanup the assisted-chat services
-rm:
+rm: ## Remove/cleanup the assisted-chat services
 	@echo "Removing assisted-chat services..."
 	./scripts/rm.sh
 
-# Show logs for the assisted-chat services
-logs:
+logs: ## Show logs for the assisted-chat services
 	@echo "Showing logs for assisted-chat services..."
 	./scripts/logs.sh
 
-# Query the assisted-chat services
-query:
+query: ## Query the assisted-chat services
 	@echo "Querying assisted-chat services..."
 	./scripts/query.sh
 
-# Query the assisted-chat services in interactive mode
-query-interactive:
+query-interactive: ## Query the assisted-chat services in interactive mode
 	@echo "Querying assisted-chat services in interactive mode..."
 	./scripts/query.sh --interactive
 
-# Attach to mcphost
-mcphost:
+mcphost: ## Attach to mcphost
 	@echo "Attaching to mcphost..."
 	./scripts/mcphost.sh
 
-# Show help information
-help:
+help: ## Show this help message
 	@echo "Available targets:"
-	@echo "  build-images  - Build all container images"
-	@echo "  generate      - Generate configuration files"
-	@echo "  run           - Start the assisted-chat services"
-	@echo "  resume        - Resume the assisted-chat services"
-	@echo "  stop          - Stop the assisted-chat services"
-	@echo "  rm            - Remove/cleanup the assisted-chat services"
-	@echo "  logs          - Show logs for the assisted-chat services"
-	@echo "  query         - Query the assisted-chat services"
-	@echo "  query-interactive - Query the assisted-chat services in interactive mode"
-	@echo "  mcphost       - Attach to mcphost"
-	@echo "  help          - Show this help message"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-30s\033[0m %s\n", $$1, $$2}'
 	@echo ""
 	@echo "Example usage:"
 	@echo "  make build-images"
