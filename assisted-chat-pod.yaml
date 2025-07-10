@@ -19,6 +19,9 @@ spec:
         - mountPath: /app-root/llama_stack_client_config.yaml
           name: config
           subPath: llama_stack_client_config.yaml
+        - mountPath: /tmp/systemprompt.txt
+          name: config
+          subPath: systemprompt.txt
     - name: assisted-service-mcp
       image: localhost/local-ai-chat-assisted-service-mcp:latest
     - name: ui
@@ -58,7 +61,7 @@ spec:
           subPath: mcphost-mcp.json
         - mountPath: /systemprompt.txt
           name: config
-          subPath: mcphost-systemprompt.txt
+          subPath: systemprompt.txt
   volumes:
     - name: config
       hostPath:
