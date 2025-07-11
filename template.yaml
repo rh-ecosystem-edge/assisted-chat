@@ -4,7 +4,7 @@ parameters:
   value: "quay.io/lightspeed-core/lightspeed-stack"
   description: "Container image for the lightspeed-stack application"
 - name: IMAGE_TAG
-  value: ''
+  value: ""
   required: true
   description: "Tag of the container image to deploy"
 - name: MCP_SERVER_URL
@@ -281,8 +281,8 @@ objects:
             httpGet:
               path: /v1/readiness
               port: ${{SERVICE_PORT}}
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            initialDelaySeconds: 30
+            periodSeconds: 10
         volumes:
         - name: lightspeed-config
           configMap:
