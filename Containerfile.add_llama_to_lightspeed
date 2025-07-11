@@ -19,4 +19,6 @@ RUN python3.12 -m pip install sqlalchemy
 
 RUN python3.12 -m pip install mcp
 
+RUN python3.12 -m pip install faiss-cpu
+
 EXPOSE 8080
