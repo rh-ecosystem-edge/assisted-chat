@@ -1,0 +1,9 @@
+# vim: set filetype=dockerfile
+FROM quay.io/lightspeed-core/lightspeed-stack:latest
+
+USER root
+
+RUN python3.12 -m pip install pyyaml pyaml litellm sqlalchemy mcp
+
+
+EXPOSE 8080
