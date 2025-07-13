@@ -238,7 +238,7 @@ objects:
         containers:
         - name: lightspeed-stack
           image: ${IMAGE}:${IMAGE_TAG}
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
           - name: http
             containerPort: ${{SERVICE_PORT}}
