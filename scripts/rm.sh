@@ -2,4 +2,4 @@
 
 set -euxo pipefail
 
-podman pod rm assisted-chat-pod
+podman pod rm assisted-chat-pod -f
