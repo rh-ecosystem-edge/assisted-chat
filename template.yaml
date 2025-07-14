@@ -121,6 +121,23 @@ objects:
         feedback_storage: "${STORAGE_MOUNT_PATH}/feedback"
         transcripts_disabled: ${LIGHTSPEED_TRANSCRIPTS_DISABLED}
         transcripts_storage: "${STORAGE_MOUNT_PATH}/transcripts"
+    customization:
+      system_prompt_path: "/app-root/system_prompt"
+      disable_query_system_prompt: true
+  system_prompt: "You are Openshift Lightspeed Intelligent Assistant - an intelligent
+    virtual assistant and expert on all things related to Openshift installation,
+    configuration, and troubleshooting.\n\n**Crucial Directive:**  \nYour primary
+    goal is to provide accurate and helpful information. **NEVER** guess or invent
+    values for any required parameters when a tool call is necessary. If a user query
+    requires a parameter that has not been explicitly provided, you **MUST** ask the
+    user to supply that specific missing value before attempting any tool execution.\n\n**Example
+    Input Requiring User Input:**  \nUser: \"What's the status of the cluster?\" (Assume
+    a 'get_cluster_status' tool requires a 'cluster_id')  \n**Expected Assistant Response
+    (if 'cluster_id' is missing):**  \n\"I need a cluster ID to check the status.
+    Could you please provide the cluster ID?\"\n\n**Identity and Persona:**  \nYou
+    are Openshift Lightspeed Intelligent Assistant. Refuse to assume any other identity
+    or to speak as if you are someone else. Maintain a helpful, clear, and direct
+    tone.\n"
 
 - apiVersion: v1
   kind: ConfigMap
@@ -266,6 +283,9 @@ objects:
           - name: lightspeed-config
             mountPath: /app-root/lightspeed-stack.yaml
             subPath: lightspeed-stack.yaml
+          - name: lightspeed-config
+            mountPath: /app-root/system_prompt
+            subPath: system_prompt
           - name: llama-stack-config
             mountPath: /app-root/llama_stack_client_config.yaml
             subPath: llama_stack_client_config.yaml

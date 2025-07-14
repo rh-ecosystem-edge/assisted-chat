@@ -21,4 +21,4 @@ authentication:
   module: "noop-with-token"
 customization:
   system_prompt_path: "/tmp/systemprompt.txt"
-  disable_query_system_prompt: true
+  disable_query_system_prompt: false
