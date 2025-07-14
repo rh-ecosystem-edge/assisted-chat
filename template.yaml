@@ -113,6 +113,8 @@ objects:
       llama_stack:
         use_as_library_client: true
         library_client_config_path: "/app-root/llama_stack_client_config.yaml"
+      authentication:
+        module: "noop-with-token"
       mcp_servers:
         - name: mcp::assisted
           url: "${MCP_SERVER_URL}"
