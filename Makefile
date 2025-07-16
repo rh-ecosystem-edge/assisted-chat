@@ -4,7 +4,7 @@
 .PHONY: all \
 	build-images \
 	build-inspector build-assisted-mcp build-lightspeed-stack build-lightspeed-plus-llama-stack build-ui \
-	generate run resume stop rm logs query query-interactive mcphost help
+	generate run resume stop rm logs query query-interactive mcphost test-eval help
 
 all: help ## Show help information
 
@@ -68,6 +68,12 @@ mcphost: ## Attach to mcphost
 	@echo "Attaching to mcphost..."
 	./scripts/mcphost.sh
 
+test-eval: ## Run agent evaluation tests
+	@echo "Refreshing OCM token..."
+	@. utils/ocm-token.sh && get_ocm_token && echo "$$OCM_TOKEN" > test/evals/ocm_token.txt
+	@echo "Running agent evaluation tests..."
+	@cd test/evals && python eval.py
+
 help: ## Show this help message
 	@echo "Available targets:"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-30s\033[0m %s\n", $$1, $$2}'
@@ -77,4 +83,5 @@ help: ## Show this help message
 	@echo "  make run"
 	@echo "  make logs"
 	@echo "  make query"
-	@echo "  make query-interactive" 
+	@echo "  make query-interactive"
+	@echo "  make test-eval"

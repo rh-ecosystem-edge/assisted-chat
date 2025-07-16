@@ -1,0 +1,28 @@
+- eval_id: basic_introduction
+  eval_query: Hi!
+  eval_type: sub-string
+  expected_key_words:
+  - "Assisted Installer"
+
+- eval_id: basic_cluster_request
+  eval_query: I want to install an OCP cluster
+  eval_type: sub-string
+  expected_key_words:
+  - "cluster name"
+  - "base domain"
+  - "version"
+
+- eval_id: list_versions
+  eval_query: List the available OpenShift versions
+  eval_type: sub-string
+  expected_key_words:
+  - "4.19"
+  - "4.18"
+  - "4.20"
+
+- eval_id: available_operators
+  eval_query: What operators are available?
+  eval_type: sub-string
+  expected_key_words:
+  - "Virtualization"
+  - "OpenShift AI"
