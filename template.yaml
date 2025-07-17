@@ -331,6 +331,7 @@ objects:
     labels:
       app: assisted-chat
   spec:
+    clusterIP: None
     ports:
     - name: http
       port: ${{SERVICE_PORT}}
