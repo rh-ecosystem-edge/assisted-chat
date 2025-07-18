@@ -19,10 +19,11 @@ RUN python3.12 -m pip install sqlalchemy
 
 RUN python3.12 -m pip install mcp
 
+RUN python3.12 -m pip install faiss-cpu sentence_transformers
+
 # Patch llama-stack with an important fix
-RUN microdnf install -y patch     
+RUN microdnf install -y patch
 RUN cd /app-root/llama-stack && \
     curl -L https://github.com/meta-llama/llama-stack/commit/5e18d4d097d683056174b3c8b270806326e7ee96.patch | patch -p1
 
 EXPOSE 8080
-

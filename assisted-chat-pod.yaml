@@ -16,12 +16,16 @@ spec:
         - mountPath: /app-root/lightspeed-stack.yaml:Z
           name: config
           subPath: lightspeed-stack.yaml
-        - mountPath: /app-root/llama_stack_client_config.yaml
+        - mountPath: /app-root/llama_stack_client_config.yaml:Z
           name: config
           subPath: llama_stack_client_config.yaml
-        - mountPath: /tmp/systemprompt.txt
+        - mountPath: /tmp/systemprompt.txt:Z
           name: config
           subPath: systemprompt.txt
+        - mountPath: /app-root/llama_stack_vector_db:Z
+          name: llama_stack_vector_db
+        - mountPath: /app-root/embeddings_model:Z
+          name: embeddings_model
     - name: assisted-service-mcp
       image: localhost/local-ai-chat-assisted-service-mcp:latest
     - name: ui
@@ -66,4 +70,12 @@ spec:
     - name: config
       hostPath:
         path: ./config
+        type: Directory
+    - name: llama_stack_vector_db
+      hostPath:
+        path: ./llama_stack_vector_db
+        type: Directory
+    - name: embeddings_model
+      hostPath:
+        path: ./embeddings_model
         type: Directory
