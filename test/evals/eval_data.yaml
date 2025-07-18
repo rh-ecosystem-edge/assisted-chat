@@ -1,0 +1,19 @@
+- eval_id: basic_introduction
+  eval_query: Hi!
+  eval_type: judge-llm
+  expected_response: "Hello! I'm the Assisted Installer, your guide for OpenShift cluster installation. How can I help you today?"
+
+- eval_id: basic_cluster_request
+  eval_query: I want to install an OCP cluster
+  eval_type: judge-llm
+  expected_response: "Great, I can help you with that. To create a cluster, I'll need some information from you. First, what would you like to call your cluster? And what base domain would you like to use? And finally, what OpenShift version would you like to install?"
+
+- eval_id: list_versions
+  eval_query: List the available OpenShift versions
+  eval_type: judge-llm
+  expected_response: "There are several versions of OpenShift available. The most recent production version is 4.19, 4.20 pre release versions are available as well as several previous verrsions."
+
+- eval_id: available_operators
+  eval_query: What operators are available?
+  eval_type: judge-llm
+  expected_response: "The operators that can be installed onto clusters are OpenShift AI and OpenShift Virtualization."

@@ -1,2 +1,6 @@
 /.env
 /config/lightspeed-stack.yaml
+.vscode
+ocm_token.txt
+.venv
+.python-version
