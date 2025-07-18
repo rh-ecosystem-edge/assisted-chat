@@ -9,7 +9,7 @@ Evaluation mechanism to validate Agent task completion (e2e)
 - **Assisted Chat API**: Must be running (`make build-images run`)
 - Install lightspeed-core **agent e2e eval**
 ```bash
-python -m pip install git+https://github.com/asamal4/lightspeed-evaluation.git@agent-goal-eval#subdirectory=agent_eval
+python -m pip install git+https://github.com/asamal4/lightspeed-evaluation.git@agent-goal-eval-v2#subdirectory=lsc_agent_eval
 ```
 
 ## Running tests

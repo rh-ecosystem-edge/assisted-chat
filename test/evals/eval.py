@@ -1,5 +1,19 @@
 import sys
-from agent_eval import AgentGoalEval
+import logging
+import argparse
+from lsc_agent_eval import AgentGoalEval
+
+# Configure logging to show all messages from agent_eval library
+logging.basicConfig(
+    level=logging.WARNING,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+
+# Enable specific loggers we want to see
+logging.getLogger('lsc_agent_eval').setLevel(logging.INFO)
 
 def print_test_result(result, config):
     """Print test result in human readable format."""
@@ -23,21 +37,20 @@ def print_test_result(result, config):
             print(f"   Error: {result.error}")
         print()
 
-class EvalArgs:
-   def __init__(self):
-       self.eval_data_yaml = 'eval_data.yaml'
-       self.agent_endpoint = 'http://localhost:8090'
-       self.agent_provider = 'gemini'
-       self.agent_model = 'gemini/gemini-2.5-flash'
-       self.judge_provider = None
-       self.judge_model = None
-       self.agent_auth_token_file = 'ocm_token.txt'
-       self.result_dir = 'results'
-
-args = EvalArgs()
+# Create proper Namespace object for AgentGoalEval
+args = argparse.Namespace()
+args.eval_data_yaml = 'eval_data.yaml'
+args.agent_endpoint = 'http://localhost:8090'
+args.agent_provider = 'gemini'
+args.agent_model = 'gemini/gemini-2.5-flash'
+# Set up judge model for LLM evaluation
+args.judge_provider = 'gemini'
+args.judge_model = 'gemini-2.5-flash'
+args.agent_auth_token_file = 'ocm_token.txt'
+args.result_dir = 'results'
 
 evaluator = AgentGoalEval(args)
-configs = evaluator.config_manager.get_eval_data()
+configs = evaluator.data_manager.get_eval_data()
 
 print(f"Running {len(configs)} evaluation(s)...")
 print("=" * 50)
