@@ -347,7 +347,7 @@ objects:
           - name: LLAMA_STACK_TELEMETRY_SINKS
             value: ${LLAMA_STACK_TELEMETRY_SINKS}
           - name: DEPLOY_VERSION
-            value: "2"
+            value: "3"
           resources:
             limits:
               memory: ${MEMORY_LIMIT}
