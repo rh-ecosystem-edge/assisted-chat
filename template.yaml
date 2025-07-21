@@ -304,13 +304,13 @@ objects:
             mountPath: ${STORAGE_MOUNT_PATH}
           livenessProbe:
             httpGet:
-              path: /v1/liveness
+              path: /liveness
               port: ${{SERVICE_PORT}}
             initialDelaySeconds: 30
             periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /v1/readiness
+              path: /readiness
               port: ${{SERVICE_PORT}}
             initialDelaySeconds: 30
             periodSeconds: 10
