@@ -96,6 +96,8 @@ objects:
 - apiVersion: v1
   kind: ConfigMap
   metadata:
+    annotations:
+      qontract.recycle: "true"
     name: lightspeed-stack-config
     labels:
       app: assisted-chat
@@ -216,6 +218,8 @@ objects:
 - apiVersion: v1
   kind: ConfigMap
   metadata:
+    annotations:
+      qontract.recycle: "true"
     name: llama-stack-client-config
     labels:
       app: assisted-chat
