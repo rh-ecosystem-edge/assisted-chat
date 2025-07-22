@@ -96,6 +96,8 @@ objects:
 - apiVersion: v1
   kind: ConfigMap
   metadata:
+    annotations:
+      qontract.recycle: "true"
     name: lightspeed-stack-config
     labels:
       app: assisted-chat
@@ -216,6 +218,8 @@ objects:
 - apiVersion: v1
   kind: ConfigMap
   metadata:
+    annotations:
+      qontract.recycle: "true"
     name: llama-stack-client-config
     labels:
       app: assisted-chat
@@ -346,8 +350,6 @@ objects:
             value: ${LLAMA_STACK_OTEL_SERVICE_NAME}
           - name: LLAMA_STACK_TELEMETRY_SINKS
             value: ${LLAMA_STACK_TELEMETRY_SINKS}
-          - name: DEPLOY_VERSION
-            value: "3"
           resources:
             limits:
               memory: ${MEMORY_LIMIT}
