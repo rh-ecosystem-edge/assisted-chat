@@ -1,14 +1,14 @@
 # vim: set filetype=dockerfile
-FROM quay.io/lightspeed-core/lightspeed-stack:latest
+FROM quay.io/lightspeed-core/lightspeed-stack:dev-latest
 
 RUN python3 -m ensurepip --default-pip && pip install --upgrade pip
 
 RUN python3 -m pip install pyyaml pyaml litellm sqlalchemy mcp
 
 # Patch llama-stack with an important fix
-# USER root
-# RUN microdnf install -y patch     
-# RUN curl -L https://github.com/meta-llama/llama-stack/commit/5e18d4d097d683056174b3c8b270806326e7ee96.patch | patch -p1 -d $(dirname $(dirname $(python3 -c "import llama_stack; print(llama_stack.__file__)")))
-# USER 1001
+USER root
+RUN microdnf install -y patch
+RUN curl -L https://github.com/meta-llama/llama-stack/commit/5e18d4d097d683056174b3c8b270806326e7ee96.patch | patch -p1 -d $(dirname $(dirname $(python3 -c "import llama_stack; print(llama_stack.__file__)")))
+USER 1001
 
 EXPOSE 8080
