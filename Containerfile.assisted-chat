@@ -1,5 +1,5 @@
 # vim: set filetype=dockerfile
-FROM quay.io/lightspeed-core/lightspeed-stack:dev-latest
+FROM quay.io/lightspeed-core/lightspeed-stack:dev-20250718-0cb49fc
 
 RUN python3 -m ensurepip --default-pip && pip install --upgrade pip
 
