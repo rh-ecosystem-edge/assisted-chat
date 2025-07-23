@@ -4,3 +4,6 @@
 ocm_token.txt
 .venv
 .python-version
+
+# Evaluation output folder
+eval_output*/
