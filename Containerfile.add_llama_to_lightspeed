@@ -1,7 +1,11 @@
+FROM quay.io/redhat-user-workloads/assisted-installer-tenant/assisted-chat-rag:cad1e1f2ef989a6b9bd0ecdc6066cb72d7b1da85 AS rag
 # vim: set filetype=dockerfile
 FROM localhost/local-ai-chat-lightspeed-stack:latest
 
 USER root
+
+COPY --from=rag /all-mpnet-base-v2/ /app-root/all-mpnet-base-v2/
+COPY --from=rag /llama_stack_vector_db/ /app-root/llama_stack_vector_db/
 
 ADD ./llama-stack /app-root/llama-stack
 

@@ -87,13 +87,13 @@ models:
   model_type: llm
 - metadata:
     embedding_dimension: 768
-  model_id: ./embeddings_model
+  model_id: ./all-mpnet-base-v2
   provider_id: sentence-transformers
   model_type: embedding
 shields: []
 vector_dbs:
  - vector_db_id: "ocp-assisted-installer-2025-07-18"
-   embedding_model: ./embeddings_model
+   embedding_model: ./all-mpnet-base-v2
    embedding_dimension: 768
    provider_id: "faiss"
 datasets: []
