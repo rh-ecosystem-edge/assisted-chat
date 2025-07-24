@@ -1,5 +1,6 @@
 /.env
 /config/lightspeed-stack.yaml
+/config/systemprompt.txt
 .vscode
 ocm_token.txt
 .venv

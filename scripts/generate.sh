@@ -24,5 +24,7 @@ source "$PROJECT_ROOT/.env"
 mkdir -p "$PROJECT_ROOT/config"
 cp "$PROJECT_ROOT/lightspeed-stack.template.yaml" "$PROJECT_ROOT/config/lightspeed-stack.yaml"
 
+yq -r '.objects[] | select(.metadata.name == "lightspeed-stack-config") | .data.system_prompt' "$PROJECT_ROOT/template.yaml" > "$PROJECT_ROOT/config/systemprompt.txt"
+
 
 
