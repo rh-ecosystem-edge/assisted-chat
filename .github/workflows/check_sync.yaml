@@ -1,0 +1,22 @@
+name: Check Containerfile Sync
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  check_sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check Containerfile sync
+        run: python scripts/check_sync.py
