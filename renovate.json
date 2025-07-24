@@ -1,6 +1,15 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "ignoreDeps": [
+    // llama-stack and lightspeed-stack must be updated together, as lightspeed-stack
+    // expects a very specific version of llama-stack, so we exclude them from auto-updates
+    // because any PR that updates one must also update the other, so it has to be done manually.
+    "llama-stack",
+    "lightspeed-stack",
+    // We don't particularly care about updating inspector
+    "inspector"
+  ],
   "git-submodules": {
-    "enabled": false
+    "enabled": true
   }
 }
