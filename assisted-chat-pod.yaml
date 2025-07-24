@@ -16,10 +16,10 @@ spec:
         - mountPath: /app-root/lightspeed-stack.yaml:Z
           name: config
           subPath: lightspeed-stack.yaml
-        - mountPath: /app-root/llama_stack_client_config.yaml
+        - mountPath: /app-root/llama_stack_client_config.yaml:Z
           name: config
           subPath: llama_stack_client_config.yaml
-        - mountPath: /tmp/systemprompt.txt
+        - mountPath: /tmp/systemprompt.txt:Z
           name: config
           subPath: systemprompt.txt
     - name: assisted-service-mcp
