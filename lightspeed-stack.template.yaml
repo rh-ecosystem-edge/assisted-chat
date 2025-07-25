@@ -18,7 +18,12 @@ user_data_collection:
   transcripts_disabled: false
   transcripts_storage: "/tmp/data/transcripts"
 authentication:
-  module: "noop-with-token"
+  module: jwk-token
+  jwk_config:
+    url: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/certs
+    jwt_configuration:
+      user_id_claim: user_id
+      username_claim: username
 customization:
   system_prompt_path: "/tmp/systemprompt.txt"
   disable_query_system_prompt: false
