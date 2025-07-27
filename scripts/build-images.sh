@@ -26,7 +26,6 @@ IMAGES:
     inspector                   Build the inspector image
     assisted-mcp                Build the assisted service MCP image
     lightspeed-stack            Build the lightspeed stack image
-    lightspeed-plus-llama-stack Build the lightspeed stack plus llama stack image
     ui                          Build the UI image
     all                         Build all images (default)
 
@@ -79,25 +78,9 @@ function build_assisted_mcp() {
 }
 
 function build_lightspeed_stack() {
-    echo "Building lightspeed stack image..."
-    pushd "${PROJECT_ROOT}/lightspeed-stack"
-    # Comment out the llama-stack dependency in pyproject.toml so it uses the locally installed version
-    # instead
-    sed -i '/^[^#].*llama-stack[[:space:]]*>=/ s/^/# /' pyproject.toml
-    uv lock
-    podman build -f Containerfile . --tag localhost/local-ai-chat-lightspeed-stack:latest
-    # Undo it
-    sed -i 's/^# \(.*llama-stack[[:space:]]*>=.*\)$/\1/' pyproject.toml
-    # uv.lock is guaranteed to change, and it's annoying to have it as a dirty file, so let's restore it
-    git checkout uv.lock 2>/dev/null || true  # Don't fail if uv.lock doesn't exist in git
-    popd
-    echo "✓ Lightspeed stack image built successfully"
-}
-
-function build_lightspeed_stack_plus_llama_stack() {
-    echo "Building lightspeed stack plus llama stack image..."
+    echo "Building lightspeed stack..."
     pushd "${PROJECT_ROOT}"
-    podman build -f Containerfile.add_llama_to_lightspeed . --tag localhost/local-ai-chat-lightspeed-stack-plus-llama-stack:latest
+    podman build -f Containerfile.assisted-chat . --tag localhost/local-ai-chat-lightspeed-stack-plus-llama-stack:latest
     popd
     echo "✓ Lightspeed stack plus llama stack image built successfully"
 }
@@ -156,9 +139,6 @@ for image in "${IMAGES_TO_BUILD[@]}"; do
         lightspeed-stack)
             build_lightspeed_stack
             ;;
-        lightspeed-plus-llama-stack)
-            build_lightspeed_stack_plus_llama_stack
-            ;;
         ui)
             build_ui
             ;;
@@ -166,7 +146,6 @@ for image in "${IMAGES_TO_BUILD[@]}"; do
             build_inspector
             build_assisted_mcp
             build_lightspeed_stack
-            build_lightspeed_stack_plus_llama_stack
             build_ui
             ;;
     esac

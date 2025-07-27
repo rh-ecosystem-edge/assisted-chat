@@ -1,14 +1,95 @@
+# This section is a direct copy of the Containerfile found in the
+# lightspeed-stack submodule. Do not modify
+# <---------- START OF LIGHTSPEED-STACK CONTAINERFILE
 # vim: set filetype=dockerfile
-FROM quay.io/lightspeed-core/lightspeed-stack:dev-20250718-0cb49fc
+FROM registry.access.redhat.com/ubi9/ubi-minimal AS builder
 
-RUN python3 -m ensurepip --default-pip && pip install --upgrade pip
+ARG APP_ROOT=/app-root
 
-RUN python3 -m pip install pyyaml pyaml litellm sqlalchemy mcp
+# Install Python
+RUN microdnf install -y --nodocs --setopt=keepcache=0 --setopt=tsflags=nodocs \
+    python3.12 python3.12-devel python3.12-pip
+
+# UV_PYTHON_DOWNLOADS=0 : Disable Python interpreter downloads and use the system interpreter.
+ENV UV_COMPILE_BYTECODE=0 \
+    UV_LINK_MODE=copy \
+    UV_PYTHON_DOWNLOADS=0
+
+WORKDIR /app-root
+
+# Install uv package manager
+RUN pip3.12 install uv
+
+# Add explicit files and directories
+# (avoid accidental inclusion of local directories or env files or credentials)
+COPY lightspeed-stack/src ./src
+COPY lightspeed-stack/pyproject.toml lightspeed-stack/LICENSE lightspeed-stack/README.md lightspeed-stack/uv.lock ./
+
+# <---------- START ASSISTED-CHAT MODIFIED SECTION
+RUN sed -i '/^[^#].*llama-stack[[:space:]]*>=/ s/^/# /' pyproject.toml
+RUN uv lock
+# <---------- END ASSISTED-CHAT MODIFIED SECTION
+
+RUN uv sync --locked --no-install-project --no-dev
+
+
+# Final image without uv package manager
+FROM registry.access.redhat.com/ubi9/ubi-minimal
+ARG APP_ROOT=/app-root
+RUN microdnf install -y --nodocs --setopt=keepcache=0 --setopt=tsflags=nodocs python3.12 python3.12-pip
+WORKDIR /app-root
+
+# PYTHONDONTWRITEBYTECODE 1 : disable the generation of .pyc
+# PYTHONUNBUFFERED 1 : force the stdout and stderr streams to be unbuffered
+# PYTHONCOERCECLOCALE 0, PYTHONUTF8 1 : skip legacy locales and use UTF-8 mode
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONCOERCECLOCALE=0 \
+    PYTHONUTF8=1 \
+    PYTHONIOENCODING=UTF-8 \
+    LANG=en_US.UTF-8
+
+COPY --from=builder --chown=1001:1001 /app-root /app-root
+
+# this directory is checked by ecosystem-cert-preflight-checks task in Konflux
+COPY --from=builder /app-root/LICENSE /licenses/
+
+# Add executables from .venv to system PATH
+ENV PATH="/app-root/.venv/bin:$PATH"
+
+# Run the application
+EXPOSE 8080
+ENTRYPOINT ["python3.12", "src/lightspeed_stack.py"]
+
+LABEL vendor="Red Hat, Inc."
+
+# no-root user is checked in Konflux
+USER 1001
+# <---------- END OF LIGHTSPEED-STACK CONTAINERFILE
+
+# Temporarily switch to root to make installations pip
+USER root
+
+# Not entirely sure why this is needed
+RUN python3.12 -m ensurepip
+
+# Use the llama-stack version from our submodule
+ADD ./llama-stack /app-root/llama-stack
+RUN cd /app-root/llama-stack && python3.12 -m pip install .
+
+# Install lightspeed-stack itself
+RUN cd /app-root/ && python3.12 -m pip install .
+
+
+# Extra runtime dependencies that are configuration dependent 
+RUN python3.12 -m pip install pyyaml pyaml litellm sqlalchemy mcp
 
 # Patch llama-stack with an important fix
-USER root
 RUN microdnf install -y patch
-RUN curl -L https://github.com/meta-llama/llama-stack/commit/5e18d4d097d683056174b3c8b270806326e7ee96.patch | patch -p1 -d $(dirname $(dirname $(python3 -c "import llama_stack; print(llama_stack.__file__)")))
+RUN cd /app-root/llama-stack && \
+    curl -L https://github.com/meta-llama/llama-stack/commit/5e18d4d097d683056174b3c8b270806326e7ee96.patch | patch -p1
+
+# Back to the original Containerfile's user
 USER 1001
 
 EXPOSE 8080
