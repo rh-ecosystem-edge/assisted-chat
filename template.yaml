@@ -116,7 +116,12 @@ objects:
         use_as_library_client: true
         library_client_config_path: "/app-root/llama_stack_client_config.yaml"
       authentication:
-        module: "noop-with-token"
+        module: jwk-token
+        jwk_config:
+          url: ${SSO_BASE_URL}/protocol/openid-connect/certs
+          jwt_configuration:
+            user_id_claim: user_id
+            username_claim: username
       mcp_servers:
         - name: mcp::assisted
           url: "${MCP_SERVER_URL}"
