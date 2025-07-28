@@ -84,6 +84,9 @@ parameters:
 - name: LLAMA_STACK_SERVER_PORT
   value: "8321"
   description: "Port number for the embedded Llama Stack server"
+- name: SSO_BASE_URL
+  value: "https://sso.redhat.com/auth/realms/redhat-external"
+  description: "SSO Base URL"
 
 apiVersion: template.openshift.io/v1
 kind: Template
