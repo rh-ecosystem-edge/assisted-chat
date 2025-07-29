@@ -84,6 +84,9 @@ parameters:
 - name: LLAMA_STACK_SERVER_PORT
   value: "8321"
   description: "Port number for the embedded Llama Stack server"
+- name: LLAMA_STACK_DB_SECRET_NAME
+  value: "llama-stack-db"
+  description: "Name of the Kubernetes secret containing the llama-stack database credentials"
 - name: SSO_BASE_URL
   value: "https://sso.redhat.com/auth/realms/redhat-external"
   description: "SSO Base URL"
@@ -238,12 +241,19 @@ objects:
           provider_type: inline::meta-reference
           config:
             persistence_store:
-              type: sqlite
-              namespace: null
-              db_path: ${STORAGE_MOUNT_PATH}/sqlite/agents_store.db
+              type: postgres
+              host: ${env.LLAMA_STACK_POSTGRES_HOST}
+              port: ${env.LLAMA_STACK_POSTGRES_PORT}
+              db: ${env.LLAMA_STACK_POSTGRES_NAME}
+              user: ${env.LLAMA_STACK_POSTGRES_USER}
+              password: ${env.LLAMA_STACK_POSTGRES_PASSWORD}
             responses_store:
-              type: sqlite
-              db_path: ${STORAGE_MOUNT_PATH}/sqlite/responses_store.db
+              type: postgres
+              host: ${env.LLAMA_STACK_POSTGRES_HOST}
+              port: ${env.LLAMA_STACK_POSTGRES_PORT}
+              db: ${env.LLAMA_STACK_POSTGRES_NAME}
+              user: ${env.LLAMA_STACK_POSTGRES_USER}
+              password: ${env.LLAMA_STACK_POSTGRES_PASSWORD}
         telemetry:
         - provider_id: meta-reference
           provider_type: inline::meta-reference
@@ -268,11 +278,20 @@ objects:
           provider_type: remote::model-context-protocol
           config: {}
       metadata_store:
-        type: sqlite
-        db_path: ${STORAGE_MOUNT_PATH}/sqlite/registry.db
+        type: postgres
+        host: ${env.LLAMA_STACK_POSTGRES_HOST}
+        port: ${env.LLAMA_STACK_POSTGRES_PORT}
+        db: ${env.LLAMA_STACK_POSTGRES_NAME}
+        user: ${env.LLAMA_STACK_POSTGRES_USER}
+        password: ${env.LLAMA_STACK_POSTGRES_PASSWORD}
+        table_name: llamastack_kvstore
       inference_store:
-        type: sqlite
-        db_path: ${STORAGE_MOUNT_PATH}/sqlite/inference_store.db
+        type: postgres
+        host: ${env.LLAMA_STACK_POSTGRES_HOST}
+        port: ${env.LLAMA_STACK_POSTGRES_PORT}
+        db: ${env.LLAMA_STACK_POSTGRES_NAME}
+        user: ${env.LLAMA_STACK_POSTGRES_USER}
+        password: ${env.LLAMA_STACK_POSTGRES_PASSWORD}
       models:
       - metadata: {}
         model_id: ${LLAMA_STACK_DEFAULT_MODEL}
@@ -335,6 +354,37 @@ objects:
             value: ${LLAMA_STACK_OTEL_SERVICE_NAME}
           - name: LLAMA_STACK_TELEMETRY_SINKS
             value: ${LLAMA_STACK_TELEMETRY_SINKS}
+          - name: LLAMA_STACK_POSTGRES_HOST
+            valueFrom:
+              secretKeyRef:
+                name: ${LLAMA_STACK_DB_SECRET_NAME}
+                key: db.host
+          - name: LLAMA_STACK_POSTGRES_PORT
+            valueFrom:
+              secretKeyRef:
+                name: ${LLAMA_STACK_DB_SECRET_NAME}
+                key: db.port
+          - name: LLAMA_STACK_POSTGRES_NAME
+            valueFrom:
+              secretKeyRef:
+                name: ${LLAMA_STACK_DB_SECRET_NAME}
+                key: db.name
+          - name: LLAMA_STACK_POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: ${LLAMA_STACK_DB_SECRET_NAME}
+                key: db.user
+          - name: LLAMA_STACK_POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: ${LLAMA_STACK_DB_SECRET_NAME}
+                key: db.password
+          - name: LLAMA_STACK_POSTGRES_CA_CERT
+            valueFrom:
+              secretKeyRef:
+                name: ${LLAMA_STACK_DB_SECRET_NAME}
+                key: db.ca_cert
+                optional: true
           resources:
             limits:
               memory: ${MEMORY_LIMIT}

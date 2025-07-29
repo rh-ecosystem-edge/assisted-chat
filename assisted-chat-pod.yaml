@@ -9,6 +9,16 @@ spec:
       env:
         - name: GEMINI_API_KEY
           value: ${GEMINI_API_KEY}
+        - name: LLAMA_STACK_POSTGRES_HOST
+          value: localhost
+        - name: LLAMA_STACK_POSTGRES_PORT
+          value: "5432"
+        - name: LLAMA_STACK_POSTGRES_USER
+          value: llamastack
+        - name: LLAMA_STACK_POSTGRES_PASSWORD
+          value: llamastack
+        - name: LLAMA_STACK_POSTGRES_NAME
+          value: llamastack
       ports:
         - containerPort: 8090
           hostPort: 8090
@@ -62,8 +72,24 @@ spec:
         - mountPath: /systemprompt.txt
           name: config
           subPath: systemprompt.txt
+    - name: postgres
+      image: registry.redhat.io/rhel9/postgresql-16:latest
+      env:
+        - name: POSTGRESQL_USER
+          value: llamastack
+        - name: POSTGRESQL_PASSWORD
+          value: llamastack
+        - name: POSTGRESQL_DATABASE
+          value: llamastack
+      ports:
+        - containerPort: 5432
+      volumeMounts:
+        - name: pgdata
+          mountPath: /var/lib/pgsql/data
   volumes:
     - name: config
       hostPath:
         path: ./config
         type: Directory
+    - name: pgdata
+      emptyDir: {}
