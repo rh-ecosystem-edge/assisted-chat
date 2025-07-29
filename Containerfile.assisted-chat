@@ -3,7 +3,7 @@ FROM quay.io/lightspeed-core/lightspeed-stack:dev-20250728-f6cc203
 
 RUN python3 -m ensurepip --default-pip && pip install --upgrade pip
 
-RUN python3 -m pip install pyyaml pyaml litellm sqlalchemy mcp
+RUN python3 -m pip install pyyaml pyaml litellm sqlalchemy mcp psycopg2-binary
 
 # Patch llama-stack with an important fix
 USER root

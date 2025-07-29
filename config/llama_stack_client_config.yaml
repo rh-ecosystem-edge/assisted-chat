@@ -25,12 +25,19 @@ providers:
     provider_type: inline::meta-reference
     config:
       persistence_store:
-        type: sqlite
-        namespace: null
-        db_path: ${env.SQLITE_STORE_DIR:=/tmp/.llama/distributions/starter}/agents_store.db
+        type: postgres
+        host: ${env.POSTGRES_HOST:=localhost}
+        port: ${env.POSTGRES_PORT:=5432}
+        db: ${env.POSTGRES_DB:=llamastack}
+        user: ${env.POSTGRES_USER:=llamastack}
+        password: ${env.POSTGRES_PASSWORD:=llamastack}
       responses_store:
-        type: sqlite
-        db_path: ${env.SQLITE_STORE_DIR:=/tmp/.llama/distributions/starter}/responses_store.db
+        type: postgres
+        host: ${env.POSTGRES_HOST:=localhost}
+        port: ${env.POSTGRES_PORT:=5432}
+        db: ${env.POSTGRES_DB:=llamastack}
+        user: ${env.POSTGRES_USER:=llamastack}
+        password: ${env.POSTGRES_PASSWORD:=llamastack}
   telemetry:
   - provider_id: meta-reference
     provider_type: inline::meta-reference
@@ -55,11 +62,20 @@ providers:
     provider_type: remote::model-context-protocol
     config: {}
 metadata_store:
-  type: sqlite
-  db_path: ${env.SQLITE_STORE_DIR:=/tmp/.llama/distributions/starter}/registry.db
+  type: postgres
+  host: ${env.POSTGRES_HOST:=localhost}
+  port: ${env.POSTGRES_PORT:=5432}
+  db: ${env.POSTGRES_DB:=llamastack}
+  user: ${env.POSTGRES_USER:=llamastack}
+  password: ${env.POSTGRES_PASSWORD:=llamastack}
+  table_name: llamastack_kvstore
 inference_store:
-  type: sqlite
-  db_path: ${env.SQLITE_STORE_DIR:=/tmp/.llama/distributions/starter}/inference_store.db
+  type: postgres
+  host: ${env.POSTGRES_HOST:=localhost}
+  port: ${env.POSTGRES_PORT:=5432}
+  db: ${env.POSTGRES_DB:=llamastack}
+  user: ${env.POSTGRES_USER:=llamastack}
+  password: ${env.POSTGRES_PASSWORD:=llamastack}
 models:
 - metadata: {}
   model_id: gemini/gemini-2.0-flash
