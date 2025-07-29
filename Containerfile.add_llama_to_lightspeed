@@ -1,7 +1,11 @@
+FROM quay.io/redhat-user-workloads/assisted-installer-tenant/assisted-chat-rag:cad1e1f2ef989a6b9bd0ecdc6066cb72d7b1da85 AS rag
 # vim: set filetype=dockerfile
 FROM localhost/local-ai-chat-lightspeed-stack:latest
 
 USER root
+
+COPY --from=rag /all-mpnet-base-v2/ /app-root/all-mpnet-base-v2/
+COPY --from=rag /llama_stack_vector_db/ /app-root/llama_stack_vector_db/
 
 ADD ./llama-stack /app-root/llama-stack
 
@@ -19,10 +23,11 @@ RUN python3.12 -m pip install sqlalchemy
 
 RUN python3.12 -m pip install mcp
 
+RUN python3.12 -m pip install faiss-cpu sentence_transformers
+
 # Patch llama-stack with an important fix
-RUN microdnf install -y patch     
+RUN microdnf install -y patch
 RUN cd /app-root/llama-stack && \
     curl -L https://github.com/meta-llama/llama-stack/commit/5e18d4d097d683056174b3c8b270806326e7ee96.patch | patch -p1
 
 EXPOSE 8080
-
