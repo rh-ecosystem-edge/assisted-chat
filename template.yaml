@@ -75,11 +75,14 @@ parameters:
 - name: LLAMA_STACK_INFERENCE_PROVIDER_TYPE
   value: "remote::gemini"
   description: "Type specification for the inference provider (remote::gemini for Google Gemini)"
-- name: LLAMA_STACK_DEFAULT_MODEL
+- name: LLAMA_STACK_2_5_PRO_MODEL
   value: "gemini/gemini-2.5-pro"
   description: "Default model to use for inference requests"
-- name: LLAMA_STACK_FLASH_MODEL
+- name: LLAMA_STACK_2_5_FLASH_MODEL
   value: "gemini/gemini-2.5-flash"
+  description: "Fast model to use for quick inference requests"
+- name: LLAMA_STACK_2_0_FLASH_MODEL
+  value: "gemini/gemini-2.0-flash"
   description: "Fast model to use for quick inference requests"
 - name: LLAMA_STACK_SERVER_PORT
   value: "8321"
@@ -140,8 +143,8 @@ objects:
         system_prompt_path: "/app-root/system_prompt"
         disable_query_system_prompt: true
       inference:
-        default_model: gemini/gemini/gemini-2.0-flash
-        default_provider: gemini
+        default_model: "${LLAMA_STACK_INFERENCE_PROVIDER}/${LLAMA_STACK_2_0_FLASH_MODEL}"
+        default_provider: ${LLAMA_STACK_INFERENCE_PROVIDER}
     system_prompt: |
       You are OpenShift Lightspeed Intelligent Assistant - an intelligent virtual assistant and expert on all things related to OpenShift installation, configuration, and troubleshooting, specifically with the Assisted Installer.
 
@@ -297,14 +300,19 @@ objects:
         password: ${env.LLAMA_STACK_POSTGRES_PASSWORD}
       models:
       - metadata: {}
-        model_id: ${LLAMA_STACK_DEFAULT_MODEL}
+        model_id: ${LLAMA_STACK_2_0_FLASH_MODEL}
         provider_id: ${LLAMA_STACK_INFERENCE_PROVIDER}
-        provider_model_id: ${LLAMA_STACK_DEFAULT_MODEL}
+        provider_model_id: ${LLAMA_STACK_2_0_FLASH_MODEL}
         model_type: llm
       - metadata: {}
-        model_id: ${LLAMA_STACK_FLASH_MODEL}
+        model_id: ${LLAMA_STACK_2_5_PRO_MODEL}
         provider_id: ${LLAMA_STACK_INFERENCE_PROVIDER}
-        provider_model_id: ${LLAMA_STACK_FLASH_MODEL}
+        provider_model_id: ${LLAMA_STACK_2_5_PRO_MODEL}
+        model_type: llm
+      - metadata: {}
+        model_id: ${LLAMA_STACK_2_5_FLASH_MODEL}
+        provider_id: ${LLAMA_STACK_INFERENCE_PROVIDER}
+        provider_model_id: ${LLAMA_STACK_2_5_FLASH_MODEL}
         model_type: llm
       shields: []
       vector_dbs: []
