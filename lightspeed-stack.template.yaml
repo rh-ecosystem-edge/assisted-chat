@@ -27,3 +27,6 @@ authentication:
 customization:
   system_prompt_path: "/tmp/systemprompt.txt"
   disable_query_system_prompt: false
+inference:
+  default_model: gemini/gemini/gemini-2.0-flash
+  default_provider: gemini
