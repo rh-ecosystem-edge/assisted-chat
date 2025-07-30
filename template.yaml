@@ -139,6 +139,9 @@ objects:
       customization:
         system_prompt_path: "/app-root/system_prompt"
         disable_query_system_prompt: true
+      inference:
+        default_model: gemini/gemini/gemini-2.0-flash
+        default_provider: gemini
     system_prompt: |
       You are OpenShift Lightspeed Intelligent Assistant - an intelligent virtual assistant and expert on all things related to OpenShift installation, configuration, and troubleshooting, specifically with the Assisted Installer.
 
