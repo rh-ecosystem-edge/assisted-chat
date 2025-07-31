@@ -56,13 +56,24 @@ parameters:
 - name: LIGHTSPEED_SERVICE_ACCESS_LOG
   value: "true"
   description: "Whether to enable access logging for HTTP requests"
-- name: LIGHTSPEED_FEEDBACK_DISABLED
-  value: "false"
-  description: "Whether to disable user feedback collection functionality"
-- name: LIGHTSPEED_TRANSCRIPTS_DISABLED
-  value: "false"
-  description: "Whether to disable conversation transcript storage"
-
+- name: LIGHTSPEED_FEEDBACK_ENABLED
+  value: "true"
+  description: "Whether to enable user feedback collection functionality"
+- name: LIGHTSPEED_TRANSCRIPTS_ENABLED
+  value: "true"
+  description: "Whether to enable conversation transcript storage"
+- name: INSIGHTS_INGRESS_SERVER_URL
+  value: "https://console.redhat.com/api/ingress/v1/upload"
+  description: "The full URL to use when uploading feedback/transcript archives to the insights ingress service"
+- name: INSIGHTS_SERVICE_ID
+  value: "assisted-chat"
+  description: "The service id used when exporting feedback/transcripts data to the insights ingress server"
+- name: INSIGHTS_COLLECTION_INTERVAL_SECONDS
+  value: "3600"
+  description: "How often to send feedback/transcript archives to the insights service"
+- name: INSIGHTS_DATA_COLLECTOR_ENABLED
+  value: "true"
+  description: "Whether the data export of feedback/transcripts to the insights ingress server is enabled or not"
 - name: LLAMA_STACK_OTEL_SERVICE_NAME
   value: "assisted-chat"
   description: "Service name for OpenTelemetry tracing and metrics"
@@ -135,10 +146,17 @@ objects:
         - name: mcp::assisted
           url: "${MCP_SERVER_URL}"
       user_data_collection:
-        feedback_disabled: ${LIGHTSPEED_FEEDBACK_DISABLED}
+        feedback_enabled: ${LIGHTSPEED_FEEDBACK_ENABLED}
         feedback_storage: "${STORAGE_MOUNT_PATH}/feedback"
-        transcripts_disabled: ${LIGHTSPEED_TRANSCRIPTS_DISABLED}
+        transcripts_enabled: ${LIGHTSPEED_TRANSCRIPTS_ENABLED}
         transcripts_storage: "${STORAGE_MOUNT_PATH}/transcripts"
+        data_collector:
+          enabled: ${INSIGHTS_DATA_COLLECTOR_ENABLED}
+          ingress_server_url: "${INSIGHTS_INGRESS_SERVER_URL}"
+          ingress_content_service_name: "${INSIGHTS_SERVICE_ID}"
+          collection_interval: ${INSIGHTS_COLLECTION_INTERVAL_SECONDS}
+          cleanup_after_send: true
+          connection_timeout: 30
       customization:
         system_prompt_path: "/app-root/system_prompt"
         disable_query_system_prompt: true
