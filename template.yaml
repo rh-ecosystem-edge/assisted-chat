@@ -421,12 +421,14 @@ objects:
               port: ${{SERVICE_PORT}}
             initialDelaySeconds: 30
             periodSeconds: 10
+            timeoutSeconds: 2
           readinessProbe:
             httpGet:
               path: /readiness
               port: ${{SERVICE_PORT}}
             initialDelaySeconds: 30
             periodSeconds: 10
+            timeoutSeconds: 2
         volumes:
         - name: lightspeed-config
           configMap:
