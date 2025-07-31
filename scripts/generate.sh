@@ -5,6 +5,8 @@ set -euo pipefail
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 PROJECT_ROOT=$(dirname "$SCRIPT_DIR")
 
+OVERRIDE_FILE=$PROJECT_ROOT/.template-params.override.env
+
 if [[ ! -f "$PROJECT_ROOT/.env" ]]; then
     echo "Missing the .env file that should contain your configuration."
     echo "Would you like help creating the .env file interactively? (y/n)"
@@ -22,7 +24,17 @@ fi
 source "$PROJECT_ROOT/.env"
 
 mkdir -p "$PROJECT_ROOT/config"
-cp "$PROJECT_ROOT/lightspeed-stack.template.yaml" "$PROJECT_ROOT/config/lightspeed-stack.yaml"
+
+if [[ -f $OVERRIDE_FILE ]]; then
+  OVERRIDE_PARAMS="--param-file=$OVERRIDE_FILE"
+fi
+
+oc process  --local \
+  -f $PROJECT_ROOT/template.yaml \
+  ${OVERRIDE_PARAMS-} \
+  --param-file=$PROJECT_ROOT/template-params.dev.env | \
+  yq '.items[] | select(.kind == "ConfigMap" and .metadata.name == "lightspeed-stack-config").data."lightspeed-stack.yaml"' -r \
+  > $PROJECT_ROOT/config/lightspeed-stack.yaml
 
 yq -r '.objects[] | select(.metadata.name == "lightspeed-stack-config") | .data.system_prompt' "$PROJECT_ROOT/template.yaml" > "$PROJECT_ROOT/config/systemprompt.txt"
 
