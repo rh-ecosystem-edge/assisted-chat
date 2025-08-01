@@ -45,7 +45,7 @@ parameters:
   value: "assisted-chat"
   description: "Name identifier for the lightspeed service instance"
 - name: LIGHTSPEED_SERVICE_WORKERS
-  value: "1"
+  value: "10"
   description: "Number of worker processes for the lightspeed service"
 - name: LIGHTSPEED_SERVICE_AUTH_ENABLED
   value: "false"
