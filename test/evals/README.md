@@ -2,10 +2,10 @@
 Evaluation mechanism to validate Agent task completion (e2e)
 - Refer [LCORE-Eval repo](https://github.com/lightspeed-core/lightspeed-evaluation/tree/main/lsc_agent_eval) for setup.
 - Supports `sub-string`, `judge-llm` and `script` based evaluation.
-- Currently it is single-turn evaluation process.
+- Supports multi-turn evaluation.
 
 ## Prerequisites
-- **Python**: Version 3.11.1 to 3.12.9
+- **Python**: Version 3.11 to 3.12
 - **Assisted Chat API**: Must be running (`make build-images run`)
 - Install lightspeed-core **agent e2e eval**
 ```bash
