@@ -129,8 +129,8 @@ objects:
         jwk_config:
           url: ${SSO_BASE_URL}/protocol/openid-connect/certs
           jwt_configuration:
-            user_id_claim: user_id
-            username_claim: username
+            user_id_claim: sub
+            username_claim: preferred_username
       mcp_servers:
         - name: mcp::assisted
           url: "${MCP_SERVER_URL}"
