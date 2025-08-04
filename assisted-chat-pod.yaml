@@ -37,9 +37,9 @@ spec:
     - name: ui
       image: localhost/local-ai-chat-ui
       env:
-        - name: AIUI_CHATBOT_API_URL
+        - name: AIUI_CHAT_API_URL
           value: http://lightspeed-stack:8090
-        - name: AIUI_APP_TOKEN
+        - name: AIUI_OCM_TOKEN
           value: ${OCM_TOKEN}
       ports:
         - containerPort: 8080
