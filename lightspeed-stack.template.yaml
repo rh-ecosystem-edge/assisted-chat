@@ -22,8 +22,8 @@ authentication:
   jwk_config:
     url: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/certs
     jwt_configuration:
-      user_id_claim: user_id
-      username_claim: username
+      user_id_claim: sub
+      username_claim: preferred_username
 customization:
   system_prompt_path: "/tmp/systemprompt.txt"
   disable_query_system_prompt: false
