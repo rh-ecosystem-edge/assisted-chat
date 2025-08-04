@@ -10,7 +10,7 @@ source "$PROJECT_ROOT/utils/ocm-token.sh"
 
 if [[ ! -f "$PROJECT_ROOT/config/lightspeed-stack.yaml" ]]; then
     echo "Configuration file not found: $PROJECT_ROOT/config/lightspeed-stack.yaml"
-    echo "Did you run ./generate.sh first?"
+    echo "Did you run 'make generate' first?"
     exit 1
 fi
 
