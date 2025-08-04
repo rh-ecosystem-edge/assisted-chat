@@ -6,6 +6,13 @@ RUN python3 -m ensurepip --default-pip && pip install --upgrade pip
 
 RUN python3 -m pip install pyyaml pyaml litellm sqlalchemy mcp psycopg2-binary
 
+# Enable async compatibility in the inference provider
+# See https://github.com/meta-llama/llama-stack/pull/3029/files
+# Remove this once lightspeed-core bump the llama-stack version
+RUN sed -i 's/response = litellm\.completion(\*\*params)/response = await litellm\.acompletion(\*\*params)/' /app-root/.venv/lib/python3.12/site-packages/llama_stack/providers/utils/inference/litellm_openai_mixin.py
+RUN sed -i 's/for chunk in response:/async for chunk in response:/' /app-root/.venv/lib/python3.12/site-packages/llama_stack/providers/utils/inference/litellm_openai_mixin.py
+
+
 USER 1001
 
 EXPOSE 8080
