@@ -137,7 +137,7 @@ objects:
       mcp_servers:
         - name: mcp::assisted
           url: "${MCP_SERVER_URL}"
-        - name: ocm::mcp
+        - name: mcp::ocm
           url: "${OCM_MCP_SERVER_URL}"
       user_data_collection:
         feedback_disabled: ${LIGHTSPEED_FEEDBACK_DISABLED}
