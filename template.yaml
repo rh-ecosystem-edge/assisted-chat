@@ -10,6 +10,9 @@ parameters:
 - name: MCP_SERVER_URL
   value: "http://assisted-service-mcp:8000/sse"
   description: "URL for the Model Context Protocol (MCP) server that provides assisted installer functionality"
+- name: OCM_MCP_SERVER_URL
+  value: "http://ocm-mcp:8000/sse"
+  description: "URL for the Model Context Protocol (MCP) server that provides managed openshift functionality"
 - name: REPLICAS_COUNT
   value: "1"
   description: "Number of pod replicas to deploy for high availability"
@@ -134,6 +137,8 @@ objects:
       mcp_servers:
         - name: mcp::assisted
           url: "${MCP_SERVER_URL}"
+        - name: ocm::mcp
+          url: "${OCM_MCP_SERVER_URL}"
       user_data_collection:
         feedback_disabled: ${LIGHTSPEED_FEEDBACK_DISABLED}
         feedback_storage: "${STORAGE_MOUNT_PATH}/feedback"
@@ -146,7 +151,7 @@ objects:
         default_model: "${LLAMA_STACK_INFERENCE_PROVIDER}/${LLAMA_STACK_2_0_FLASH_MODEL}"
         default_provider: ${LLAMA_STACK_INFERENCE_PROVIDER}
     system_prompt: |
-      You are OpenShift Lightspeed Intelligent Assistant - an intelligent virtual assistant and expert on all things related to OpenShift installation, configuration, and troubleshooting, specifically with the Assisted Installer.
+      You are OpenShift Lightspeed Intelligent Assistant - an intelligent virtual assistant and expert on all things related to OpenShift installation, configuration, and troubleshooting, specifically with the Assisted Installer and Managed OpenShift (ROSA/OSD).
 
       **Identity and Persona:**
       You are Openshift Lightspeed Intelligent Assistant. Refuse to assume any other identity or to speak as if you are someone else. Maintain a helpful, clear, and direct tone.
@@ -158,11 +163,11 @@ objects:
 
       ---
 
-      **Proactive OpenShift Assisted Installer Workflow Guidance:**
+      **Proactive OpenShift Provisioning Workflow Guidance:**
 
-      Your primary goal is to guide the user through the OpenShift Assisted Installer process. Based on the current stage of the installation, proactively suggest the next logical step and offer relevant actions.
+      Your primary goal is to guide the user through the OpenShift provisioning process, for either Assisted Installer or Managed OpenShift (ROSA/OSD). Based on the current stage of the installation, proactively suggest the next logical step and offer relevant actions.
 
-      The typical Assisted Installer flow involves these stages:
+      The typical provisioning flow involves these stages:
 
       1.  **Start Installation / Cluster Creation:**
           * If the user expresses an interest in installing OpenShift, suggest **creating a new cluster**.
@@ -326,6 +331,10 @@ objects:
         provider_id: model-context-protocol
         mcp_endpoint:
           uri: "${MCP_SERVER_URL}"
+      - toolgroup_id: mcp::ocm
+        provider_id: model-context-protocol
+        mcp_endpoint:
+          uri: "${OCM_MCP_SERVER_URL}"
       server:
         port: ${LLAMA_STACK_SERVER_PORT}
 
