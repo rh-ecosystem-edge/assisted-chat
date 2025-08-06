@@ -21,8 +21,28 @@ fi
 
 DEFAULT_QUERY="What is the OpenShift Assisted Installer? Can you list my clusters?"
 MODELS=$(curl --silent --show-error -X 'GET' 'http://0.0.0.0:8090/v1/models' -H 'accept: application/json')
-MODEL_IDENTIFIER=$(jq '.models[] | select(.model_type == "llm").identifier' -r <<<"$MODELS" | fzf)
-PROVIDER=$(jq '.models[] | select(.identifier == "'"$MODEL_IDENTIFIER"'") | .provider_id' -r <<<"$MODELS")
+< <(jq -r '
+    # Get all models
+    .models[] 
+
+    # Ignore models that are not LLMs, like embeddings
+    | select(.model_type == "llm") 
+
+    # Extract relevant fields
+    | . as $model
+    | $model.identifier as $model_name
+    | $model.provider_id as $provider
+
+    # Determine type label based on model identifier
+    | (if ($model_name | startswith("gemini/gemini/")) then "Vertex AI"
+       elif ($model_name | contains("gemini")) then "True Gemini"
+       else ""
+       end) as $type_label
+
+    # Format with proper spacing for alignment
+    | "\($model_name | . + (" " * (40 - length)))\($type_label)\t\($model_name)\t\($provider)"
+    ' <<<"$MODELS" | fzf --delimiter='\t' --with-nth=1 --accept-nth=2,3 --header="Model Name                               Type") \
+    IFS=$'\t' read -r MODEL_NAME MODEL_PROVIDER
 
 # Generate a random UUID for the initial conversation_id
 # Try different methods to generate UUID based on what's available
@@ -58,8 +78,8 @@ send_curl_query() {
         'http://localhost:8090/v1/query' \
         --json '{
     "conversation_id": "'"$CONVERSATION_ID"'",
-    "model": "'"$MODEL_IDENTIFIER"'",
-    "provider": "'"$PROVIDER"'",
+    "model": "'"$MODEL_NAME"'",
+    "provider": "'"$MODEL_PROVIDER"'",
     "query": "'"${query}"'"
   }')
     body=$(cat "$tmpfile")
