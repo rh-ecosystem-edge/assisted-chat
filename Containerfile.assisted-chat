@@ -1,17 +1,10 @@
 # vim: set filetype=dockerfile
-# This is the digest of quay.io/lightspeed-core/lightspeed-stack:0.1.1
-FROM quay.io/lightspeed-core/lightspeed-stack@sha256:c4c795e66cb3f27715f991895e2cd8e45c714c3f6ebdca066e8ab13a231ba3c0
+# This is the digest of quay.io/lightspeed-core/lightspeed-stack:dev-20250806-739b786
+FROM quay.io/lightspeed-core/lightspeed-stack@sha256:2cf68a775df9157689e95222e413f33a05107c31c428db27ec205fd5b7c7d535
 
 RUN python3 -m ensurepip --default-pip && pip install --upgrade pip
 
 RUN python3 -m pip install pyyaml pyaml litellm sqlalchemy mcp psycopg2-binary
-
-# Enable async compatibility in the inference provider
-# See https://github.com/meta-llama/llama-stack/pull/3029/files
-# Remove this once lightspeed-core bump the llama-stack version
-RUN sed -i 's/response = litellm\.completion(\*\*params)/response = await litellm\.acompletion(\*\*params)/' /app-root/.venv/lib/python3.12/site-packages/llama_stack/providers/utils/inference/litellm_openai_mixin.py
-RUN sed -i 's/for chunk in response:/async for chunk in response:/' /app-root/.venv/lib/python3.12/site-packages/llama_stack/providers/utils/inference/litellm_openai_mixin.py
-
 
 USER 1001
 

@@ -11,12 +11,6 @@ RUN cd /app-root/llama-stack && python3.12 -m pip install --editable .
 
 RUN cd /app-root/ && python3.12 -m pip install .
 
-# Enable async compatibility in the inference provider
-# See https://github.com/meta-llama/llama-stack/pull/3029/files
-# Remove this once lightspeed-core bump the llama-stack version
-RUN sed -i 's/response = litellm\.completion(\*\*params)/response = await litellm\.acompletion(\*\*params)/' /app-root/llama-stack/llama_stack/providers/utils/inference/litellm_openai_mixin.py
-RUN sed -i 's/for chunk in response:/async for chunk in response:/' /app-root/llama-stack/llama_stack/providers/utils/inference/litellm_openai_mixin.py
-
 RUN python3.12 -m pip install pyyaml pyaml
 
 RUN python3.12 -m pip install litellm
