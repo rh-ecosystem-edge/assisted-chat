@@ -103,6 +103,6 @@ tool_groups:
 - toolgroup_id: mcp::assisted
   provider_id: model-context-protocol
   mcp_endpoint:
-    uri: "http://assisted-service-mcp:8000/sse"
+    uri: "http://assisted-service-mcp:8000/mcp"
 server:
   port: 8321

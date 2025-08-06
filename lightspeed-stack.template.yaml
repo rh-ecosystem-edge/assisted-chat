@@ -11,7 +11,7 @@ llama_stack:
   library_client_config_path: "llama_stack_client_config.yaml"
 mcp_servers:
   - name: mcp::assisted
-    url: "http://assisted-service-mcp:8000/sse"
+    url: "http://assisted-service-mcp:8000/mcp"
 user_data_collection:
   feedback_disabled: false
   feedback_storage: "/tmp/data/feedback"

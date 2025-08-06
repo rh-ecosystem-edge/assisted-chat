@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "assisted": {
-      "transport": "sse",
-      "url": "http://assisted-service-mcp:8000/sse",
+      "transport": "streamable",
+      "url": "http://assisted-service-mcp:8000/mcp",
       "headers": ["Authorization: Bearer ${env://OCM_TOKEN}"]
     }
   }
