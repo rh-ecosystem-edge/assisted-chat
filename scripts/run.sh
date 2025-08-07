@@ -26,9 +26,9 @@ fi
 set -a && source "$PROJECT_ROOT/.env" && set +a
 export LIGHTSPEED_STACK_IMAGE_OVERRIDE="${LIGHTSPEED_STACK_IMAGE_OVERRIDE:-localhost/local-ai-chat-lightspeed-stack-plus-llama-stack}"
 
-# Validate and export OCM token for use in pod configuration
+# Validate and export OCM tokens for use in pod configuration
 if ! export_ocm_token; then
-    echo "Failed to get OCM token. The UI container will not be able to authenticate with OCM."
+    echo "Failed to get OCM tokens. The UI container will not be able to authenticate with OCM."
     exit 1
 fi
 podman play kube --build=false <(envsubst < "$PROJECT_ROOT"/assisted-chat-pod.yaml)
