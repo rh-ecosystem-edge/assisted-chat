@@ -143,7 +143,7 @@ objects:
         system_prompt_path: "/app-root/system_prompt"
         disable_query_system_prompt: true
       inference:
-        default_model: "${LLAMA_STACK_INFERENCE_PROVIDER}/${LLAMA_STACK_2_0_FLASH_MODEL}"
+        default_model: ${LLAMA_STACK_2_0_FLASH_MODEL}
         default_provider: ${LLAMA_STACK_INFERENCE_PROVIDER}
     system_prompt: |
       You are OpenShift Lightspeed Intelligent Assistant - an intelligent virtual assistant and expert on all things related to OpenShift installation, configuration, and troubleshooting, specifically with the Assisted Installer.
