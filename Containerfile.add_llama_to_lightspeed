@@ -13,7 +13,7 @@ RUN cd /app-root/ && python3.12 -m pip install .
 
 RUN python3.12 -m pip install pyyaml pyaml
 
-RUN python3.12 -m pip install litellm
+RUN python3.12 -m pip install litellm[proxy]
 
 RUN python3.12 -m pip install sqlalchemy
 

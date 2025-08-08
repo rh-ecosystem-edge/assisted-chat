@@ -4,7 +4,7 @@ FROM quay.io/lightspeed-core/lightspeed-stack@sha256:2cf68a775df9157689e95222e41
 
 RUN python3 -m ensurepip --default-pip && pip install --upgrade pip
 
-RUN python3 -m pip install pyyaml pyaml litellm sqlalchemy mcp psycopg2-binary
+RUN python3 -m pip install pyyaml pyaml litellm[proxy] sqlalchemy mcp psycopg2-binary
 
 USER 1001
 
