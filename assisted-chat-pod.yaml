@@ -34,6 +34,8 @@ spec:
           subPath: systemprompt.txt
     - name: assisted-service-mcp
       image: localhost/local-ai-chat-assisted-service-mcp:latest
+    - name: ocm-mcp
+      image: localhost/local-ai-chat-ocm-mcp:latest
     - name: ui
       image: localhost/local-ai-chat-ui
       env:

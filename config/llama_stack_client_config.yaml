@@ -104,5 +104,9 @@ tool_groups:
   provider_id: model-context-protocol
   mcp_endpoint:
     uri: "http://assisted-service-mcp:8000/sse"
+- toolgroup_id: mcp::ocm
+  provider_id: model-context-protocol
+  mcp_endpoint:
+    uri: "http://ocm-mcp:8000/sse"
 server:
   port: 8321

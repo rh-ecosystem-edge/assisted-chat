@@ -12,6 +12,8 @@ llama_stack:
 mcp_servers:
   - name: mcp::assisted
     url: "http://assisted-service-mcp:8000/sse"
+  - name: mcp::ocm
+    url: "http://ocm-mcp:8000/sse"
 user_data_collection:
   feedback_disabled: false
   feedback_storage: "/tmp/data/feedback"

@@ -4,6 +4,11 @@
       "transport": "sse",
       "url": "http://assisted-service-mcp:8000/sse",
       "headers": ["Authorization: Bearer ${env://OCM_TOKEN}"]
+    },
+    "ocm": {
+      "transport": "sse",
+      "url": "http://ocm-mcp:8000/sse",
+      "headers": ["Authorization: Bearer ${env://OCM_TOKEN}"]
     }
   }
 }

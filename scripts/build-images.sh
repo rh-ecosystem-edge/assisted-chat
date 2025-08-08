@@ -7,6 +7,7 @@ PROJECT_ROOT=$(dirname "$SCRIPT_DIR")
 
 if [[ ! -d "${PROJECT_ROOT}/inspector" ||
     ! -d "${PROJECT_ROOT}/assisted-service-mcp" ||
+    ! -d "${PROJECT_ROOT}/ocm-mcp" ||
     ! -d "${PROJECT_ROOT}/assisted-installer-ui/" ||
     ! -d "${PROJECT_ROOT}/lightspeed-stack" ]]; then
     echo "Dependency directories do not exist. Load git submodules first."
@@ -25,6 +26,7 @@ OPTIONS:
 IMAGES:
     inspector                   Build the inspector image
     assisted-mcp                Build the assisted service MCP image
+    ocm-mcp                     Build the OCM MCP image
     lightspeed-stack            Build the lightspeed stack image
     lightspeed-plus-llama-stack Build the lightspeed stack plus llama stack image
     ui                          Build the UI image
@@ -78,6 +80,14 @@ function build_assisted_mcp() {
     echo "✓ Assisted service MCP image built successfully"
 }
 
+function build_ocm_mcp() {
+    echo "Building OCM MCP image..."
+    pushd "${PROJECT_ROOT}/ocm-mcp"
+    make build IMAGE_NAME=localhost/local-ai-chat-ocm-mcp TAG=latest
+    popd
+    echo "✓ OCM MCP image built successfully"
+}
+
 function build_lightspeed_stack() {
     echo "Building lightspeed stack image..."
     pushd "${PROJECT_ROOT}/lightspeed-stack"
@@ -124,7 +134,7 @@ while [[ $# -gt 0 ]]; do
             show_usage
             exit 0
             ;;
-        inspector|assisted-mcp|lightspeed-stack|lightspeed-plus-llama-stack|ui|all)
+        inspector|assisted-mcp|ocm-mcp|lightspeed-stack|lightspeed-plus-llama-stack|ui|all)
             IMAGES_TO_BUILD+=("$1")
             shift
             ;;
@@ -142,7 +152,7 @@ if [[ ${#IMAGES_TO_BUILD[@]} -eq 0 ]]; then
 fi
 
 # Verify Red Hat subscription before building
-check_redhat_subscription
+# check_redhat_subscription
 
 # Build requested images
 for image in "${IMAGES_TO_BUILD[@]}"; do
@@ -152,6 +162,9 @@ for image in "${IMAGES_TO_BUILD[@]}"; do
             ;;
         assisted-mcp)
             build_assisted_mcp
+            ;;
+        ocm-mcp)
+            build_ocm_mcp
             ;;
         lightspeed-stack)
             build_lightspeed_stack
@@ -165,6 +178,7 @@ for image in "${IMAGES_TO_BUILD[@]}"; do
         all)
             build_inspector
             build_assisted_mcp
+            build_ocm_mcp
             build_lightspeed_stack
             build_lightspeed_stack_plus_llama_stack
             build_ui
