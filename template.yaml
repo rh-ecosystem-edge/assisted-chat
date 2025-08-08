@@ -1,4 +1,11 @@
 ---
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: assisted-chat
+  annotations:
+    description: "OpenShift template for assisted-chat service with lightspeed-stack"
+
 parameters:
 - name: IMAGE
   value: "quay.io/lightspeed-core/lightspeed-stack"
@@ -93,13 +100,15 @@ parameters:
 - name: SSO_BASE_URL
   value: "https://sso.redhat.com/auth/realms/redhat-external"
   description: "SSO Base URL"
-
-apiVersion: template.openshift.io/v1
-kind: Template
-metadata:
-  name: assisted-chat
-  annotations:
-    description: "OpenShift template for assisted-chat service with lightspeed-stack"
+- name: SYSTEM_PROMPT_PATH
+  value: "/app-root/system_prompt"
+  description: "Path for a file containing the system prompt to use"
+- name: LLAMA_CLIENT_CONFIG_PATH
+  value: "/app-root/llama_stack_client_config.yaml"
+  description: "Path for a file with llama stack client config"
+- name: DISABLE_QUERY_SYSTEM_PROMPT
+  value: "true"
+  description: "Corresponds to the lightspeed config customization.disable_query_system_prompt"
 
 objects:
 - apiVersion: v1
@@ -123,7 +132,7 @@ objects:
         access_log: ${LIGHTSPEED_SERVICE_ACCESS_LOG}
       llama_stack:
         use_as_library_client: true
-        library_client_config_path: "/app-root/llama_stack_client_config.yaml"
+        library_client_config_path: "${LLAMA_CLIENT_CONFIG_PATH}"
       authentication:
         module: jwk-token
         jwk_config:
@@ -140,8 +149,8 @@ objects:
         transcripts_disabled: ${LIGHTSPEED_TRANSCRIPTS_DISABLED}
         transcripts_storage: "${STORAGE_MOUNT_PATH}/transcripts"
       customization:
-        system_prompt_path: "/app-root/system_prompt"
-        disable_query_system_prompt: true
+        system_prompt_path: "${SYSTEM_PROMPT_PATH}"
+        disable_query_system_prompt: ${DISABLE_QUERY_SYSTEM_PROMPT}
       inference:
         default_model: ${LLAMA_STACK_2_0_FLASH_MODEL}
         default_provider: ${LLAMA_STACK_INFERENCE_PROVIDER}
