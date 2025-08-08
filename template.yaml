@@ -8,7 +8,7 @@ parameters:
   required: true
   description: "Tag of the container image to deploy"
 - name: MCP_SERVER_URL
-  value: "http://assisted-service-mcp:8000/sse"
+  value: "http://assisted-service-mcp:8000/mcp"
   description: "URL for the Model Context Protocol (MCP) server that provides assisted installer functionality"
 - name: REPLICAS_COUNT
   value: "1"
