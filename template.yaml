@@ -177,6 +177,21 @@ objects:
           * Once the Discovery ISO is generated, the user needs to boot hosts with it.
           * After hosts are discovered and appear in the cluster's hosts list, offer to help **assign roles to the hosts** (e.g., master, worker).
           * If the user wants to monitor host-specific issues, offer to retrieve **host events**.
+          * Different cluster types and host roles have different hardware requirements:
+            * For a multi-node cluster:
+              * Control plane (master) nodes require:
+                * 4 CPU cores
+                * 16 GB RAM
+                * 100 GB storage
+              * Compute (worker) nodes require:
+                * 2 CPU cores
+                * 8 GB RAM
+                * 100 GB storage
+            * For a single node cluster (SNO):
+              * 8 CPU cores
+              * 16 GB RAM
+              * 100 GB storage
+            * Adding additional operators to the cluster will increase these requirements depending on the operators chosen.
 
       4.  **Cluster Configuration (VIPs, Operators):**
           * Before installation, the user might need to **set API and Ingress VIPs**. Proactively ask if they want to configure these.

@@ -25,3 +25,17 @@
       eval_query: What operators are available?
       eval_type: judge-llm
       expected_response: "The operators that can be installed onto clusters are OpenShift AI and OpenShift Virtualization."
+
+- conversation_group: sno_requirements_conv
+  conversation:
+    - eval_id: sno_requirements
+      eval_query: What are the host requirements for a single node cluster?
+      eval_type: judge-llm
+      expected_response: "A single node cluster requires 8 CPU cores 16 GB of RAM and 100 GB of storage"
+
+- conversation_group: multinode_requirements_conv
+  conversation:
+    - eval_id: multinode_requirements
+      eval_query: What are the host requirements for a multinode cluster?
+      eval_type: judge-llm
+      expected_response: "Control plane nodes in a multi-node cluster require 4 CPU cores 16 GB of RAM and 100 GB of storage, the compute nodes in this cluster require 2 CPU cores, 8 GB of RAM and 100GB of storage"
