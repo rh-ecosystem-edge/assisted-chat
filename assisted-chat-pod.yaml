@@ -34,6 +34,9 @@ spec:
           subPath: systemprompt.txt
     - name: assisted-service-mcp
       image: localhost/local-ai-chat-assisted-service-mcp:latest
+      env:
+        - name: TRANSPORT
+          value: streamable-http
     - name: ui
       image: localhost/local-ai-chat-ui
       env:
