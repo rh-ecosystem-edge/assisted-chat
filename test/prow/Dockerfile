@@ -6,5 +6,6 @@ RUN pip install git+https://github.com/lightspeed-core/lightspeed-evaluation.git
 RUN mkdir -p /opt/app-root/src
 WORKDIR /opt/app-root/src
 COPY . .
+RUN chmod 755 test/prow/entrypoint.sh
 
 ENTRYPOINT [ "/opt/app-root/src/test/prow/entrypoint.sh" ]
