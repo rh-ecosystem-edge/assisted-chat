@@ -6,7 +6,7 @@ objects:
 - apiVersion: apps/v1
   kind: Deployment
   metadata:
-    name:assisted-chat-eval-test
+    name: assisted-chat-eval-test
   spec:
     selector:
       matchLabels:
