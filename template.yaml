@@ -284,13 +284,8 @@ objects:
           provider_type: remote::model-context-protocol
           config: {}
       metadata_store:
-        type: postgres
-        host: ${env.LLAMA_STACK_POSTGRES_HOST}
-        port: ${env.LLAMA_STACK_POSTGRES_PORT}
-        db: ${env.LLAMA_STACK_POSTGRES_NAME}
-        user: ${env.LLAMA_STACK_POSTGRES_USER}
-        password: ${env.LLAMA_STACK_POSTGRES_PASSWORD}
-        table_name: llamastack_kvstore
+        type: sqlite
+        db_path: ${STORAGE_MOUNT_PATH}/sqlite/registry.db
       inference_store:
         type: postgres
         host: ${env.LLAMA_STACK_POSTGRES_HOST}
