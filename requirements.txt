@@ -1,0 +1,8 @@
+# Common packages for assisted-chat containers
+# These packages are shared between Containerfile.assisted-chat and Containerfile.add_llama_to_lightspeed
+pyyaml
+pyaml
+litellm[proxy]==1.75.3
+sqlalchemy
+mcp
+psycopg2-binary
