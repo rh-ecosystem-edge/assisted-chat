@@ -1,0 +1,46 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: assisted-chat-post-deploy-tests
+  annotations:
+    description: "OpenShift template for assisted-chat post deployment tests"
+objects:
+- apiVersion: batch/v1
+  kind: Job
+  metadata:
+    name: assisted-chat-post-deploy-${IMAGE_TAG}-${JOBID}
+  spec:
+    backoffLimit: 5
+    template:
+      spec:
+        restartPolicy: Never
+        serviceAccountName: assisted-chat
+        containers:
+        - image: ${IMAGE}:${IMAGE_TAG}
+          imagePullPolicy: Always
+          name: assisted-chat-post-deploy
+          command:
+          - python3
+          args:
+          - test/post-deploy/test_basic.py
+          resources:
+            requests:
+              memory: ${MEMORY_REQUESTS}
+              cpu: ${CPU_REQUESTS}
+            limits:
+              memory: ${MEMORY_LIMIT}
+parameters:
+- name: JOBID
+  generate: expression
+  from: "[0-9a-z]{7}"
+- name: IMAGE
+  value: quay.io/lightspeed-core/lightspeed-stack
+- name: IMAGE_TAG
+  value: ""
+  required: true
+- name: MEMORY_REQUESTS
+  value: 128Mi
+- name: MEMORY_LIMIT
+  value: 128Mi
+- name: CPU_REQUESTS
+  value: 100m
