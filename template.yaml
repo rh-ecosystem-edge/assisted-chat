@@ -63,13 +63,24 @@ parameters:
 - name: LIGHTSPEED_SERVICE_ACCESS_LOG
   value: "true"
   description: "Whether to enable access logging for HTTP requests"
-- name: LIGHTSPEED_FEEDBACK_DISABLED
-  value: "false"
-  description: "Whether to disable user feedback collection functionality"
-- name: LIGHTSPEED_TRANSCRIPTS_DISABLED
-  value: "false"
-  description: "Whether to disable conversation transcript storage"
-
+- name: LIGHTSPEED_FEEDBACK_ENABLED
+  value: "true"
+  description: "Whether to enable user feedback collection functionality"
+- name: LIGHTSPEED_TRANSCRIPTS_ENABLED
+  value: "true"
+  description: "Whether to enable conversation transcript storage"
+- name: INSIGHTS_INGRESS_SERVER_URL
+  value: "https://console.redhat.com/api/ingress/v1/upload"
+  description: "The full URL to use when uploading feedback/transcript archives to the insights ingress service"
+- name: INSIGHTS_INGRESS_SECRET_NAME
+  value: "insights-ingress"
+  description: "The name of a secret containing the auth_token for the insights ingress server"
+- name: INSIGHTS_SERVICE_ID
+  value: "ocm-assisted-chat"
+  description: "The service id used when exporting feedback/transcripts data to the insights ingress server"
+- name: LIGHTSPEED_EXPORTER_COLLECTION_INTERVAL_SECONDS
+  value: "1800" # 30 minutes
+  description: "How often to send feedback/transcript archives to the insights service"
 - name: LLAMA_STACK_OTEL_SERVICE_NAME
   value: "assisted-chat"
   description: "Service name for OpenTelemetry tracing and metrics"
@@ -144,10 +155,13 @@ objects:
         - name: mcp::assisted
           url: "${MCP_SERVER_URL}"
       user_data_collection:
-        feedback_disabled: ${LIGHTSPEED_FEEDBACK_DISABLED}
+        feedback_enabled: ${LIGHTSPEED_FEEDBACK_ENABLED}
         feedback_storage: "${STORAGE_MOUNT_PATH}/feedback"
-        transcripts_disabled: ${LIGHTSPEED_TRANSCRIPTS_DISABLED}
+        transcripts_enabled: ${LIGHTSPEED_TRANSCRIPTS_ENABLED}
         transcripts_storage: "${STORAGE_MOUNT_PATH}/transcripts"
+        data_collector:
+          # We use the external collector as a sidecar
+          enabled: false
       customization:
         system_prompt_path: "${SYSTEM_PROMPT_PATH}"
         disable_query_system_prompt: ${DISABLE_QUERY_SYSTEM_PROMPT}
@@ -448,10 +462,46 @@ objects:
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 2
+
+        - name: lightspeed-to-dataverse-exporter
+          # TODO: change this to the official repo once it gets integrated in lightspeed build
+          # pipeline
+          image: quay.io/ometelka/lightspeed-dataverse-exporter:latest
+          imagePullPolicy: Always
+          args:
+          - "--mode"
+          - "manual"
+          - "--config"
+          - "/etc/config/config.yaml"
+          - "--log-level"
+          - "INFO"
+          env:
+          - name: INGRESS_SERVER_AUTH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: ${INSIGHTS_INGRESS_SECRET_NAME}
+                key: auth_token
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "200m"
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+          volumeMounts:
+            - name: lightspeed-exporter-config
+              mountPath: /etc/config/config.yaml
+              subPath: config.yaml
+            - name: data-storage
+              mountPath: ${STORAGE_MOUNT_PATH}
+
         volumes:
         - name: lightspeed-config
           configMap:
             name: lightspeed-stack-config
+        - name: lightspeed-exporter-config
+          configMap:
+            name: lightspeed-exporter-config
         - name: llama-stack-config
           configMap:
             name: llama-stack-client-config
@@ -492,3 +542,22 @@ objects:
     tls:
       termination: edge
       insecureEdgeTerminationPolicy: Redirect
+
+- apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: lightspeed-exporter-config
+  data:
+    config.yaml: |
+      data_dir: "${STORAGE_MOUNT_PATH}"
+      allowed_subdirs:
+       - feedback
+       - transcripts
+      service_id: "${INSIGHTS_SERVICE_ID}"
+      identity_id: "${LIGHTSPEED_NAME}"
+      ingress_server_url: "${INSIGHTS_INGRESS_SERVER_URL}"
+
+      # Collection settings
+      collection_interval: ${LIGHTSPEED_EXPORTER_COLLECTION_INTERVAL_SECONDS}
+      cleanup_after_send: true
+      ingress_connection_timeout: 30
