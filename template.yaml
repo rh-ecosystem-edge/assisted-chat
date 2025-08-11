@@ -81,6 +81,9 @@ parameters:
 - name: LIGHTSPEED_EXPORTER_COLLECTION_INTERVAL_SECONDS
   value: "1800" # 30 minutes
   description: "How often to send feedback/transcript archives to the insights service"
+- name: LIGHTSPEED_EXPORTER_IMAGE_TAG
+  value: "dev-latest"
+  description: "Tag of the lightspeed data exporter image to use"
 - name: LLAMA_STACK_OTEL_SERVICE_NAME
   value: "assisted-chat"
   description: "Service name for OpenTelemetry tracing and metrics"
@@ -464,9 +467,7 @@ objects:
             timeoutSeconds: 2
 
         - name: lightspeed-to-dataverse-exporter
-          # TODO: change this to the official repo once it gets integrated in lightspeed build
-          # pipeline
-          image: quay.io/ometelka/lightspeed-dataverse-exporter:latest
+          image: quay.io/lightspeed-core/lightspeed-to-dataverse-exporter:${LIGHTSPEED_EXPORTER_IMAGE_TAG}
           imagePullPolicy: Always
           args:
           - "--mode"
