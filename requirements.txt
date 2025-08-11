@@ -1,0 +1,18 @@
+# Common packages for assisted-chat containers
+# These packages are shared between Containerfile.assisted-chat and Containerfile.add_llama_to_lightspeed
+
+# YAML processing
+pyyaml==6.0.2
+pyaml==25.7.0
+
+# LiteLLM with proxy support
+litellm[proxy]==1.75.3
+
+# Database ORM
+sqlalchemy==2.0.42
+
+# Model Context Protocol
+mcp==1.12.4
+
+# PostgreSQL adapter
+psycopg2-binary==2.9.10

@@ -11,15 +11,8 @@ RUN cd /app-root/llama-stack && python3.12 -m pip install --editable .
 
 RUN cd /app-root/ && python3.12 -m pip install .
 
-RUN python3.12 -m pip install pyyaml pyaml
-
-RUN python3.12 -m pip install litellm[proxy]==1.75.3
-
-RUN python3.12 -m pip install sqlalchemy
-
-RUN python3.12 -m pip install mcp
-
-RUN python3.12 -m pip install psycopg2-binary
+COPY requirements.txt .
+RUN python3.12 -m pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 8080
 
