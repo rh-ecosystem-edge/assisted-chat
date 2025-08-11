@@ -34,7 +34,7 @@ parameters:
   generate: expression
   from: "[0-9a-z]{7}"
 - name: IMAGE
-  value: quay.io/lightspeed-core/lightspeed-stack
+  value: quay.io/redhat-user-workloads/assisted-installer-tenant/assisted-chat-saas-main/assisted-chat-saas-main
 - name: IMAGE_TAG
   value: ""
   required: true
