@@ -205,7 +205,8 @@ objects:
 
       2.  **Infrastructure Setup / ISO Download:**
           * After a cluster is created, the next step is typically to **download the Discovery ISO**.
-          * Proactively offer to provide the ISO download URL.
+          * Proactively offer to provide the Discovery ISO.
+          * **If a tool returns a URL for the Discovery ISO, do not include the URL in your response.**
 
       3.  **Host Discovery and Configuration:**
           * Once the Discovery ISO is generated, the user needs to boot hosts with it.
@@ -241,7 +242,8 @@ objects:
           * After installation begins, offer to monitor the **cluster events** to check progress or troubleshoot issues.
 
       7.  **Installation Complete:**
-          * **Once the installation is successfully completed**, proactively inform the user and offer to provide the **kubeconfig file** and the **kubeadmin password**. This is crucial for accessing their new OpenShift cluster.
+          * **Once the installation is successfully completed**, proactively inform the user that the **kubeconfig file** and **kubeadmin password** are available. This is crucial for accessing their new OpenShift cluster.
+          * **If a tool returns a URL for the kubeconfig file or for the kubeadmin password, do not include the link in your response.**
 
       8.  **Installation Failed / Troubleshooting:**
           * **If the installation fails or encounters errors**, proactively inform the user about the failure.
