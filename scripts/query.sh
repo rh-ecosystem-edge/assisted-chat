@@ -13,8 +13,21 @@ PROJECT_ROOT=$(dirname "$SCRIPT_DIR")
 # Source the OCM token utility
 source "$PROJECT_ROOT/utils/ocm-token.sh"
 
+# Configure base URL based on QUERY_ENV environment variable
+case "${QUERY_ENV:-}" in
+    "int")
+        BASE_URL="https://assisted-chat.api.integration.openshift.com"
+        ;;
+    "stage")
+        BASE_URL="https://assisted-chat.api.stage.openshift.com"
+        ;;
+    *)
+        BASE_URL="http://localhost:8090"
+        ;;
+esac
+
 get_available_models() {
-    curl --silent --show-error -X 'GET' 'http://0.0.0.0:8090/v1/models' -H 'accept: application/json'
+    curl --silent --show-error -X 'GET' "${BASE_URL}/v1/models" -H 'accept: application/json'
 }
 
 select_model() {
@@ -61,7 +74,7 @@ get_conversation_history() {
     tmpfile=$(mktemp)
     status=$(curl --silent --show-error --output "$tmpfile" --write-out "%{http_code}" \
         -H "Authorization: Bearer ${OCM_TOKEN}" \
-        "http://localhost:8090/v1/conversations/${conversation_id}")
+        "${BASE_URL}/v1/conversations/${conversation_id}")
     body=$(cat "$tmpfile")
     rm "$tmpfile"
 
@@ -137,7 +150,7 @@ select_conversation() {
     tmpfile=$(mktemp)
     status=$(curl --silent --show-error --output "$tmpfile" --write-out "%{http_code}" \
         -H "Authorization: Bearer ${OCM_TOKEN}" \
-        'http://localhost:8090/v1/conversations')
+        "${BASE_URL}/v1/conversations")
     body=$(cat "$tmpfile")
     rm "$tmpfile"
 
@@ -243,7 +256,7 @@ send_curl_query() {
 
     status=$(curl --silent --show-error --output "$tmpfile" --write-out "%{http_code}" \
         -H "Authorization: Bearer ${OCM_TOKEN}" \
-        'http://localhost:8090/v1/query' \
+        "${BASE_URL}/v1/query" \
         --json "$json_payload")
     body=$(cat "$tmpfile")
     rm "$tmpfile"
