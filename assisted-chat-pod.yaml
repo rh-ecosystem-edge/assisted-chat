@@ -51,9 +51,14 @@ spec:
           hostPort: 8080
     - name: mcp-inspector
       image: localhost/local-ai-chat-inspector:latest
+      env:
+        - name: HOST
+          value: 0.0.0.0
       ports:
         - containerPort: 6274
           hostPort: 6274
+        - containerPort: 6277
+          hostPort: 6277
     - name: mcphost
       image: quay.io/otuchfel/mcphost:0.9.2 
       tty: true
