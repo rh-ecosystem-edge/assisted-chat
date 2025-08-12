@@ -109,8 +109,8 @@ parameters:
   value: "8321"
   description: "Port number for the embedded Llama Stack server"
 - name: ASSISTED_CHAT_DB_SECRET_NAME
-  value: "llama-stack-db"
-  description: "Name of the Kubernetes secret containing the llama-stack database credentials"
+  value: "assisted-chat-db"
+  description: "Name of the Kubernetes secret containing the assisted-chat database credentials"
 - name: SSO_BASE_URL
   value: "https://sso.redhat.com/auth/realms/redhat-external"
   description: "SSO Base URL"
