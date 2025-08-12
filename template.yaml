@@ -74,7 +74,9 @@ parameters:
   description: "The full URL to use when uploading feedback/transcript archives to the insights ingress service"
 - name: INSIGHTS_INGRESS_SECRET_NAME
   value: "insights-ingress"
-  description: "The name of a secret containing the auth_token for the insights ingress server"
+  description: |
+    The name of a secret containing the auth_token for the insights ingress server. Will be ignored
+    if it doesn't exist but LIGHTSPEED_EXPORTER_AUTH_MODE should be set to 'openshift' in that case.
 - name: INSIGHTS_SERVICE_ID
   value: "ocm-assisted-chat"
   description: "The service id used when exporting feedback/transcripts data to the insights ingress server"
@@ -84,6 +86,12 @@ parameters:
 - name: LIGHTSPEED_EXPORTER_IMAGE_TAG
   value: "dev-latest"
   description: "Tag of the lightspeed data exporter image to use"
+- name: LIGHTSPEED_EXPORTER_AUTH_MODE
+  value: "openshift"
+  description: |
+    The type of authentication to use for the lightspeed data exporter. Valid values are 'manual'
+    and 'openshift'. If 'manual' is specified the INSIGHTS_INGRESS_SECRET_NAME secret should contain
+    a valid auth token in the data item `auth_token`.
 - name: LLAMA_STACK_OTEL_SERVICE_NAME
   value: "assisted-chat"
   description: "Service name for OpenTelemetry tracing and metrics"
@@ -479,7 +487,7 @@ objects:
           imagePullPolicy: Always
           args:
           - "--mode"
-          - "manual"
+          - "${LIGHTSPEED_EXPORTER_AUTH_MODE}"
           - "--config"
           - "/etc/config/config.yaml"
           - "--log-level"
@@ -490,6 +498,7 @@ objects:
               secretKeyRef:
                 name: ${INSIGHTS_INGRESS_SECRET_NAME}
                 key: auth_token
+                optional: true
           resources:
             limits:
               memory: "512Mi"
