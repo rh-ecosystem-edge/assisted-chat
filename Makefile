@@ -4,7 +4,7 @@
 .PHONY: all \
 	build-images \
 	build-inspector build-assisted-mcp build-lightspeed-stack build-lightspeed-plus-llama-stack build-ui \
-	generate run resume stop rm logs query query-interactive mcphost test-eval help
+	generate run resume stop rm logs query query-interactive mcphost test-eval psql sqlite help
 
 all: help ## Show help information
 
@@ -60,9 +60,8 @@ query: ## Query the assisted-chat services
 	@echo "Querying assisted-chat services..."
 	./scripts/query.sh
 
-query-interactive: ## Query the assisted-chat services in interactive mode
-	@echo "Querying assisted-chat services in interactive mode..."
-	./scripts/query.sh --interactive
+query-interactive: query ## Query the assisted-chat services (deprecated, use 'query')
+	@echo "WARNING: 'query-interactive' is deprecated. Use 'make query' instead."
 
 mcphost: ## Attach to mcphost
 	@echo "Attaching to mcphost..."
@@ -73,6 +72,16 @@ test-eval: ## Run agent evaluation tests
 	@. utils/ocm-token.sh && get_ocm_token && echo "$$OCM_TOKEN" > test/evals/ocm_token.txt
 	@echo "Running agent evaluation tests..."
 	@cd test/evals && python eval.py
+
+psql: ## Connect to PostgreSQL database in the assisted-chat pod
+	@echo "Connecting to PostgreSQL database..."
+	@podman exec -it assisted-chat-pod-postgres env PGOPTIONS='-c search_path="lightspeed-stack",public' psql -U assisted-chat -d assisted-chat
+
+sqlite: ## Copy SQLite database from pod and open in browser
+	@echo "Copying SQLite database from pod..."
+	@podman cp assisted-chat-pod-lightspeed-stack:/tmp/assisted-chat.db /tmp/assisted-chat.db
+	@echo "Opening SQLite database in browser..."
+	@sqlitebrowser /tmp/assisted-chat.db
 
 help: ## Show this help message
 	@echo "Available targets:"

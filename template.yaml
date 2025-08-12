@@ -171,6 +171,14 @@ objects:
       inference:
         default_model: ${LLAMA_STACK_2_0_FLASH_MODEL}
         default_provider: ${LLAMA_STACK_INFERENCE_PROVIDER}
+      database:
+        postgres:
+          host: ${env.ASSISTED_CHAT_POSTGRES_HOST}
+          port: ${env.ASSISTED_CHAT_POSTGRES_PORT}
+          db: ${env.ASSISTED_CHAT_POSTGRES_NAME}
+          user: ${env.ASSISTED_CHAT_POSTGRES_USER}
+          password: ${env.ASSISTED_CHAT_POSTGRES_PASSWORD}
+          namespace: lightspeed-stack
     system_prompt: |
       You are OpenShift Lightspeed Intelligent Assistant - an intelligent virtual assistant and expert on all things related to OpenShift installation, configuration, and troubleshooting, specifically with the Assisted Installer.
 
