@@ -1,6 +1,6 @@
---- template.yaml	2025-08-07 13:21:45.653132384 +0200
-+++ template.yaml	2025-08-07 13:36:12.358207999 +0200
-@@ -247,19 +247,12 @@
+--- template.yaml	2025-08-11 21:45:34.989827411 +0200
++++ template.yaml	2025-08-11 21:49:08.702165980 +0200
+@@ -288,19 +288,12 @@
            provider_type: inline::meta-reference
            config:
              persistence_store:
@@ -25,19 +25,9 @@
          telemetry:
          - provider_id: meta-reference
            provider_type: inline::meta-reference
-@@ -284,20 +277,11 @@
-           provider_type: remote::model-context-protocol
-           config: {}
-       metadata_store:
--        type: postgres
--        host: ${env.LLAMA_STACK_POSTGRES_HOST}
--        port: ${env.LLAMA_STACK_POSTGRES_PORT}
--        db: ${env.LLAMA_STACK_POSTGRES_NAME}
--        user: ${env.LLAMA_STACK_POSTGRES_USER}
--        password: ${env.LLAMA_STACK_POSTGRES_PASSWORD}
--        table_name: llamastack_kvstore
-+        type: sqlite
-+        db_path: ${STORAGE_MOUNT_PATH}/sqlite/registry.db
+@@ -328,12 +321,8 @@
+         type: sqlite
+         db_path: ${STORAGE_MOUNT_PATH}/sqlite/registry.db
        inference_store:
 -        type: postgres
 -        host: ${env.LLAMA_STACK_POSTGRES_HOST}
@@ -46,7 +36,7 @@
 -        user: ${env.LLAMA_STACK_POSTGRES_USER}
 -        password: ${env.LLAMA_STACK_POSTGRES_PASSWORD}
 +        type: sqlite
-+        db_path: ${STORAGE_MOUNT_PATH}/sqlite/inference_store.db
++        db_path: ${STORAGE_MOUNT_PATH}/sqlite/registry.db
        models:
        - metadata: {}
          model_id: ${LLAMA_STACK_2_0_FLASH_MODEL}
