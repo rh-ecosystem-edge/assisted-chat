@@ -9,16 +9,16 @@ spec:
       env:
         - name: GEMINI_API_KEY
           value: ${GEMINI_API_KEY}
-        - name: LLAMA_STACK_POSTGRES_HOST
+        - name: ASSISTED_CHAT_POSTGRES_HOST
           value: localhost
-        - name: LLAMA_STACK_POSTGRES_PORT
+        - name: ASSISTED_CHAT_POSTGRES_PORT
           value: "5432"
-        - name: LLAMA_STACK_POSTGRES_USER
-          value: llamastack
-        - name: LLAMA_STACK_POSTGRES_PASSWORD
-          value: llamastack
-        - name: LLAMA_STACK_POSTGRES_NAME
-          value: llamastack
+        - name: ASSISTED_CHAT_POSTGRES_USER
+          value: assisted-chat
+        - name: ASSISTED_CHAT_POSTGRES_PASSWORD
+          value: assisted-chat
+        - name: ASSISTED_CHAT_POSTGRES_NAME
+          value: assisted-chat
       ports:
         - containerPort: 8090
           hostPort: 8090
@@ -81,11 +81,11 @@ spec:
       image: registry.redhat.io/rhel9/postgresql-16:latest
       env:
         - name: POSTGRESQL_USER
-          value: llamastack
+          value: assisted-chat
         - name: POSTGRESQL_PASSWORD
-          value: llamastack
+          value: assisted-chat
         - name: POSTGRESQL_DATABASE
-          value: llamastack
+          value: assisted-chat
       ports:
         - containerPort: 5432
       volumeMounts:

@@ -108,7 +108,7 @@ parameters:
 - name: LLAMA_STACK_SERVER_PORT
   value: "8321"
   description: "Port number for the embedded Llama Stack server"
-- name: LLAMA_STACK_DB_SECRET_NAME
+- name: ASSISTED_CHAT_DB_SECRET_NAME
   value: "llama-stack-db"
   description: "Name of the Kubernetes secret containing the llama-stack database credentials"
 - name: SSO_BASE_URL
@@ -289,18 +289,18 @@ objects:
           config:
             persistence_store:
               type: postgres
-              host: ${env.LLAMA_STACK_POSTGRES_HOST}
-              port: ${env.LLAMA_STACK_POSTGRES_PORT}
-              db: ${env.LLAMA_STACK_POSTGRES_NAME}
-              user: ${env.LLAMA_STACK_POSTGRES_USER}
-              password: ${env.LLAMA_STACK_POSTGRES_PASSWORD}
+              host: ${env.ASSISTED_CHAT_POSTGRES_HOST}
+              port: ${env.ASSISTED_CHAT_POSTGRES_PORT}
+              db: ${env.ASSISTED_CHAT_POSTGRES_NAME}
+              user: ${env.ASSISTED_CHAT_POSTGRES_USER}
+              password: ${env.ASSISTED_CHAT_POSTGRES_PASSWORD}
             responses_store:
               type: postgres
-              host: ${env.LLAMA_STACK_POSTGRES_HOST}
-              port: ${env.LLAMA_STACK_POSTGRES_PORT}
-              db: ${env.LLAMA_STACK_POSTGRES_NAME}
-              user: ${env.LLAMA_STACK_POSTGRES_USER}
-              password: ${env.LLAMA_STACK_POSTGRES_PASSWORD}
+              host: ${env.ASSISTED_CHAT_POSTGRES_HOST}
+              port: ${env.ASSISTED_CHAT_POSTGRES_PORT}
+              db: ${env.ASSISTED_CHAT_POSTGRES_NAME}
+              user: ${env.ASSISTED_CHAT_POSTGRES_USER}
+              password: ${env.ASSISTED_CHAT_POSTGRES_PASSWORD}
         telemetry:
         - provider_id: meta-reference
           provider_type: inline::meta-reference
@@ -329,11 +329,11 @@ objects:
         db_path: ${STORAGE_MOUNT_PATH}/sqlite/registry.db
       inference_store:
         type: postgres
-        host: ${env.LLAMA_STACK_POSTGRES_HOST}
-        port: ${env.LLAMA_STACK_POSTGRES_PORT}
-        db: ${env.LLAMA_STACK_POSTGRES_NAME}
-        user: ${env.LLAMA_STACK_POSTGRES_USER}
-        password: ${env.LLAMA_STACK_POSTGRES_PASSWORD}
+        host: ${env.ASSISTED_CHAT_POSTGRES_HOST}
+        port: ${env.ASSISTED_CHAT_POSTGRES_PORT}
+        db: ${env.ASSISTED_CHAT_POSTGRES_NAME}
+        user: ${env.ASSISTED_CHAT_POSTGRES_USER}
+        password: ${env.ASSISTED_CHAT_POSTGRES_PASSWORD}
       models:
       - metadata: {}
         model_id: ${LLAMA_STACK_2_0_FLASH_MODEL}
@@ -401,35 +401,35 @@ objects:
             value: ${LLAMA_STACK_OTEL_SERVICE_NAME}
           - name: LLAMA_STACK_TELEMETRY_SINKS
             value: ${LLAMA_STACK_TELEMETRY_SINKS}
-          - name: LLAMA_STACK_POSTGRES_HOST
+          - name: ASSISTED_CHAT_POSTGRES_HOST
             valueFrom:
               secretKeyRef:
-                name: ${LLAMA_STACK_DB_SECRET_NAME}
+                name: ${ASSISTED_CHAT_DB_SECRET_NAME}
                 key: db.host
-          - name: LLAMA_STACK_POSTGRES_PORT
+          - name: ASSISTED_CHAT_POSTGRES_PORT
             valueFrom:
               secretKeyRef:
-                name: ${LLAMA_STACK_DB_SECRET_NAME}
+                name: ${ASSISTED_CHAT_DB_SECRET_NAME}
                 key: db.port
-          - name: LLAMA_STACK_POSTGRES_NAME
+          - name: ASSISTED_CHAT_POSTGRES_NAME
             valueFrom:
               secretKeyRef:
-                name: ${LLAMA_STACK_DB_SECRET_NAME}
+                name: ${ASSISTED_CHAT_DB_SECRET_NAME}
                 key: db.name
-          - name: LLAMA_STACK_POSTGRES_USER
+          - name: ASSISTED_CHAT_POSTGRES_USER
             valueFrom:
               secretKeyRef:
-                name: ${LLAMA_STACK_DB_SECRET_NAME}
+                name: ${ASSISTED_CHAT_DB_SECRET_NAME}
                 key: db.user
-          - name: LLAMA_STACK_POSTGRES_PASSWORD
+          - name: ASSISTED_CHAT_POSTGRES_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: ${LLAMA_STACK_DB_SECRET_NAME}
+                name: ${ASSISTED_CHAT_DB_SECRET_NAME}
                 key: db.password
-          - name: LLAMA_STACK_POSTGRES_CA_CERT
+          - name: ASSISTED_CHAT_POSTGRES_CA_CERT
             valueFrom:
               secretKeyRef:
-                name: ${LLAMA_STACK_DB_SECRET_NAME}
+                name: ${ASSISTED_CHAT_DB_SECRET_NAME}
                 key: db.ca_cert
                 optional: true
           resources:
