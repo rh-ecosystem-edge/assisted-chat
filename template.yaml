@@ -44,10 +44,9 @@ parameters:
 - name: CPU_REQUEST
   value: "500m"
   description: "Initial CPU request for the container (in millicores)"
-- name: GEMINI_API_SECRET_NAME
-  value: "assisted-chat-gemini-secret"
-  description: "Name of the Kubernetes secret containing the Gemini API key"
-
+- name: VERTEX_API_SECRET_NAME
+  value: "assisted-chat-vertex-secret"
+  description: "Name of the Kubernetes secret containing the Vertex service account credentials"
 - name: LIGHTSPEED_NAME
   value: "assisted-chat"
   description: "Name identifier for the lightspeed service instance"
@@ -90,21 +89,6 @@ parameters:
 - name: LLAMA_STACK_TELEMETRY_SINKS
   value: "console,sqlite"
   description: "Comma-separated list of telemetry output destinations (console, sqlite)"
-- name: LLAMA_STACK_INFERENCE_PROVIDER
-  value: "gemini"
-  description: "Provider identifier for the inference service"
-- name: LLAMA_STACK_INFERENCE_PROVIDER_TYPE
-  value: "remote::gemini"
-  description: "Type specification for the inference provider (remote::gemini for Google Gemini)"
-- name: LLAMA_STACK_2_5_PRO_MODEL
-  value: "gemini/gemini-2.5-pro"
-  description: "Default model to use for inference requests"
-- name: LLAMA_STACK_2_5_FLASH_MODEL
-  value: "gemini/gemini-2.5-flash"
-  description: "Fast model to use for quick inference requests"
-- name: LLAMA_STACK_2_0_FLASH_MODEL
-  value: "gemini/gemini-2.0-flash"
-  description: "Fast model to use for quick inference requests"
 - name: LLAMA_STACK_SERVER_PORT
   value: "8321"
   description: "Port number for the embedded Llama Stack server"
@@ -123,6 +107,20 @@ parameters:
 - name: DISABLE_QUERY_SYSTEM_PROMPT
   value: "true"
   description: "Corresponds to the lightspeed config customization.disable_query_system_prompt"
+- name: ASSISTED_CHAT_DEFAULT_MODEL
+  value: gemini-2.0-flash
+- name: USER_ID_CLAIM
+  value: "sub"
+  description: "The claim to use as the user ID in the authentication module"
+- name: USERNAME_CLAIM
+  value: "preferred_username"
+  description: "The claim to use as the username in the authentication module"
+- name: LIGHTSSPEED_STACK_POSTGRES_SSL_MODE
+  value: "verify-full"
+  description: "SSL mode for the PostgreSQL database connection used by lightspeed-stack"
+- name: LLAMA_STACK_POSTGRES_SSL_MODE
+  value: "verify-full"
+  description: "SSL mode for the PostgreSQL database connection used by llama-stack"
 
 objects:
 - apiVersion: v1
@@ -152,8 +150,8 @@ objects:
         jwk_config:
           url: ${SSO_BASE_URL}/protocol/openid-connect/certs
           jwt_configuration:
-            user_id_claim: sub
-            username_claim: preferred_username
+            user_id_claim: ${USER_ID_CLAIM}
+            username_claim: ${USERNAME_CLAIM}
       mcp_servers:
         - name: mcp::assisted
           url: "${MCP_SERVER_URL}"
@@ -169,8 +167,8 @@ objects:
         system_prompt_path: "${SYSTEM_PROMPT_PATH}"
         disable_query_system_prompt: ${DISABLE_QUERY_SYSTEM_PROMPT}
       inference:
-        default_model: ${LLAMA_STACK_2_0_FLASH_MODEL}
-        default_provider: ${LLAMA_STACK_INFERENCE_PROVIDER}
+        default_model: ${ASSISTED_CHAT_DEFAULT_MODEL}
+        default_provider: gemini
       database:
         postgres:
           host: ${env.ASSISTED_CHAT_POSTGRES_HOST}
@@ -178,7 +176,7 @@ objects:
           db: ${env.ASSISTED_CHAT_POSTGRES_NAME}
           user: ${env.ASSISTED_CHAT_POSTGRES_USER}
           password: ${env.ASSISTED_CHAT_POSTGRES_PASSWORD}
-          ssl_mode: "verify-full"
+          ssl_mode: ${LIGHTSSPEED_STACK_POSTGRES_SSL_MODE}
           ca_cert_path: /etc/tls/ca-bundle.pem
           namespace: lightspeed-stack
     system_prompt: |
@@ -296,10 +294,10 @@ objects:
       - vector_io
       providers:
         inference:
-        - provider_id: ${LLAMA_STACK_INFERENCE_PROVIDER}
-          provider_type: ${LLAMA_STACK_INFERENCE_PROVIDER_TYPE}
+        - provider_id: gemini
+          provider_type: remote::gemini
           config:
-            api_key: ${env.GEMINI_API_KEY}
+            api_key: dummy-to-stop-llama-stack-from-complaining-even-though-we-use-vertex-and-not-gemini-directly
         vector_io: []
         files: []
         safety: []
@@ -314,7 +312,7 @@ objects:
               db: ${env.ASSISTED_CHAT_POSTGRES_NAME}
               user: ${env.ASSISTED_CHAT_POSTGRES_USER}
               password: ${env.ASSISTED_CHAT_POSTGRES_PASSWORD}
-              ssl_mode: "verify-full"
+              ssl_mode: ${LLAMA_STACK_POSTGRES_SSL_MODE}
               ca_cert_path: /etc/tls/ca-bundle.pem
             responses_store:
               type: postgres
@@ -323,7 +321,7 @@ objects:
               db: ${env.ASSISTED_CHAT_POSTGRES_NAME}
               user: ${env.ASSISTED_CHAT_POSTGRES_USER}
               password: ${env.ASSISTED_CHAT_POSTGRES_PASSWORD}
-              ssl_mode: "verify-full"
+              ssl_mode: ${LLAMA_STACK_POSTGRES_SSL_MODE}
               ca_cert_path: /etc/tls/ca-bundle.pem
         telemetry:
         - provider_id: meta-reference
@@ -358,24 +356,9 @@ objects:
         db: ${env.ASSISTED_CHAT_POSTGRES_NAME}
         user: ${env.ASSISTED_CHAT_POSTGRES_USER}
         password: ${env.ASSISTED_CHAT_POSTGRES_PASSWORD}
-        ssl_mode: "verify-full"
+        ssl_mode: ${LLAMA_STACK_POSTGRES_SSL_MODE}
         ca_cert_path: /etc/tls/ca-bundle.pem
-      models:
-      - metadata: {}
-        model_id: ${LLAMA_STACK_2_0_FLASH_MODEL}
-        provider_id: ${LLAMA_STACK_INFERENCE_PROVIDER}
-        provider_model_id: ${LLAMA_STACK_2_0_FLASH_MODEL}
-        model_type: llm
-      - metadata: {}
-        model_id: ${LLAMA_STACK_2_5_PRO_MODEL}
-        provider_id: ${LLAMA_STACK_INFERENCE_PROVIDER}
-        provider_model_id: ${LLAMA_STACK_2_5_PRO_MODEL}
-        model_type: llm
-      - metadata: {}
-        model_id: ${LLAMA_STACK_2_5_FLASH_MODEL}
-        provider_id: ${LLAMA_STACK_INFERENCE_PROVIDER}
-        provider_model_id: ${LLAMA_STACK_2_5_FLASH_MODEL}
-        model_type: llm
+      models: []
       shields: []
       vector_dbs: []
       datasets: []
@@ -426,11 +409,8 @@ objects:
             containerPort: ${{SERVICE_PORT}}
             protocol: TCP
           env:
-          - name: GEMINI_API_KEY
-            valueFrom:
-              secretKeyRef:
-                name: ${GEMINI_API_SECRET_NAME}
-                key: api_key
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: /app-root/google-vertex-service-account.json
           - name: LLAMA_STACK_SQLITE_STORE_DIR
             value: ${STORAGE_MOUNT_PATH}/sqlite
           - name: LLAMA_STACK_OTEL_SERVICE_NAME
@@ -479,6 +459,9 @@ objects:
           - name: llama-stack-config
             mountPath: /app-root/llama_stack_client_config.yaml
             subPath: llama_stack_client_config.yaml
+          - name: google-vertex-service-account
+            mountPath: /app-root/google-vertex-service-account.json
+            subPath: service_account
           - name: data-storage
             mountPath: ${STORAGE_MOUNT_PATH}
           - name: db-ca-cert
@@ -499,36 +482,6 @@ objects:
             periodSeconds: 10
             timeoutSeconds: 2
 
-        - name: lightspeed-to-dataverse-exporter
-          image: quay.io/lightspeed-core/lightspeed-to-dataverse-exporter:${LIGHTSPEED_EXPORTER_IMAGE_TAG}
-          imagePullPolicy: Always
-          args:
-          - "--mode"
-          - "manual"
-          - "--config"
-          - "/etc/config/config.yaml"
-          - "--log-level"
-          - "INFO"
-          env:
-          - name: INGRESS_SERVER_AUTH_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: ${INSIGHTS_INGRESS_SECRET_NAME}
-                key: auth_token
-          resources:
-            limits:
-              memory: "512Mi"
-              cpu: "200m"
-            requests:
-              memory: "256Mi"
-              cpu: "100m"
-          volumeMounts:
-            - name: lightspeed-exporter-config
-              mountPath: /etc/config/config.yaml
-              subPath: config.yaml
-            - name: data-storage
-              mountPath: ${STORAGE_MOUNT_PATH}
-
         volumes:
         - name: lightspeed-config
           configMap:
@@ -539,6 +492,9 @@ objects:
         - name: llama-stack-config
           configMap:
             name: llama-stack-client-config
+        - name: google-vertex-service-account
+          secret:
+            secretName: ${VERTEX_API_SECRET_NAME}
         - name: data-storage
           emptyDir: {}
         - name: db-ca-cert

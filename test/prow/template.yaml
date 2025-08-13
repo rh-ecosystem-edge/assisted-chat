@@ -34,11 +34,6 @@ objects:
               secretKeyRef:
                 key: ${SSL_CLIENT_SECRET_KEY}
                 name: ${SSL_CLIENT_SECRET_NAME}
-          - name: GEMINI_API_KEY
-            valueFrom:
-              secretKeyRef:
-                key: ${GEMINI_API_SECRET_KEY_NAME}
-                name: ${GEMINI_API_SECRET_NAME}
           - name: AGENT_URL
             value: ${AGENT_URL}
           - name: AGENT_PORT
@@ -74,8 +69,4 @@ parameters:
   value: http://assisted-chat
 - name: AGENT_PORT
   value: "8090"
-- name: GEMINI_API_SECRET_NAME
-  value: gemini
-- name: GEMINI_API_SECRET_KEY_NAME
-  value: api_key
 
