@@ -1,6 +1,7 @@
 /.env
 /config/lightspeed-stack.yaml
 /config/systemprompt.txt
+/config/vertex-credentials.json
 .vscode
 ocm_token.txt
 .venv

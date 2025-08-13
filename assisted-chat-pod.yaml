@@ -9,6 +9,8 @@ spec:
       env:
         - name: GEMINI_API_KEY
           value: ${GEMINI_API_KEY}
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /tmp/vertex-credentials.json
         - name: ASSISTED_CHAT_POSTGRES_HOST
           value: localhost
         - name: ASSISTED_CHAT_POSTGRES_PORT
@@ -32,6 +34,10 @@ spec:
         - mountPath: /tmp/systemprompt.txt
           name: config
           subPath: systemprompt.txt
+        - mountPath: /tmp/vertex-credentials.json
+          name: config
+          subPath: vertex-credentials.json
+          readOnly: true
     - name: assisted-service-mcp
       image: localhost/local-ai-chat-assisted-service-mcp:latest
       env:
