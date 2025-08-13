@@ -41,12 +41,12 @@ select_model() {
 
         # Extract relevant fields
         | . as $model
-        | $model.identifier as $model_name
+        | $model.provider_resource_id as $model_name
         | $model.provider_id as $provider
 
         # Determine type label based on model identifier
-        | (if ($model_name | startswith("gemini/gemini/")) then "Vertex AI"
-           elif ($model_name | contains("gemini")) then "True Gemini"
+        | (if ($model_name | startswith("gemini/")) then "Gemini"
+           elif ($model_name) then "Vertex Gemini"
            else ""
            end) as $type_label
 
