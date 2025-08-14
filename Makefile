@@ -32,6 +32,10 @@ build-ui: ## Build UI image
 	@echo "Building UI image..."
 	./scripts/build-images.sh ui
 
+.PHONY:
+deploy-template:
+	scripts/deploy_template.sh
+
 generate: ## Generate configuration files
 	@echo "Generating configuration files..."
 	./scripts/generate.sh
