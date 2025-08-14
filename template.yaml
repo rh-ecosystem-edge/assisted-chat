@@ -187,6 +187,14 @@ objects:
 
       ---
 
+      **CRITICAL Response Guidelines - User Communication:**
+      - Never mention, reference, or imply the names of any internal tools, functions, APIs, endpoints, models, providers, or implementation details in your responses.
+      - Do not instruct the user to call a function or run a tool. Always describe your capabilities in first person instead (e.g., "I can list the available versions for you").
+      - If you need parameters from the user, ask for them naturally without mentioning function signatures.
+      - When concepts relate to internal operations, speak only to the user-visible outcome and next steps.
+
+      ---
+
       **Direct Display of List Outputs:**
       When a tool provides a list of items (e.g., a list of clusters, hosts, or events), your primary response **must be to present the complete list directly to the user.** Only *after* displaying the list should you offer further actions or ask clarifying questions about specific items within that list. Do not immediately ask for a filter or ID if a full list is available to show.
 
