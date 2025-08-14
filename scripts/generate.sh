@@ -62,6 +62,8 @@ if [[ -f $OVERRIDE_FILE ]]; then
     OVERRIDE_PARAMS="--param-file=$OVERRIDE_FILE"
 fi
 
+
+echo "Creating $PROJECT_ROOT/config/lightspeed-stack.yaml"
 oc process --local \
     -f "$PROJECT_ROOT/template.yaml" \
     "${OVERRIDE_PARAMS-}" \
@@ -69,4 +71,5 @@ oc process --local \
     yq '.items[] | select(.kind == "ConfigMap" and .metadata.name == "lightspeed-stack-config").data."lightspeed-stack.yaml"' -r \
         >"$PROJECT_ROOT/config/lightspeed-stack.yaml"
 
+echo "Creating $PROJECT_ROOT/config/systemprompt.txt"
 yq -r '.objects[] | select(.metadata.name == "lightspeed-stack-config") | .data.system_prompt' "$PROJECT_ROOT/template.yaml" >"$PROJECT_ROOT/config/systemprompt.txt"
