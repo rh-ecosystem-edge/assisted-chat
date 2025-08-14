@@ -1,6 +1,6 @@
 # vim: set filetype=dockerfile
-# This is the digest of quay.io/lightspeed-core/lightspeed-stack:dev-20250812-701065b
-FROM quay.io/lightspeed-core/lightspeed-stack@sha256:83d34b42f9d1e000ed38aa66e5ba63ceba9d93af16a948798e553930c2a628dd
+# This is the digest of quay.io/lightspeed-core/lightspeed-stack:dev-20250814-7a531cb
+FROM quay.io/lightspeed-core/lightspeed-stack@sha256:90deb575e0c18bdcf9721aa7614826653ad13b717c992f12b89b6e1f0413179c
 
 RUN python3 -m ensurepip --default-pip && pip install --upgrade pip
 
