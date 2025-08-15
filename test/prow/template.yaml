@@ -21,6 +21,7 @@ objects:
         containers:
         - name: assisted-chat-eval-test
           image: ${IMAGE_NAME}
+          command: [ "/opt/app-root/src/test/prow/entrypoint.sh" ]
           imagePullPolicy: Always
           env:
           - name: CLIENT_ID

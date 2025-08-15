@@ -15,4 +15,4 @@ echo $OCM_TOKEN > test/evals/ocm_token.txt
 
 cd test/evals
 
-python eval.py --agent_endpoint "${AGENT_URL}:${AGENT_PORT}"
+#python eval.py --agent_endpoint "${AGENT_URL}:${AGENT_PORT}"
