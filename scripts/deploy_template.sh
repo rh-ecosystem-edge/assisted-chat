@@ -9,6 +9,7 @@ set -o pipefail
 #$ASSISTED_CHAT_IMG is not in repo/image:tag format but rather in repo/<image name>@sha256:<digest>
 #The template needs the tag, and it references the image by <image name>:<tag> so splitting the variable by ":" works for now
 
+echo "THIS IS A TEST COMMIT, DO NOT MERGE"
 echo $ASSISTED_CHAT_IMG
 IMAGE=$(echo $ASSISTED_CHAT_IMG | cut -d ":" -f1)
 TAG=$(echo $ASSISTED_CHAT_IMG | cut -d ":" -f2)
