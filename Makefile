@@ -83,7 +83,9 @@ test-eval: ## Run agent evaluation tests
 	@echo "Refreshing OCM token..."
 	@. utils/ocm-token.sh && get_ocm_token && echo "$$OCM_TOKEN" > test/evals/ocm_token.txt
 	@echo "Running agent evaluation tests..."
-	@cd test/evals && python eval.py
+	# Use python3.12 instead of python to ensure compatibility with lsc_agent_eval package
+	# which requires Python version <3.13,>=3.11
+	@cd test/evals && python3.12 eval.py
 
 psql: ## Connect to PostgreSQL database in the assisted-chat pod
 	@echo "Connecting to PostgreSQL database..."
