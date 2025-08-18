@@ -454,12 +454,6 @@ objects:
               secretKeyRef:
                 name: ${ASSISTED_CHAT_DB_SECRET_NAME}
                 key: db.password
-          - name: ASSISTED_CHAT_POSTGRES_CA_CERT
-            valueFrom:
-              secretKeyRef:
-                name: ${ASSISTED_CHAT_DB_SECRET_NAME}
-                key: db.ca_cert
-                optional: true
           resources:
             limits:
               memory: ${MEMORY_LIMIT}
@@ -479,6 +473,9 @@ objects:
             subPath: llama_stack_client_config.yaml
           - name: data-storage
             mountPath: ${STORAGE_MOUNT_PATH}
+          - name: db-ca-cert
+            mountPath: /etc/tls
+            readOnly: true
           livenessProbe:
             httpGet:
               path: /liveness
@@ -536,6 +533,13 @@ objects:
             name: llama-stack-client-config
         - name: data-storage
           emptyDir: {}
+        - name: db-ca-cert
+          secret:
+            secretName: ${ASSISTED_CHAT_DB_SECRET_NAME}
+            items:
+            - key: db.ca_cert
+              path: ca-bundle.pem
+              optional: true
 
 - apiVersion: v1
   kind: Service
