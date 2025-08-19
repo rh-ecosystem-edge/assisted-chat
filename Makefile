@@ -5,6 +5,7 @@
 	build-images \
 	build-inspector build-assisted-mcp build-lightspeed-stack build-lightspeed-plus-llama-stack build-ui \
 	generate run resume stop rm logs query query-int query-stage query-interactive mcphost test-eval psql sqlite help
+	deploy-template ci-test deploy-template-local
 
 all: help ## Show help information
 
@@ -32,9 +33,27 @@ build-ui: ## Build UI image
 	@echo "Building UI image..."
 	./scripts/build-images.sh ui
 
-.PHONY:
-deploy-template:
+deploy-template: ## Used by the CI. Deploys the template on the temporary CI cluster
 	scripts/deploy_template.sh
+
+ci-test: ## Used by the CI to test the assisted-chat services
+	./scripts/ci_test.sh
+
+deploy-template-local: ## Used to test the CI flow locally. Deploys the template on whatever cluster `oc` is currently logged in to
+	@echo "Setting up local secrets directory..."
+	@mkdir -p /tmp/secrets/vertex
+	@if [ -z "$(VERTEX_SERVICE_ACCOUNT_PATH)" ]; then \
+		echo "Error: VERTEX_SERVICE_ACCOUNT_PATH environment variable must be set"; \
+		exit 1; \
+	fi
+	@if [ -z "$(ASSISTED_CHAT_IMG)" ]; then \
+		echo "Error: ASSISTED_CHAT_IMG environment variable must be set"; \
+		exit 1; \
+	fi
+	@cp "$(VERTEX_SERVICE_ACCOUNT_PATH)" /tmp/secrets/vertex/service_account
+	@echo "Deploying template locally..."
+	oc create namespace assisted-chat || true
+	NAMESPACE=assisted-chat SECRETS_BASE_PATH=/tmp/secrets ASSISTED_CHAT_IMG="$(ASSISTED_CHAT_IMG)" scripts/deploy_template.sh
 
 generate: ## Generate configuration files
 	@echo "Generating configuration files..."

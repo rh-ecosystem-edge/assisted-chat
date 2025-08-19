@@ -11,7 +11,7 @@ OCM_TOKEN=$(curl -X POST https://sso.redhat.com/auth/realms/redhat-external/prot
   -d "client_id=$CLIENT_ID" \
   -d "client_secret=$CLIENT_SECRET" | jq '.access_token')
 
-echo $OCM_TOKEN > test/evals/ocm_token.txt
+echo "$OCM_TOKEN" > test/evals/ocm_token.txt
 
 cd test/evals
 
