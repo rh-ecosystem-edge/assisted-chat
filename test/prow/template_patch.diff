@@ -1,6 +1,6 @@
 --- template.yaml	2025-08-12 21:43:04.576023093 +0200
 +++ template.yaml	2025-08-13 13:29:34.487449455 +0200
-@@ -171,14 +171,6 @@
+@@ -171,16 +171,6 @@
        inference:
          default_model: ${LLAMA_STACK_2_0_FLASH_MODEL}
          default_provider: ${LLAMA_STACK_INFERENCE_PROVIDER}
@@ -11,11 +11,13 @@
 -          db: ${env.ASSISTED_CHAT_POSTGRES_NAME}
 -          user: ${env.ASSISTED_CHAT_POSTGRES_USER}
 -          password: ${env.ASSISTED_CHAT_POSTGRES_PASSWORD}
+-          ssl_mode: "verify-full"
+-          ca_cert_path: /etc/tls/ca-bundle.pem
 -          namespace: lightspeed-stack
      system_prompt: |
        You are OpenShift Lightspeed Intelligent Assistant - an intelligent virtual assistant and expert on all things related to OpenShift installation, configuration, and troubleshooting, specifically with the Assisted Installer.
  
-@@ -296,19 +288,12 @@
+@@ -308,19 +298,12 @@
            provider_type: inline::meta-reference
            config:
              persistence_store:
@@ -40,7 +42,7 @@
          telemetry:
          - provider_id: meta-reference
            provider_type: inline::meta-reference
-@@ -336,12 +321,8 @@
+@@ -348,12 +331,8 @@
          type: sqlite
          db_path: ${STORAGE_MOUNT_PATH}/sqlite/registry.db
        inference_store:
@@ -55,7 +57,7 @@
        models:
        - metadata: {}
          model_id: ${LLAMA_STACK_2_0_FLASH_MODEL}
-@@ -409,37 +390,6 @@
+@@ -431,31 +410,6 @@
              value: ${LLAMA_STACK_OTEL_SERVICE_NAME}
            - name: LLAMA_STACK_TELEMETRY_SINKS
              value: ${LLAMA_STACK_TELEMETRY_SINKS}
@@ -84,16 +86,10 @@
 -              secretKeyRef:
 -                name: ${ASSISTED_CHAT_DB_SECRET_NAME}
 -                key: db.password
--          - name: ASSISTED_CHAT_POSTGRES_CA_CERT
--            valueFrom:
--              secretKeyRef:
--                name: ${ASSISTED_CHAT_DB_SECRET_NAME}
--                key: db.ca_cert
--                optional: true
            resources:
              limits:
                memory: ${MEMORY_LIMIT}
-@@ -474,36 +424,6 @@
+@@ -496,36 +428,6 @@
              periodSeconds: 10
              timeoutSeconds: 2
  
