@@ -13,7 +13,7 @@ oc process -p IMAGE_NAME="$ASSISTED_CHAT_TEST" -p SSL_CLIENT_SECRET_NAME=assiste
 
 sleep 5
 oc get pods -n "$NAMESPACE"
-POD_NAME=$(oc get pods | tr -s ' ' | cut -d ' ' -f1 | grep assisted-chat-eval-test)
+POD_NAME=$(oc get pods -n "$NAMESPACE" | tr -s ' ' | cut -d ' ' -f1 | grep assisted-chat-eval-test)
 
 TIMEOUT=600
 ELAPSED=0
