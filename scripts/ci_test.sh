@@ -13,7 +13,7 @@ oc process -p IMAGE_NAME="$ASSISTED_CHAT_TEST" -p SSL_CLIENT_SECRET_NAME=assiste
 
 sleep 5
 oc get pods -n "$NAMESPACE"
-POD_NAME=$(oc get pods | tr -s ' ' | cut -d ' ' -f1 | grep assisted-chat-eval-tes)
+POD_NAME=$(oc get pods | tr -s ' ' | cut -d ' ' -f1 | grep assisted-chat-eval-test)
 
 TIMEOUT=600
 ELAPSED=0
@@ -24,7 +24,9 @@ while [ $ELAPSED -lt $TIMEOUT ]; do
     CURRENT_RESTARTS=$(oc get pod "$POD_NAME" -n "$NAMESPACE" -o=jsonpath='{.status.containerStatuses[0].restartCount}')
     if [[ $CURRENT_RESTARTS -gt 0 ]]; then
         echo "Pod ${POD_NAME} was restarted, so the tests should run at least once, exiting"
-        oc logs -n "$NAMESPACE" "$POD_NAME"
+        echo "########################## Start of logs ##########################"
+        oc logs -p -n "$NAMESPACE" "$POD_NAME"
+        echo "########################## End of logs ##########################"
         exit "$(oc get pod "$POD_NAME" -n "$NAMESPACE" -o=jsonpath='{.status.containerStatuses[0].lastState.terminated.exitCode}')"
     fi
     if [[ "$CURRENT_STATUS" == "Succeeded" ]]; then
