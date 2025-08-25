@@ -24,9 +24,7 @@ while [ $ELAPSED -lt $TIMEOUT ]; do
     CURRENT_RESTARTS=$(oc get pod "$POD_NAME" -n "$NAMESPACE" -o=jsonpath='{.status.containerStatuses[0].restartCount}')
     if [[ $CURRENT_RESTARTS -gt 0 ]]; then
         echo "Pod ${POD_NAME} was restarted, so the tests should run at least once, exiting"
-        echo "########################## Start of logs ##########################"
-        oc logs -p -n "$NAMESPACE" "$POD_NAME"
-        echo "########################## End of logs ##########################"
+        oc logs -p -n "$NAMESPACE" "$POD_NAME" || true
         exit "$(oc get pod "$POD_NAME" -n "$NAMESPACE" -o=jsonpath='{.status.containerStatuses[0].lastState.terminated.exitCode}')"
     fi
     if [[ "$CURRENT_STATUS" == "Succeeded" ]]; then
