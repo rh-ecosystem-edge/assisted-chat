@@ -482,6 +482,36 @@ objects:
             periodSeconds: 10
             timeoutSeconds: 2
 
+        - name: lightspeed-to-dataverse-exporter
+          image: quay.io/lightspeed-core/lightspeed-to-dataverse-exporter:${LIGHTSPEED_EXPORTER_IMAGE_TAG}
+          imagePullPolicy: Always
+          args:
+          - "--mode"
+          - "manual"
+          - "--config"
+          - "/etc/config/config.yaml"
+          - "--log-level"
+          - "INFO"
+          env:
+          - name: INGRESS_SERVER_AUTH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: ${INSIGHTS_INGRESS_SECRET_NAME}
+                key: auth_token
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "200m"
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+          volumeMounts:
+            - name: lightspeed-exporter-config
+              mountPath: /etc/config/config.yaml
+              subPath: config.yaml
+            - name: data-storage
+              mountPath: ${STORAGE_MOUNT_PATH}
+
         volumes:
         - name: lightspeed-config
           configMap:
