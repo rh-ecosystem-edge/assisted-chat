@@ -4,6 +4,38 @@ import argparse
 import logging
 import sys
 
+# Monkey patch to fix httpx ResponseNotRead error in lsc_agent_eval
+def patch_httpx_response_error():
+    """Patch httpx Response to handle streaming response text access safely."""
+    try:
+        import httpx
+        
+        # Store original text property
+        original_text = httpx.Response.text
+        
+        def safe_text(self):
+            """Safely access response text, handling streaming responses."""
+            try:
+                return original_text.fget(self)
+            except httpx.ResponseNotRead:
+                # If it's a streaming response that hasn't been read, read it first
+                try:
+                    self.read()
+                    return original_text.fget(self)
+                except Exception:
+                    # If we still can't read it, return a safe fallback
+                    return f"<Streaming response - status {self.status_code}>"
+        
+        # Replace the text property with our safe version
+        httpx.Response.text = property(safe_text)
+        
+    except ImportError:
+        # httpx not available, skip patching
+        pass
+
+# Apply the patch before importing lsc_agent_eval
+patch_httpx_response_error()
+
 from lsc_agent_eval import AgentGoalEval
 
 # Configure logging to show all messages from agent_eval library
