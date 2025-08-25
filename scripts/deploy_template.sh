@@ -75,9 +75,10 @@ oc process \
     -p USERNAME_CLAIM=clientHost \
     -p LIGHTSSPEED_STACK_POSTGRES_SSL_MODE=disable \
     -p LLAMA_STACK_POSTGRES_SSL_MODE=disable \
+    -p LIGHTSPEED_EXPORTER_AUTH_MODE=manual \
     -f template.yaml --local |
     jq '. as $root | $root.items = [$root.items[] | '"$FILTER"']' |
     oc apply -n "$NAMESPACE" -f -
 
 sleep 5
-oc wait --for=condition=Available deployment/assisted-chat -n "$NAMESPACE" --timeout=300s
+oc rollout status  -n $NAMESPACE deployment/assisted-chat --timeout=300s

@@ -3,21 +3,19 @@ kind: Template
 metadata:
   name: assisted-chat-eval-test
 objects:
-- apiVersion: apps/v1
-  kind: Deployment
+- apiVersion: batch/v1
+  kind: Job
   metadata:
     name: assisted-chat-eval-test
+    labels:
+      app: assisted-chat-eval-test
   spec:
-    selector:
-      matchLabels:
-        app: assisted-chat-eval-test
-    replicas: 1
     template:
       metadata:
         labels:
           app: assisted-chat-eval-test
       spec:
-        restartPolicy: Always
+        restartPolicy: Never
         containers:
         - name: assisted-chat-eval-test
           image: ${IMAGE_NAME}
@@ -38,23 +36,6 @@ objects:
             value: ${AGENT_URL}
           - name: AGENT_PORT
             value: ${AGENT_PORT}
-
-        
-- apiVersion: v1
-  kind: Service
-  metadata:
-    labels:
-      app: assisted-chat-eval-test
-    name: assisted-chat-eval-test
-  spec:
-    ports:
-    - port: 8091
-      protocol: TCP
-      targetPort: 8091
-    selector:
-      app: assisted-chat-eval-test
-    sessionAffinity: None
-    type: ClusterIP
 
 parameters:
 - name: IMAGE_NAME
