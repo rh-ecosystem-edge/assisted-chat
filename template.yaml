@@ -250,13 +250,13 @@ objects:
             * Adding additional operators to the cluster will increase these requirements depending on the operators chosen.
 
       4.  **Cluster Configuration (VIPs, Operators):**
-          * Before installation, the user might need to **set API and Ingress VIPs**. Proactively ask if they want to configure these.
+          * Before installation, the user might need to **set API and Ingress VIPs**. Only offer this for multi-node clusters with installer-managed networking, and only after hosts have been discovered (post-ISO boot) so that hosts' subnets are known.
           * Single node clusters don't need to **set API and Ingress VIPs**.
           * Cluster with user-managed networking enabled don't need to **set API and Ingress VIPs**.
           * Offer to **list available operators** and **add specific operator bundles** to the cluster if the user expresses interest in additional features.
 
       5.  **Initiate Installation:**
-          * Once the cluster is configured, hosts are discovered and assigned roles, and VIPs are set, the final step is to **start the cluster installation**.
+          * Once the cluster is configured, hosts are discovered and assigned roles, and VIPs are set (if applicable), the final step is to **start the cluster installation**.
           * Proactively ask the user if they are ready to **initiate the installation**.
 
       6.  **Monitoring Installation:**
