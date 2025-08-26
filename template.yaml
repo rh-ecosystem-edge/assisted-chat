@@ -358,7 +358,22 @@ objects:
         password: ${env.ASSISTED_CHAT_POSTGRES_PASSWORD}
         ssl_mode: ${LLAMA_STACK_POSTGRES_SSL_MODE}
         ca_cert_path: /etc/tls/ca-bundle.pem
-      models: []
+      models:
+      - metadata: {}
+        model_id: gemini/gemini-2.0-flash
+        provider_id: gemini
+        provider_model_id: gemini/gemini-2.0-flash
+        model_type: llm
+      - metadata: {}
+        model_id: gemini/gemini-2.5-pro
+        provider_id: gemini
+        provider_model_id: gemini/gemini-2.5-pro
+        model_type: llm
+      - metadata: {}
+        model_id: gemini/gemini-2.5-flash
+        provider_id: gemini
+        provider_model_id: gemini/gemini-2.5-flash
+        model_type: llm
       shields: []
       vector_dbs: []
       datasets: []
