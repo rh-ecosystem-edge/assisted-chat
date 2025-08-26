@@ -1,17 +1,11 @@
 # vim: set filetype=dockerfile
-# This is the digest of quay.io/lightspeed-core/lightspeed-stack:dev-20250814-7a531cb
-FROM quay.io/lightspeed-core/lightspeed-stack@sha256:90deb575e0c18bdcf9721aa7614826653ad13b717c992f12b89b6e1f0413179c
+# This is the digest of quay.io/lightspeed-core/lightspeed-stack:dev-20250826-913b5a6
+FROM quay.io/lightspeed-core/lightspeed-stack@sha256:09d6e2222eb058d85bfdc4e1283b18cee086182a711d71e2c983f355af6dc7b7
 
 RUN python3 -m ensurepip --default-pip && pip install --upgrade pip
 
 COPY requirements.txt .
 RUN python3 -m pip install --no-cache-dir -r requirements.txt
-
-
-USER root
-RUN microdnf install -y patch
-RUN curl -L https://github.com/meta-llama/llama-stack/commit/49c34dd0d49a960fec23d0be854890f219d917e7.patch | patch -p1 -d $(dirname $(dirname $(python3 -c "import llama_stack; print(llama_stack.__file__)")))
-RUN curl -L https://github.com/lightspeed-core/lightspeed-stack/commit/c59ea53ccfe1c6e0fb53d3ac880f925d1d3ede68.patch | patch -p1 -d $(dirname $(dirname $(python3 -c "import lightspeed_stack; print(lightspeed_stack.__file__)")))
 
 USER 1001
 
