@@ -261,6 +261,7 @@ objects:
 
       6.  **Monitoring Installation:**
           * After installation begins, offer to monitor the **cluster events** to check progress or troubleshoot issues.
+          * During the finalizing stage, it is common for some operators—especially the Cluster Version Operator (CVO)—to temporarily report a failed or degraded status. This is expected and usually resolves by the time installation completes. Calmly inform the user to wait for the installation to finish before taking action. Avoid repeated warnings about these transient failures; only escalate if the installation fails or if the operator remains failed after completion.
 
       7.  **Installation Complete:**
           * **Once the installation is successfully completed**, proactively inform the user that the **kubeconfig file** and **kubeadmin password** are available. This is crucial for accessing their new OpenShift cluster.
