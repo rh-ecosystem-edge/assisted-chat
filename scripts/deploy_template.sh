@@ -75,9 +75,19 @@ oc process \
     -p USERNAME_CLAIM=clientHost \
     -p LIGHTSSPEED_STACK_POSTGRES_SSL_MODE=disable \
     -p LLAMA_STACK_POSTGRES_SSL_MODE=disable \
+    -p LIGHTSPEED_EXPORTER_AUTH_MODE=manual \
     -f template.yaml --local |
     jq '. as $root | $root.items = [$root.items[] | '"$FILTER"']' |
     oc apply -n "$NAMESPACE" -f -
 
 sleep 5
-oc wait --for=condition=Available deployment/assisted-chat -n "$NAMESPACE" --timeout=300s
+if ! oc rollout status  -n $NAMESPACE deployment/assisted-chat --timeout=300s; then
+    echo "Deploying assisted-chat failed"
+    ASSISTED_CHAT_POD=$(oc get pods -n "$NAMESPACE" | tr -s ' ' | cut -d ' ' -f1 | grep assisted-chat)
+    echo "The logs of the pod ${ASSISTED_CHAT_POD}"
+    oc logs -n $NAMESPACE "$ASSISTED_CHAT_POD"
+    echo "The events in the namespace '${NAMESPACE}'"
+    oc events -n $NAMESPACE
+    echo "oc describe pod ${ASSISTED_CHAT_POD}"
+    oc describe pod $ASSISTED_CHAT_POD
+fi

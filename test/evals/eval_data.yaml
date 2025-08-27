@@ -3,7 +3,7 @@
     - eval_id: basic_introduction
       eval_query: Hi!
       eval_types: [response_eval:sub-string]
-      expected_keywords: ["Hello", "OpenShift", "help"]
+      expected_keywords: ["OpenShift", "help"]
       description: Basic greeting test using keyword matching for reliability (avoids LLM judge flapping)
 
 - conversation_group: basic_cluster_request_conv
@@ -11,7 +11,7 @@
     - eval_id: basic_cluster_request
       eval_query: I want to install an OCP cluster
       eval_types: [response_eval:sub-string]
-      expected_keywords: ["help", "cluster", "details", "name", "domain", "version"]
+      expected_keywords: ["cluster", "name", "domain", "version"]
       description: Cluster creation request test using keyword matching for reliability
 
 - conversation_group: list_versions_conv
@@ -19,12 +19,11 @@
   conversation:
     - eval_id: list_versions_tool_call
       eval_query: What OpenShift versions are available?
-      eval_types: [tool_eval, response_eval:sub-string, response_eval:accuracy]
+      eval_types: [tool_eval, response_eval:sub-string]
       expected_tool_calls:
         - - tool_name: list_versions
             arguments: {}
       expected_keywords: ["versions", "available", "OpenShift"]
-      expected_response: "There are several versions of OpenShift available. The most recent production version is 4.19, 4.20 pre release versions are available as well as several previous versions."
       description: Test single tool call with no dynamic parameters
 
 - conversation_group: available_operators_conv

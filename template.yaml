@@ -73,7 +73,12 @@ parameters:
   description: "The full URL to use when uploading feedback/transcript archives to the insights ingress service"
 - name: INSIGHTS_INGRESS_SECRET_NAME
   value: "insights-ingress"
-  description: "The name of a secret containing the auth_token for the insights ingress server"
+  description: |
+    The name of a secret containing the auth_token for the insights ingress server. Will be ignored
+    if it doesn't exist but LIGHTSPEED_EXPORTER_AUTH_MODE should be set to 'sso' in that case.
+- name: SSO_CLIENT_SECRET_NAME
+  value: "ingress-sso"
+  description: "Name of the K8s secret that contains the SSO client credentials"
 - name: INSIGHTS_SERVICE_ID
   value: "ocm-assisted-chat"
   description: "The service id used when exporting feedback/transcripts data to the insights ingress server"
@@ -83,6 +88,14 @@ parameters:
 - name: LIGHTSPEED_EXPORTER_IMAGE_TAG
   value: "dev-latest"
   description: "Tag of the lightspeed data exporter image to use"
+- name: LIGHTSPEED_EXPORTER_AUTH_MODE
+  value: "sso"
+  description: |
+    The type of authentication to use for the lightspeed data exporter to access the api ingress
+    server. Valid values are 'manual' 'sso' (sso.redhat.com auth) and 'openshift' (k8s pull secret).
+    If 'manual' is specified the INSIGHTS_INGRESS_SECRET_NAME secret should contain a valid auth
+    token in the data item `auth_token`. For 'sso', the SSO_CLIENT_SECRET_NAME secret should contain
+    the credentials for a valid SSO service account.
 - name: LLAMA_STACK_OTEL_SERVICE_NAME
   value: "assisted-chat"
   description: "Service name for OpenTelemetry tracing and metrics"
@@ -237,17 +250,18 @@ objects:
             * Adding additional operators to the cluster will increase these requirements depending on the operators chosen.
 
       4.  **Cluster Configuration (VIPs, Operators):**
-          * Before installation, the user might need to **set API and Ingress VIPs**. Proactively ask if they want to configure these.
+          * Before installation, the user might need to **set API and Ingress VIPs**. Only offer this for multi-node clusters with user-managed networking disabled, and only after hosts have been discovered (post-ISO boot) so that hosts' subnets are known.
           * Single node clusters don't need to **set API and Ingress VIPs**.
           * Cluster with user-managed networking enabled don't need to **set API and Ingress VIPs**.
           * Offer to **list available operators** and **add specific operator bundles** to the cluster if the user expresses interest in additional features.
 
       5.  **Initiate Installation:**
-          * Once the cluster is configured, hosts are discovered and assigned roles, and VIPs are set, the final step is to **start the cluster installation**.
+          * Once the cluster is configured, hosts are discovered and assigned roles, and VIPs are set (if applicable), the final step is to **start the cluster installation**.
           * Proactively ask the user if they are ready to **initiate the installation**.
 
       6.  **Monitoring Installation:**
           * After installation begins, offer to monitor the **cluster events** to check progress or troubleshoot issues.
+          * During the finalizing stage, it is common for some operators—especially the Cluster Version Operator (CVO)—to temporarily report a failed or degraded status. This is expected and usually resolves by the time installation completes. Calmly inform the user to wait for the installation to finish before taking action. Avoid repeated warnings about these transient failures; only escalate if the installation fails or if the operator remains failed after completion.
 
       7.  **Installation Complete:**
           * **Once the installation is successfully completed**, proactively inform the user that the **kubeconfig file** and **kubeadmin password** are available. This is crucial for accessing their new OpenShift cluster.
@@ -481,6 +495,49 @@ objects:
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 2
+
+        - name: lightspeed-to-dataverse-exporter
+          image: quay.io/lightspeed-core/lightspeed-to-dataverse-exporter:${LIGHTSPEED_EXPORTER_IMAGE_TAG}
+          imagePullPolicy: Always
+          args:
+          - "--mode"
+          - "${LIGHTSPEED_EXPORTER_AUTH_MODE}"
+          - "--config"
+          - "/etc/config/config.yaml"
+          - "--log-level"
+          - "INFO"
+          env:
+          - name: CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: ${SSO_CLIENT_SECRET_NAME}
+                key: client_id
+                optional: true
+          - name: CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: ${SSO_CLIENT_SECRET_NAME}
+                key: client_secret
+                optional: true
+          - name: INGRESS_SERVER_AUTH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: ${INSIGHTS_INGRESS_SECRET_NAME}
+                key: auth_token
+                optional: true
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "200m"
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+          volumeMounts:
+            - name: lightspeed-exporter-config
+              mountPath: /etc/config/config.yaml
+              subPath: config.yaml
+            - name: data-storage
+              mountPath: ${STORAGE_MOUNT_PATH}
 
         volumes:
         - name: lightspeed-config
