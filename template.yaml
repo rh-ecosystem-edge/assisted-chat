@@ -165,43 +165,6 @@ objects:
           jwt_configuration:
             user_id_claim: ${USER_ID_CLAIM}
             username_claim: ${USERNAME_CLAIM}
-            role_rules:
-              - jsonpath: "$.realm_access.roles[*]"
-                operator: "contains"
-                value: "redhat:employees"
-                roles: ["redhat_employee"]
-      authorization:
-        access_rules:
-          - role: redhat_employee
-            actions:
-            - get_models
-          # Temporarily we only want redhat employees to be able to use the service,
-          # uncomment when we want to allow all authenticated users
-          # - role: "*"
-          #   actions:
-            - query
-            - streaming_query
-            - get_conversation
-            - list_conversations
-            - delete_conversation
-            - feedback
-          # "nobody" is a made up role, doesn't do anything but just good for being explicit
-          # about what is not allowed by anyone
-          - role: nobody
-            actions:
-            # This exposes the database password - once LSC fixes this issue we
-            # can allow this for employees
-            - get_config
-            # For now we don't want to let even administrators / employees access other users conversations
-            - query_other_conversations
-            - delete_other_conversations
-            - list_other_conversations
-            - read_other_conversations
-          # For k8s pod probes
-          - role: "*"
-            actions:
-            - info
-            - get_metrics
       mcp_servers:
         - name: mcp::assisted
           url: "${MCP_SERVER_URL}"
