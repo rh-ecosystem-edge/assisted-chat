@@ -11,9 +11,15 @@ SECRETS_BASE_PATH="${SECRETS_BASE_PATH:-/var/run/secrets}"
 #$ASSISTED_CHAT_IMG is not in repo/image:tag format but rather in repo/<image name>@sha256:<digest>
 #The template needs the tag, and it references the image by <image name>:<tag> so splitting the variable by ":" works for now
 
-echo "$ASSISTED_CHAT_IMG"
-IMAGE=$(echo "$ASSISTED_CHAT_IMG" | cut -d ":" -f1)
-TAG=$(echo "$ASSISTED_CHAT_IMG" | cut -d ":" -f2)
+if [[ -n $ASSISTED_CHAT_IMG ]]; then
+    echo "The variable ASSISTED_CHAT_IMG was proided with the value ${ASSISTED_CHAT_IMG}, using it to create the IMAGE and TAG variables for the template"
+    IMAGE=$(echo "$ASSISTED_CHAT_IMG" | cut -d ":" -f1)
+    TAG=$(echo "$ASSISTED_CHAT_IMG" | cut -d ":" -f2)
+else
+    IMAGE="quay.io/redhat-services-prod/assisted-installer-tenant/saas/assisted-chat"
+    echo "The variable ASSISTED_CHAT_IMG was not provieded, downloading the latest image from ${IMAGE}"
+    TAG="latest"
+fi
 
 # What secrets have we got?
 ls -laR "$SECRETS_BASE_PATH"
@@ -81,13 +87,7 @@ oc process \
     oc apply -n "$NAMESPACE" -f -
 
 sleep 5
-if ! oc rollout status  -n $NAMESPACE deployment/assisted-chat --timeout=300s; then
-    echo "Deploying assisted-chat failed"
-    ASSISTED_CHAT_POD=$(oc get pods -n "$NAMESPACE" | tr -s ' ' | cut -d ' ' -f1 | grep assisted-chat)
-    echo "The logs of the pod ${ASSISTED_CHAT_POD}"
-    oc logs -n $NAMESPACE "$ASSISTED_CHAT_POD"
-    echo "The events in the namespace '${NAMESPACE}'"
-    oc events -n $NAMESPACE
-    echo "oc describe pod ${ASSISTED_CHAT_POD}"
-    oc describe pod $ASSISTED_CHAT_POD
+if  ! oc rollout status  -n $NAMESPACE deployment/assisted-chat --timeout=300s; then
+    echo "Deploying assisted-chat failed, the logs of the pods are in artifacts/eval-test/gather-extra/artifacts/pods/ directory."
+    exit 1
 fi
