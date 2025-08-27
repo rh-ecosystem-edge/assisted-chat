@@ -185,7 +185,6 @@ objects:
             - list_conversations
             - delete_conversation
             - feedback
-            - get_metrics
           # "nobody" is a made up role, doesn't do anything but just good for being explicit
           # about what is not allowed by anyone
           - role: nobody
@@ -202,6 +201,7 @@ objects:
           - role: "*"
             actions:
             - info
+            - get_metrics
       mcp_servers:
         - name: mcp::assisted
           url: "${MCP_SERVER_URL}"
