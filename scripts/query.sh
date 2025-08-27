@@ -218,6 +218,12 @@ if [[ -n "$CONVERSATION_ID" ]]; then
 else
     # Only select model for new conversations
     echo "Selecting model for new conversation..."
+
+    if ! get_ocm_token; then
+        echo "Failed to get OCM token for query"
+        return 1
+    fi
+
     MODELS=$(get_available_models)
     model_selection=$(select_model "$MODELS")
     MODEL_NAME=$(echo "$model_selection" | cut -d'|' -f1)
