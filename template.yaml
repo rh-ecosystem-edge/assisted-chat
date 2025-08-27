@@ -186,7 +186,6 @@ objects:
             - delete_conversation
             - feedback
             - get_metrics
-            - info
           # "nobody" is a made up role, doesn't do anything but just good for being explicit
           # about what is not allowed by anyone
           - role: nobody
@@ -199,6 +198,10 @@ objects:
             - delete_other_conversations
             - list_other_conversations
             - read_other_conversations
+          # For k8s pod probes
+          - role: "*"
+            actions:
+            - info
       mcp_servers:
         - name: mcp::assisted
           url: "${MCP_SERVER_URL}"
