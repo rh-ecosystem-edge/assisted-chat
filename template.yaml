@@ -134,6 +134,12 @@ parameters:
 - name: LLAMA_STACK_POSTGRES_SSL_MODE
   value: "verify-full"
   description: "SSL mode for the PostgreSQL database connection used by llama-stack"
+- name: AUTHN_ROLE_RULES
+  value: '[]'
+  description: "lightspeed-stack authentication role rules"
+- name: AUTHZ_ACCESS_RULES
+  value: '[]'
+  description: "lightspeed-stack authorization access rules"
 
 objects:
 - apiVersion: v1
@@ -165,51 +171,9 @@ objects:
           jwt_configuration:
             user_id_claim: ${USER_ID_CLAIM}
             username_claim: ${USERNAME_CLAIM}
-            role_rules:
-            - jsonpath: "$.realm_access.roles[*]"
-              operator: "contains"
-              value: "redhat:employees"
-              roles: ["redhat_employee"]
-            - jsonpath: "$.org_id"
-              operator: "in"
-              value: [["6405426"]]
-              roles: ["redhat_employee"]
-            - jsonpath: "$.is_internal"
-              operator: "equals"
-              value: [true]
-              roles: ["redhat_employee"]
+            role_rules: ${AUTHN_ROLE_RULES}
       authorization:
-        access_rules:
-          - role: redhat_employee
-            actions:
-            - get_models
-          # Temporarily we only want redhat employees to be able to use the service,
-          # uncomment when we want to allow all authenticated users
-          # - role: "*"
-          #   actions:
-            - query
-            - streaming_query
-            - get_conversation
-            - list_conversations
-            - delete_conversation
-            - feedback
-          # "nobody" is a made up role, doesn't do anything but just good for being explicit
-          # about what is not allowed by anyone
-          - role: nobody
-            actions:
-            # This exposes the database password - once LSC fixes this issue we
-            # can allow this for employees
-            - get_config
-            # For now we don't want to let even administrators / employees access other users conversations
-            - query_other_conversations
-            - delete_other_conversations
-            - list_other_conversations
-            - read_other_conversations
-          # For k8s pod probes
-          - role: "*"
-            actions:
-            - info
-            - get_metrics
+        access_rules: ${AUTHZ_ACCESS_RULES}
       mcp_servers:
         - name: mcp::assisted
           url: "${MCP_SERVER_URL}"
