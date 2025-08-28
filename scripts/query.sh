@@ -27,7 +27,7 @@ case "${QUERY_ENV:-}" in
 esac
 
 get_available_models() {
-    curl --silent --show-error -X 'GET' "${BASE_URL}/v1/models" -H 'accept: application/json'
+    curl --silent --show-error -X 'GET' "${BASE_URL}/v1/models" -H 'accept: application/json' -H "Authorization: Bearer ${OCM_TOKEN}"
 }
 
 select_model() {

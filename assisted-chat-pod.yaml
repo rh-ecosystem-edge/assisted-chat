@@ -38,6 +38,10 @@ spec:
           name: config
           subPath: vertex-credentials.json
           readOnly: true
+        - mountPath: /etc/tls/ca-bundle.pem
+          name: config
+          subPath: ca-bundle.pem
+          readOnly: true
     - name: assisted-service-mcp
       image: localhost/local-ai-chat-assisted-service-mcp:latest
       env:
