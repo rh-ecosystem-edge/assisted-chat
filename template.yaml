@@ -165,19 +165,19 @@ objects:
           jwt_configuration:
             user_id_claim: ${USER_ID_CLAIM}
             username_claim: ${USERNAME_CLAIM}
-            role_rules:
-            - jsonpath: "$.realm_access.roles[*]"
-              operator: "contains"
-              value: "redhat:employees"
-              roles: ["redhat_employee"]
-            - jsonpath: "$.org_id"
-              operator: "in"
-              value: [["6405426"]]
-              roles: ["redhat_employee"]
-            - jsonpath: "$.is_internal"
-              operator: "equals"
-              value: [true]
-              roles: ["redhat_employee"]
+            role_rules: []
+            # - jsonpath: "$.realm_access.roles[*]"
+            #   operator: "contains"
+            #   value: "redhat:employees"
+            #   roles: ["redhat_employee"]
+            # - jsonpath: "$.org_id"
+            #   operator: "in"
+            #   value: [["6405426"]]
+            #   roles: ["redhat_employee"]
+            # - jsonpath: "$.is_internal"
+            #   operator: "equals"
+            #   value: [true]
+            #   roles: ["redhat_employee"]
       authorization:
         access_rules:
           - role: redhat_employee
