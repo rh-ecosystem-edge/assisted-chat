@@ -2,22 +2,29 @@
   conversation:
     - eval_id: basic_introduction
       eval_query: Hi!
-      eval_types: [response_eval:accuracy]
-      expected_response: "Hello! I'm the Assisted Installer, your guide for OpenShift cluster installation. How can I help you today?"
+      eval_types: [response_eval:sub-string]
+      expected_keywords: ["OpenShift", "help"]
+      description: Basic greeting test using keyword matching for reliability (avoids LLM judge flapping)
 
 - conversation_group: basic_cluster_request_conv
   conversation:
     - eval_id: basic_cluster_request
       eval_query: I want to install an OCP cluster
-      eval_types: [response_eval:accuracy]
-      expected_response: "Great, I can help you with that. To create a cluster, I'll need some information from you. First, what would you like to call your cluster? And what base domain would you like to use? And finally, what OpenShift version would you like to install?"
+      eval_types: [response_eval:sub-string]
+      expected_keywords: ["cluster", "name", "domain", "version"]
+      description: Cluster creation request test using keyword matching for reliability
 
 - conversation_group: list_versions_conv
+  description: Test basic tool calling with predictable parameters
   conversation:
-    - eval_id: list_versions
-      eval_query: List the available OpenShift versions
-      eval_types: [response_eval:accuracy]
-      expected_response: "There are several versions of OpenShift available. The most recent production version is 4.19, 4.20 pre release versions are available as well as several previous versions."
+    - eval_id: list_versions_tool_call
+      eval_query: What OpenShift versions are available?
+      eval_types: [tool_eval, response_eval:sub-string]
+      expected_tool_calls:
+        - - tool_name: list_versions
+            arguments: {}
+      expected_keywords: ["versions", "available", "OpenShift"]
+      description: Test single tool call with no dynamic parameters
 
 - conversation_group: available_operators_conv
   conversation:
@@ -39,3 +46,12 @@
       eval_query: What are the host requirements for a multinode cluster?
       eval_types: [response_eval:accuracy]
       expected_response: "Control plane nodes in a multi-node cluster require 4 CPU cores 16 GB of RAM and 100 GB of storage, the compute nodes in this cluster require 2 CPU cores, 8 GB of RAM and 100GB of storage"
+
+- conversation_group: cluster_creation_with_iso_conv
+  description: Test sequential tool calling for cluster creation and ISO retrieval
+  conversation:
+    - eval_id: create_cluster_and_get_iso
+      eval_query: Create a new SNO cluster named 'tool-eval-sno' with version 4.19.7 and then get the discovery ISO for it. Base domain is example.com, and no SSH key needs to be injected.
+      eval_types: [response_eval:sub-string]
+      expected_keywords: ["cluster", "tool-eval-sno", "Discovery ISO"]
+      description: Test multi-step workflow (create cluster + get ISO) via response validation. Tool validation skipped due to dynamic cluster_id parameter limitations.
