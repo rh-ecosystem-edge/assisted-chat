@@ -2,6 +2,8 @@
 # This is the digest of quay.io/lightspeed-core/lightspeed-stack:dev-20250828-691c83e
 FROM quay.io/lightspeed-core/lightspeed-stack@sha256:f1ec2f3880b0da80279aee20abb1cb20d681b244c17133470bb9399a75bc423e
 
+COPY test/ .
+
 USER 1001
 USER root
 RUN microdnf install -y patch
