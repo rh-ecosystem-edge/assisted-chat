@@ -97,6 +97,10 @@ spec:
         VMs
       name: privileged-nested
       type: string
+    - default:
+      - latest
+      name: additional-tags
+      type: array
     results:
     - description: ""
       name: IMAGE_URL
@@ -521,6 +525,9 @@ spec:
         value: $(tasks.build-image-index.results.IMAGE_URL)
       - name: IMAGE_DIGEST
         value: $(tasks.build-image-index.results.IMAGE_DIGEST)
+      - name: ADDITIONAL_TAGS
+        value: 
+        - $(params.additional-tags[*])
       runAfter:
       - build-image-index
       taskRef:
