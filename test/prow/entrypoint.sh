@@ -16,4 +16,4 @@ echo "GEMINI_API_KEY=${GEMINI_API_KEY}" > .env
 
 cd test/evals
 
-python eval.py --agent_endpoint "${AGENT_URL}:${AGENT_PORT}" 
+python eval.py --agent_endpoint "${AGENT_URL}:${AGENT_PORT}"
