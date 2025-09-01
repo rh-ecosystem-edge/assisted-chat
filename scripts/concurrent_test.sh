@@ -42,28 +42,50 @@ RESET='\033[0m'
 show_help() {
     echo "Usage: $0 [OPTIONS]"
     echo ""
-    echo "Test concurrent streaming requests to the lightspeed server."
+    echo "Test concurrent streaming requests to the lightspeed server by simulating users."
     echo ""
     echo "Options:"
-    echo "  -n, --requests NUM    Number of concurrent requests (default: 5)"
-    echo "  -h, --help           Show this help message"
+    echo "  -u, --users NUM              Number of concurrent users (default: 3)"
+    echo "  -r, --requests-per-user NUM  Number of requests per user (default: 5)"
+    echo "  -d, --delay SECONDS          Delay between requests per user in seconds (default: 1.0)"
+    echo "  -h, --help                   Show this help message"
     echo ""
     echo "Examples:"
-    echo "  $0                   # Run with default 5 concurrent requests"
-    echo "  $0 -n 10            # Run with 10 concurrent requests"
-    echo "  $0 --requests 20     # Run with 20 concurrent requests"
+    echo "  $0                           # Run with 3 users, 5 requests each, 1s delay"
+    echo "  $0 -u 5 -r 3 -d 0.5         # Run with 5 users, 3 requests each, 0.5s delay"
+    echo "  $0 --users 10 --requests-per-user 2 --delay 2  # 10 users, 2 requests each, 2s delay"
 }
 
 # Parse command line arguments
-CONCURRENT_REQUESTS=5
+CONCURRENT_USERS=3
+REQUESTS_PER_USER=5
+REQUEST_DELAY=1.0
 
 while [[ $# -gt 0 ]]; do
     case $1 in
-        -n|--requests)
-            CONCURRENT_REQUESTS="$2"
+        -u|--users)
+            CONCURRENT_USERS="$2"
             # Validate that it's a positive integer
-            if ! [[ "$CONCURRENT_REQUESTS" =~ ^[1-9][0-9]*$ ]]; then
-                echo -e "${RED}Error: Number of requests must be a positive integer${RESET}" >&2
+            if ! [[ "$CONCURRENT_USERS" =~ ^[1-9][0-9]*$ ]]; then
+                echo -e "${RED}Error: Number of users must be a positive integer${RESET}" >&2
+                exit 1
+            fi
+            shift 2
+            ;;
+        -r|--requests-per-user)
+            REQUESTS_PER_USER="$2"
+            # Validate that it's a positive integer
+            if ! [[ "$REQUESTS_PER_USER" =~ ^[1-9][0-9]*$ ]]; then
+                echo -e "${RED}Error: Number of requests per user must be a positive integer${RESET}" >&2
+                exit 1
+            fi
+            shift 2
+            ;;
+        -d|--delay)
+            REQUEST_DELAY="$2"
+            # Validate that it's a positive number (integer or decimal)
+            if ! [[ "$REQUEST_DELAY" =~ ^[0-9]*\.?[0-9]+$ ]]; then
+                echo -e "${RED}Error: Delay must be a positive number${RESET}" >&2
                 exit 1
             fi
             shift 2
@@ -80,6 +102,9 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# Calculate total requests
+TOTAL_REQUESTS=$((CONCURRENT_USERS * REQUESTS_PER_USER))
+
 # Get the script directory to locate utils
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 PROJECT_ROOT=$(dirname "$SCRIPT_DIR")
@@ -88,14 +113,14 @@ PROJECT_ROOT=$(dirname "$SCRIPT_DIR")
 source "$PROJECT_ROOT/utils/ocm-token.sh"
 
 # Configuration
-DEFAULT_QUERY="What is the OpenShift Assisted Installer? Can you list my clusters?"
-SERVER_URL="http://localhost:8090/v1/streaming_query"
-LIVENESS_URL="http://127.0.0.1:8090/liveness"
+DEFAULT_QUERY="List my openshift clusters"
+SERVER_URL="https://assisted-chat.api.integration.openshift.com/v1/streaming_query"
+LIVENESS_URL="https://assisted-chat.api.integration.openshift.com/liveness"
 RESULTS_DIR="/tmp/concurrent_test_$$"
 LIVENESS_RESULTS_FILE="$RESULTS_DIR/liveness_times.txt"
 
-echo -e "${CYAN}=== Concurrent Streaming Request Test ===${RESET}"
-echo "Testing $CONCURRENT_REQUESTS concurrent requests..."
+echo -e "${CYAN}=== Concurrent User Simulation Test ===${RESET}"
+echo "Testing $CONCURRENT_USERS users, each sending $REQUESTS_PER_USER requests with ${REQUEST_DELAY}s delay ($TOTAL_REQUESTS total)..."
 echo
 
 # Create results directory
@@ -122,19 +147,54 @@ send_request() {
         -H "Cache-Control: no-cache" \
         "$SERVER_URL" \
         --json "{\"query\": \"${DEFAULT_QUERY}\"}" > /dev/null 2>&1 || curl_exit_code=$?
+
     
     local end_time=$(date +%s.%N)
-    if command -v bc >/dev/null 2>&1; then
-        local duration=$(echo "$end_time - $start_time" | bc -l)
-    else
-        local duration=$(awk "BEGIN {print $end_time - $start_time}")
-    fi
+    local duration=$(echo "$end_time - $start_time" | bc -l)
     
     if [[ $curl_exit_code -eq 0 ]]; then
         echo "SUCCESS,$request_id,200,$duration,OK" > "$result_file"
     else
         echo "FAILURE,$request_id,000,$duration,TIMEOUT" > "$result_file"
     fi
+}
+
+# Function to simulate a user sending sequential requests
+simulate_user() {
+    local user_id="$1"
+
+    # Stagger user start times to avoid simultaneous requests
+    # User 1 starts immediately, User 2 after 0.1s, User 3 after 0.2s, etc.
+    local stagger_delay=$(echo "($user_id - 1) * 0.1" | bc -l 2>/dev/null || awk "BEGIN {print ($user_id - 1) * 0.1}")
+    if (( $(echo "$stagger_delay > 0" | bc -l 2>/dev/null || awk "BEGIN {print ($stagger_delay > 0)}") )); then
+        echo "User $user_id: Waiting ${stagger_delay}s before starting..."
+        sleep "$stagger_delay"
+    fi
+
+    local user_start_time=$(date +%s.%N)
+    echo "User $user_id: Starting session with $REQUESTS_PER_USER requests"
+
+    for request_num in $(seq 1 $REQUESTS_PER_USER); do
+        local global_request_id="${user_id}_${request_num}"
+        echo "User $user_id: Sending request $request_num/$REQUESTS_PER_USER"
+
+        # Send the request using the existing function
+        send_request "$global_request_id"
+
+        # Wait configured delay before next request (except for the last one)
+        if [[ $request_num -lt $REQUESTS_PER_USER ]]; then
+            sleep "$REQUEST_DELAY"
+        fi
+    done
+
+    local user_end_time=$(date +%s.%N)
+    if command -v bc >/dev/null 2>&1; then
+        local user_duration=$(echo "$user_end_time - $user_start_time" | bc -l)
+    else
+        local user_duration=$(awk "BEGIN {print $user_end_time - $user_start_time}")
+    fi
+
+    echo "User $user_id: Completed session in ${user_duration}s"
 }
 
 # Function to continuously check liveness endpoint
@@ -185,7 +245,7 @@ fi
 # Export token so it's available to subshells
 export OCM_TOKEN
 
-echo "Launching $CONCURRENT_REQUESTS concurrent requests..."
+echo "Launching $CONCURRENT_USERS concurrent users (staggered start: 0.1s intervals)..."
 echo "Starting liveness monitoring..."
 
 # Start liveness checking in background
@@ -194,14 +254,14 @@ liveness_pid=$!
 
 overall_start=$(date +%s.%N)
 
-# Launch all requests concurrently
-for i in $(seq 1 $CONCURRENT_REQUESTS); do
-    send_request "$i" &
+# Launch all users concurrently
+for i in $(seq 1 $CONCURRENT_USERS); do
+    simulate_user "$i" &
     pids[$i]=$!
 done
 
-# Wait for all requests to complete
-for i in $(seq 1 $CONCURRENT_REQUESTS); do
+# Wait for all users to complete
+for i in $(seq 1 $CONCURRENT_USERS); do
     wait ${pids[$i]}
 done
 
@@ -227,8 +287,10 @@ total_response_time=0
 min_time=""
 max_time=""
 
-for i in $(seq 1 $CONCURRENT_REQUESTS); do
-    result_file="$RESULTS_DIR/result_$i.txt"
+for user_id in $(seq 1 $CONCURRENT_USERS); do
+    for request_num in $(seq 1 $REQUESTS_PER_USER); do
+        global_request_id="${user_id}_${request_num}"
+        result_file="$RESULTS_DIR/result_${global_request_id}.txt"
     if [[ -f "$result_file" ]]; then
         result=$(cat "$result_file")
         IFS=',' read -r status request_id http_status duration error_type <<< "$result"
@@ -260,6 +322,7 @@ for i in $(seq 1 $CONCURRENT_REQUESTS); do
     else
         failed_requests=$((failed_requests + 1))
     fi
+    done
 done
 
 # Calculate average response time
@@ -307,17 +370,20 @@ echo -e "${CYAN}                           TEST SUMMARY                         
 echo -e "${CYAN}=====================================================================${RESET}"
 echo
 echo -e "${YELLOW}📊 RESULTS:${RESET}"
-echo "  • Total requests: $CONCURRENT_REQUESTS"
+echo "  • Users: $CONCURRENT_USERS"
+echo "  • Requests per user: $REQUESTS_PER_USER"
+echo "  • Delay between requests: ${REQUEST_DELAY}s"
+echo "  • Total requests: $TOTAL_REQUESTS"
 echo -e "  • ${GREEN}✅ Successful: $successful_requests${RESET}"
 echo -e "  • ${RED}❌ Failed: $failed_requests${RESET}"
 
-if [[ $CONCURRENT_REQUESTS -gt 0 ]]; then
+if [[ $TOTAL_REQUESTS -gt 0 ]]; then
     if command -v bc >/dev/null 2>&1; then
-        success_rate=$(echo "scale=1; $successful_requests * 100 / $CONCURRENT_REQUESTS" | bc -l 2>/dev/null || echo "0.0")
+        success_rate=$(echo "scale=1; $successful_requests * 100 / $TOTAL_REQUESTS" | bc -l 2>/dev/null || echo "0.0")
         echo -e "  • 📈 Success rate: ${success_rate}%"
     else
         # Fallback calculation without bc
-        success_rate=$((successful_requests * 100 / CONCURRENT_REQUESTS))
+        success_rate=$((successful_requests * 100 / TOTAL_REQUESTS))
         echo -e "  • 📈 Success rate: ${success_rate}%"
     fi
 fi
@@ -358,7 +424,7 @@ else
 fi
 
 echo
-if [[ $successful_requests -eq $CONCURRENT_REQUESTS ]]; then
+if [[ $successful_requests -eq $TOTAL_REQUESTS ]]; then
     echo -e "${GREEN}🎉 All requests succeeded!${RESET}"
 elif [[ $successful_requests -gt 0 ]]; then
     echo -e "${YELLOW}⚠️  Mixed results - some requests failed${RESET}"
