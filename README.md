@@ -80,6 +80,10 @@ both schemas. If you're running `lightspeed-stack` without a database
 configuration you can use `make sqlite` to browse the contents of the temporary
 SQLite database.
 
+## Configuration flags
+
+- `DISABLE_QUERY_SYSTEM_PROMPT` (default: `false`): maps to `customization.disable_query_system_prompt` in Lightspeed Stack. When `true`, requests including `system_prompt` are rejected with HTTP 422.
+- `DISABLE_QUERY_MODEL_OVERRIDE` (default: `false`): maps to `customization.disable_query_model_override` in Lightspeed Stack. When `true`, requests including `model` or `provider` are rejected with HTTP 422.
 
 ## Override
 

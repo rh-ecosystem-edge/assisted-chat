@@ -120,6 +120,9 @@ parameters:
 - name: DISABLE_QUERY_SYSTEM_PROMPT
   value: "true"
   description: "Corresponds to the lightspeed config customization.disable_query_system_prompt"
+- name: DISABLE_QUERY_MODEL_OVERRIDE
+  value: "false"
+  description: "Corresponds to the lightspeed config customization.disable_query_model_override"
 - name: ASSISTED_CHAT_DEFAULT_MODEL
   value: gemini-2.0-flash
 - name: USER_ID_CLAIM
@@ -188,6 +191,7 @@ objects:
       customization:
         system_prompt_path: "${SYSTEM_PROMPT_PATH}"
         disable_query_system_prompt: ${DISABLE_QUERY_SYSTEM_PROMPT}
+        disable_query_model_override: ${DISABLE_QUERY_MODEL_OVERRIDE}
       inference:
         default_model: ${ASSISTED_CHAT_DEFAULT_MODEL}
         default_provider: gemini
