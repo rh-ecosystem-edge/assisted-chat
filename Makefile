@@ -4,7 +4,7 @@
 .PHONY: all \
 	build-images \
 	build-inspector build-assisted-mcp build-lightspeed-stack build-lightspeed-plus-llama-stack build-ui \
-	generate run resume stop rm logs query query-int query-stage query-interactive mcphost test-eval psql sqlite help
+	generate run resume stop rm logs query query-int query-stage query-interactive delete mcphost test-eval psql sqlite help
 	deploy-template ci-test deploy-template-local
 
 all: help ## Show help information
@@ -93,6 +93,10 @@ query-stage: ## Query the assisted-chat services (stage environment)
 
 query-interactive: query ## Query the assisted-chat services (deprecated, use 'query')
 	@echo "WARNING: 'query-interactive' is deprecated. Use 'make query' instead."
+
+delete: ## Delete a conversation from assisted-chat services
+	@echo "Deleting conversation from assisted-chat services..."
+	DELETE_MODE=true ./scripts/query.sh
 
 mcphost: ## Attach to mcphost
 	@echo "Attaching to mcphost..."

@@ -182,9 +182,6 @@ objects:
         feedback_storage: "${STORAGE_MOUNT_PATH}/feedback"
         transcripts_enabled: ${LIGHTSPEED_TRANSCRIPTS_ENABLED}
         transcripts_storage: "${STORAGE_MOUNT_PATH}/transcripts"
-        data_collector:
-          # We use the external collector as a sidecar
-          enabled: false
       customization:
         system_prompt_path: "${SYSTEM_PROMPT_PATH}"
         disable_query_system_prompt: ${DISABLE_QUERY_SYSTEM_PROMPT}

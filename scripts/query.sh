@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+# Check if this is a delete operation
+DELETE_MODE=${DELETE_MODE:-false}
+
 # Color definitions
 CYAN='\033[0;36m'
 RESET='\033[0m'
@@ -164,12 +167,18 @@ select_conversation() {
     conversations_json=$(echo "$body" | jq -r '.conversations // []')
 
     if [[ "$conversations_json" == "[]" ]]; then
+        if [[ "$DELETE_MODE" == "true" ]]; then
+            echo "No conversations found"
+            exit 0
+        fi
         echo "No existing conversations found. Starting a new conversation."
         return 0
     fi
 
     fzf_options=()
-    fzf_options+=("$(printf "%-36s | %-32s" "New conversation" "Start a fresh conversation")")
+    if [[ "$DELETE_MODE" != "true" ]]; then
+        fzf_options+=("$(printf "%-36s | %-32s" "New conversation" "Start a fresh conversation")")
+    fi
 
     while IFS= read -r conv; do
         if [[ -n "$conv" ]]; then
@@ -193,14 +202,39 @@ select_conversation() {
     done < <(echo "$conversations_json" | jq -c '.[]')
 
     # Use fzf to let user select with a better prompt and preview
-    selected=$(printf '%s\n' "${fzf_options[@]}" | fzf --prompt="Select conversation: " --height=15 --header="ID                                   | Created             | Model                | Messages")
+    if [[ "$DELETE_MODE" == "true" ]]; then
+        prompt="Select conversation to delete: "
+    else
+        prompt="Select conversation: "
+    fi
+    selected=$(printf '%s\n' "${fzf_options[@]}" | fzf --prompt="$prompt" --height=15 --header="ID                                   | Created             | Model                | Messages")
 
     if [[ -z "$selected" ]]; then
         echo "No selection made. Exiting."
         exit 1
     fi
 
-    if [[ $(echo "$selected" | cut -d' ' -f1-2) == "New conversation" ]]; then
+    if [[ "$DELETE_MODE" == "true" ]]; then
+        CONVERSATION_ID=$(echo "$selected" | cut -c1-36 | xargs)
+        read -p "Are you sure you want to delete conversation $CONVERSATION_ID? (y/N): " confirm
+        if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+            echo "Deletion cancelled."
+            exit 0
+        fi
+        tmpfile=$(mktemp)
+        status=$(curl --silent --show-error --output "$tmpfile" --write-out "%{http_code}" \
+            -X DELETE -H "Authorization: Bearer ${OCM_TOKEN}" \
+            "${BASE_URL}/v1/conversations/${CONVERSATION_ID}")
+        body=$(cat "$tmpfile")
+        rm "$tmpfile"
+        if ! good_http_response "$status"; then
+            echo "Error: Failed to delete conversation (HTTP $status)"
+            echo "Response: $body"
+            exit 1
+        fi
+        echo "Conversation $CONVERSATION_ID deleted successfully."
+        exit 0
+    elif [[ $(echo "$selected" | cut -d' ' -f1-2) == "New conversation" ]]; then
         CONVERSATION_ID=""
     else
         # Extract conversation ID from the selected line (first 36 characters)
