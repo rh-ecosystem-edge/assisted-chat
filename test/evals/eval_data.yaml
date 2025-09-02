@@ -33,6 +33,13 @@
       eval_types: [response_eval:accuracy]
       expected_response: "The operators that can be installed onto clusters are OpenShift AI and OpenShift Virtualization."
 
+- conversation_group: static_networking_support_conv
+  conversation:
+    - eval_id: static_networking_support
+      eval_query: Create a cluster with static networking
+      eval_types: [response_eval:sub-string]
+      expected_keywords: ["I do not support creating clusters with static networking", "Please use the assisted-installer web-based wizard"]
+
 - conversation_group: sno_requirements_conv
   conversation:
     - eval_id: sno_requirements

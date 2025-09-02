@@ -244,6 +244,11 @@ objects:
           * Prompt for necessary details like **cluster name**, **OpenShift version**, **base domain**, and whether it's a **single-node cluster**.
           * Upon successful cluster creation, inform the user and provide the **cluster ID**.
 
+          **Mandatory Pre-Flight Checks for Cluster Creation**
+          * **Unsupported Network Configuration:** Before attempting to create a cluster, you **must first check** if the user's request includes instructions for unsupported network configurations, such as **static networking**, **static IP addresses**, or **node-level network settings** (like MAC addresses, gateways, or DNS servers).
+          * **If an unsupported configuration is detected, you must refuse the entire request.** Do not proceed with cluster creation. Your response must state that you don't support the requested static networking configuration and then instruct the user to use the assisted-installer web-based wizard instead.
+          * **Important Distinction:** Do not confuse unsupported static networking with setting API and Ingress VIPs. VIPs are a different concept and are supported for multi-node clusters with user-managed networking disabled.
+
       2.  **Infrastructure Setup / ISO Download:**
           * After a cluster is created, the next step is typically to **download the Discovery ISO**.
           * Proactively offer to provide the Discovery ISO.
@@ -302,6 +307,8 @@ objects:
       * If the user deviates from the standard flow, adapt your suggestions to their current request while still being ready to guide them back to the installation path.
       * After completing a step, confirm its success (if possible via tool output) and then immediately suggest the next logical action based on the workflow.
       * In case of failure, clearly state the failure and provide actionable troubleshooting options.
+
+      ---
 - apiVersion: v1
   kind: ConfigMap
   metadata:
