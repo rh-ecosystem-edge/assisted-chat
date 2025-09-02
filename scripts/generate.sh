@@ -73,6 +73,8 @@ if [[ ! -f "$PROJECT_ROOT/.env" ]]; then
         echo "Exiting. You can copy .env.template to .env and fill it in manually."
         exit 1
     fi
+else
+    echo "The .env file already exists. Skipping interactive configuration."
 fi
 
 source "$PROJECT_ROOT/.env"
@@ -83,6 +85,7 @@ if [[ -f $OVERRIDE_FILE ]]; then
     OVERRIDE_PARAMS="--param-file=$OVERRIDE_FILE"
 fi
 
+echo "Generating $PROJECT_ROOT/config/lightspeed-stack.yaml"
 oc process --local \
     -f "$PROJECT_ROOT/template.yaml" \
     "${OVERRIDE_PARAMS-}" \
@@ -90,4 +93,5 @@ oc process --local \
     yq '.items[] | select(.kind == "ConfigMap" and .metadata.name == "lightspeed-stack-config").data."lightspeed-stack.yaml"' -r \
         >"$PROJECT_ROOT/config/lightspeed-stack.yaml"
 
+echo "Generating $PROJECT_ROOT/config/systemprompt.txt"
 yq -r '.objects[] | select(.metadata.name == "lightspeed-stack-config") | .data.system_prompt' "$PROJECT_ROOT/template.yaml" >"$PROJECT_ROOT/config/systemprompt.txt"
