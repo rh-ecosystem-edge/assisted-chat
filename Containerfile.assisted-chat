@@ -1,6 +1,6 @@
 # vim: set filetype=dockerfile
-# This is the digest of quay.io/lightspeed-core/lightspeed-stack:dev-20250828-691c83e
-FROM quay.io/lightspeed-core/lightspeed-stack@sha256:f1ec2f3880b0da80279aee20abb1cb20d681b244c17133470bb9399a75bc423e
+# This is the digest of quay.io/lightspeed-core/lightspeed-stack:dev-20250902-be56d50
+FROM quay.io/lightspeed-core/lightspeed-stack@sha256:1a27cbd2204e2bb843988dda100011b75b9619426c1efec83549e4945f9bb34a
 
 USER 1001
 USER root
