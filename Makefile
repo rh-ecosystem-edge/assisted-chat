@@ -4,7 +4,7 @@
 .PHONY: all \
 	build-images \
 	build-inspector build-assisted-mcp build-lightspeed-stack build-lightspeed-plus-llama-stack build-ui \
-	generate run resume stop rm logs query query-int query-stage query-interactive delete mcphost test-eval psql sqlite help
+	generate run resume stop rm logs query query-int query-stage query-prod query-interactive delete mcphost test-eval psql sqlite help
 	deploy-template ci-test deploy-template-local
 
 all: help ## Show help information
@@ -90,6 +90,10 @@ query-int: ## Query the assisted-chat services (integration environment)
 query-stage: ## Query the assisted-chat services (stage environment)
 	@echo "Querying assisted-chat services (stage environment)..."
 	QUERY_ENV=stage ./scripts/query.sh
+
+query-prod: ## Query the assisted-chat services (production environment)
+	@echo "Querying assisted-chat services (production environment)..."
+	QUERY_ENV=prod ./scripts/query.sh
 
 query-interactive: query ## Query the assisted-chat services (deprecated, use 'query')
 	@echo "WARNING: 'query-interactive' is deprecated. Use 'make query' instead."

@@ -24,6 +24,9 @@ case "${QUERY_ENV:-}" in
     "stage")
         BASE_URL="https://assisted-chat.api.stage.openshift.com"
         ;;
+    "prod")
+        BASE_URL="https://assisted-chat.api.openshift.com"
+        ;;
     *)
         BASE_URL="http://localhost:8090"
         ;;
