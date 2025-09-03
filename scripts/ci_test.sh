@@ -56,7 +56,7 @@ while [ $ELAPSED -lt $TIMEOUT ]; do
         echo "The evaluation tests failed, you can see the logs of the pods under the directory artifacts/eval-test/gather-extra/artifacts/pods/."
         echo "oc events"
         oc events -n "$NAMESPACE"
-        exit "$(oc get pod "$POD_NAME" -n "$NAMESPACE" -o=jsonpath='{.status.containerStatuses[0].lastState.terminated.exitCode}')"
+        exit 1
     fi
 
     echo "Waiting for pod $POD_NAME to be ready..."
