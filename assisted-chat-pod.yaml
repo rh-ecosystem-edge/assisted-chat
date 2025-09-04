@@ -34,7 +34,7 @@ spec:
         - mountPath: /tmp/systemprompt.txt
           name: config
           subPath: systemprompt.txt
-        - mountPath: /tmp/vertex-credentials.json
+        - mountPath: /tmp/vertex-credentials.json:Z
           name: config
           subPath: vertex-credentials.json
           readOnly: true
