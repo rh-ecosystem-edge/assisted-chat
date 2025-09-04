@@ -6,6 +6,8 @@ set -o pipefail
 
 SECRETS_BASE_PATH="${SECRETS_BASE_PATH:-/var/run/secrets}"
 
+printenv
+
 #All the secret are expected to be mounted under /var/run/secrets by the ci-operator
 
 #$ASSISTED_CHAT_IMG is not in repo/image:tag format but rather in repo/<image name>@sha256:<digest>
@@ -16,7 +18,7 @@ if [[ -n $ASSISTED_CHAT_IMG ]]; then
     IMAGE=$(echo "$ASSISTED_CHAT_IMG" | cut -d ":" -f1)
     TAG=$(echo "$ASSISTED_CHAT_IMG" | cut -d ":" -f2)
 else
-    IMAGE="quay.io/redhat-services-prod/assisted-installer-tenant/saas/assisted-chat"
+    IMAGE="quay.io/redhat-user-workloads/assisted-installer-tenant/assisted-chat-saas-main/assisted-chat-saas-main"
     echo "The variable ASSISTED_CHAT_IMG was not provieded, downloading the latest image from ${IMAGE}"
     TAG="latest"
 fi
