@@ -3,6 +3,11 @@ kind: Pod
 metadata:
   name: assisted-chat-pod
 spec:
+  dnsPolicy: "None"
+  dnsConfig:
+    nameservers:
+      - "8.8.8.8"
+      - "8.8.4.4"
   containers:
     - name: lightspeed-stack
       image: ${LIGHTSPEED_STACK_IMAGE_OVERRIDE}
