@@ -1,0 +1,103 @@
+#!/usr/bin/env python3
+
+# Summarize the transcript data into a more useful format
+
+from dataclasses import dataclass
+from datetime import datetime
+import shutil
+from dateutil.parser import parse
+import json
+import pathlib
+from typing import Any
+
+SCRIPT_DIR = pathlib.Path(__file__).parent.resolve()
+OUT_DIR = SCRIPT_DIR / "summaries"
+
+def main():
+    shutil.rmtree(OUT_DIR, ignore_errors=True)
+    OUT_DIR.mkdir(exist_ok=True)
+    feedback = feedback_by_conv_query()
+    for path, dirs, files in (SCRIPT_DIR / "extracted/transcripts").walk():
+        json_files = [f for f in files if f.endswith("json")]
+        if not json_files:
+            continue
+
+        ts, conv_id, summary = summarize_conversation(path, [path /f for f in json_files], feedback)
+        with open(OUT_DIR / conv_id, "w") as fd:
+            fd.write(summary)
+
+def conv_query_key(conv_id: str, user_question: str):
+    return f"{conv_id}|{user_question}"
+
+def feedback_by_conv_query():
+    by_key = {}
+    for f in (SCRIPT_DIR / "extracted/feedback").glob("**/*.json"):
+        parsed = json.loads(f.read_text())
+        by_key[conv_query_key(parsed["conversation_id"], parsed["user_question"])] = parsed
+    return by_key
+
+@dataclass
+class ConvoPair:
+    timestamp: datetime
+    query: str
+    response: str
+    attachments: list[Any]
+    tool_calls: list[Any]
+
+def summarize_conversation(base_path: pathlib.Path, json_files: list[pathlib.Path], feedback: dict[str, Any]):
+    provider = None
+    model = None
+    user_id = None
+    conv_id = None
+
+    pairs: list[ConvoPair] = []
+    for f in json_files:
+        with f.open('r') as fd:
+            parsed = json.load(fd)
+
+            provider = parsed["metadata"]["provider"]
+            model = parsed["metadata"]["model"]
+            user_id = parsed["metadata"]["user_id"]
+            conv_id = parsed["metadata"]["conversation_id"]
+
+            ts = parsed["metadata"]["timestamp"]
+            query = parsed["redacted_query"]
+            response = parsed["llm_response"]
+            attachments = parsed["attachments"]
+            tool_calls = parsed.get("tool_calls", [])
+
+            pairs.append(ConvoPair(
+                timestamp=parse(ts),
+                query=query,
+                response=response,
+                attachments=attachments,
+                tool_calls=tool_calls,
+            ))
+
+    pairs = sorted(pairs, key=lambda p: p.timestamp)
+    start_time = pairs[0].timestamp
+    out = f"Conversation ID: {conv_id}\n"
+    out += f"Model: {model}\n"
+    out += f"Provider: {provider}\n"
+    out += f"Starting Time: {start_time.strftime("%Y/%m/%d %H:%M:%S %Z")}\n"
+    out += f"User ID: {user_id}\n\n"
+
+    for p in pairs:
+        out += f"[{p.timestamp.strftime("%H:%M:%S")}]\n"
+        out += f"User: {p.query}\n\n"
+        out += f"Assisted Chat: {p.response}\n"
+        if p.tool_calls:
+            out += f"Tool calls: {json.dumps(p.tool_calls, indent=2)}\n"
+        feedback_key = conv_query_key(conv_id, p.query)
+        if feedback_key in feedback:
+            f = feedback[feedback_key]
+            if f["sentiment"] > 0:
+                out += "User: <THUMBS UP> (Positive Feedback)\n"
+            else:
+                out += f"User: <THUMBS DOWN> (Negative Feedback) - {f["user_feedback"]} (Categories: {f["categories"]})\n"
+        out += "\n"
+
+    return start_time, conv_id, out
+
+if __name__ == "__main__":
+    main()

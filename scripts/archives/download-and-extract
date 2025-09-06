@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Download and extract the transcript/feedback tgz archives from S3 using local user authentication
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+set -euo pipefail
+
+ENV=${1:-prod}
+
+ACCOUNT=""
+if [[ $ENV == "prod" ]]; then
+  ACCOUNT="insights-prod-rh"
+elif [[ $ENV == "stage" ]]; then
+  ACCOUNT="crc-stage"
+else
+  echo "Usage: $0 prod|stage"
+  exit 1
+fi
+
+rm -rf $SCRIPT_DIR/from-s3/*
+
+rh-aws-saml-login $ACCOUNT -- aws s3 sync --exclude '*' --include 'ocm-assisted-chat/*' s3://rh-lightspeed-assistant-archives-$ENV $SCRIPT_DIR/from-s3
+
+rm -rf $SCRIPT_DIR/extracted/*
+mkdir -p $SCRIPT_DIR/extracted
+cat $(find $SCRIPT_DIR/from-s3 -name "*.tgz") | tar -xzvf - -i -C $SCRIPT_DIR/extracted

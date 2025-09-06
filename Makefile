@@ -4,8 +4,8 @@
 .PHONY: all \
 	build-images \
 	build-inspector build-assisted-mcp build-lightspeed-stack build-lightspeed-plus-llama-stack build-ui \
-	generate run resume stop rm logs query query-int query-stage query-prod query-interactive delete mcphost test-eval psql sqlite help
-	deploy-template ci-test deploy-template-local
+	deploy-template ci-test deploy-template-local \
+	generate run resume stop rm logs query query-int query-stage query-prod query-interactive delete mcphost test-eval psql sqlite transcript-summaries-prod help
 
 all: help ## Show help information
 
@@ -121,6 +121,10 @@ sqlite: ## Copy SQLite database from pod and open in browser
 	@podman cp assisted-chat-pod-lightspeed-stack:/tmp/assisted-chat.db /tmp/assisted-chat.db
 	@echo "Opening SQLite database in browser..."
 	@sqlitebrowser /tmp/assisted-chat.db
+
+transcript-summaries-prod:
+	./scripts/archives/download-and-extract prod
+	./scripts/archives/summarize-transcripts
 
 help: ## Show this help message
 	@echo "Available targets:"
