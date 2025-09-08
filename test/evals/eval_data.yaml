@@ -36,13 +36,6 @@
         - - tool_name: list_operator_bundles
             arguments: {}
 
-- conversation_group: static_networking_support_conv
-  conversation:
-    - eval_id: static_networking_support
-      eval_query: Create a cluster with static networking
-      eval_types: [response_eval:sub-string]
-      expected_keywords: ["I do not support creating clusters with static networking", "assisted-installer web-based wizard"]
-
 - conversation_group: sno_requirements_conv
   conversation:
     - eval_id: sno_requirements
@@ -194,3 +187,46 @@
               cluster_id: "[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
       expected_keywords: ["cluster", "eval-test2-uniq-cluster-name", "test.local", "4.18.22"]
       description: Test handling requesting a cluster by name
+
+- conversation_group: static_net_config_vlan
+  description: Configure a basic static network config for two hosts with vlans
+  conversation:
+    - eval_id: create_eval_test_sno
+      eval_query: create a new single node cluster named eval-test-static-net-cluster, running on version 4.19.7 with the x86_64 CPU architecture, configured under the base domain example.com, without an ssh key.
+      eval_types: [tool_eval]
+      expected_tool_calls:
+        - - tool_name: create_cluster
+            arguments:
+              name: "eval-test-static-net-cluster"
+              version: "4\\.19\\.7"
+              base_domain: "example\\.com"
+              single_node: "(?i:true)"
+              cpu_architecture: "x86_64"
+              ssh_public_key: null
+    - eval_id: configure_hosts
+      eval_query: |
+        I want to configure static networking. Create configs for two hosts: both have a single vlan interface backed by an ethernet interface.  The first has an ethernet interface with mac address c5:d6:bc:f0:05:20, and the vlan interface has ip address 10.0.0.5/24. The second has an ethernet mac address of a0:a9:b6:81:c7:a6 and a vlan ip address of 10.0.0.6/24. The vlan id for both is 400. Use the name eth0 for the ethernet interface and vlan0 as the name of the vlan interface for both hosts. Also I want DNS config for both of these configs with a DNS server 8.8.8.8.
+      eval_types: [tool_eval]
+      expected_tool_calls:
+        - - tool_name: generate_nmstate_yaml
+            arguments: 
+              params: |-
+                \{"ethernet_ifaces": \[\{"mac_address": "c5:d6:bc:f0:05:20", "name": "eth0"}\], "vlan_ifaces": \[{"name": "vlan0", "vlan_id": 400, "base_interface_name": "eth0", "ipv4_address": {"address": "10.0.0.5", "cidr_length": 24}}\], "dns": {"dns_servers": \["8.8.8.8"\]}}
+        - - tool_name: generate_nmstate_yaml
+            arguments: 
+              params: |-
+                {"ethernet_ifaces": \[{"mac_address": "a0:a9:b6:81:c7:a6", "name": "eth0"}\], "vlan_ifaces": \[{"name": "vlan0", "vlan_id": 400, "base_interface_name": "eth0", "ipv4_address": {"address": "10.0.0.6", "cidr_length": 24}}\], "dns": {"dns_servers": \["8.8.8.8"\]}}
+    - eval_id: apply_to_cluster
+      eval_query: Yes, apply it to the cluster.
+      eval_types: [tool_eval]
+      expected_tool_calls:
+        - - tool_name: alter_static_network_config_nmstate_for_host
+            arguments:
+              cluster_id: "[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
+              index: null
+              new_nmstate_yaml: "10.0.0.5"
+        - - tool_name: alter_static_network_config_nmstate_for_host
+            arguments:
+              cluster_id: "[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
+              index: null
+              new_nmstate_yaml: "10.0.0.6"
