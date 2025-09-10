@@ -21,4 +21,4 @@ echo "GEMINI_API_KEY=${GEMINI_API_KEY}" > .env
 
 TEST_DIR="${WORK_DIR}/test/evals"
 
-python $TEST_DIR/eval.py --agent_endpoint "${AGENT_URL}:${AGENT_PORT}" --agent_auth_token_file $TEST_DIR/ocm_token.txt --eval_data_yaml $TEST_DIR/eval_data.yaml
+python $TEST_DIR/eval.py --agent_endpoint "${AGENT_URL}:${AGENT_PORT}" --agent_auth_token_file $TEMP_DIR/ocm_token.txt --eval_data_yaml $TEST_DIR/eval_data.yaml
