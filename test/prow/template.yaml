@@ -6,7 +6,7 @@ objects:
 - apiVersion: batch/v1
   kind: Job
   metadata:
-    name: assisted-chat-eval-test
+    name: assisted-chat-eval-test-${JOB_ID}
     labels:
       app: assisted-chat-eval-test
   spec:
@@ -43,6 +43,9 @@ objects:
             value: ${AGENT_PORT}
 
 parameters:
+- name: JOB_ID
+  generate: expression
+  from: "[0-9a-f]{7}"
 - name: IMAGE_NAME
   required: true
 - name: SSL_CLIENT_SECRET_NAME
