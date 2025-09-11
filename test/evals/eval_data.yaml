@@ -41,8 +41,8 @@
   conversation:
     - eval_id: static_networking_support
       eval_query: Create a cluster with static networking
-      eval_types: [response_eval:sub-string]
-      expected_keywords: ["I do not support creating clusters with static networking", "Please use the assisted-installer web-based wizard"]
+      eval_types: [response_eval:accuracy]
+      expected_response: I do not support creating clusters with static networking", "Please use the assisted-installer web-based wizard
 
 - conversation_group: sno_requirements_conv
   conversation:
@@ -88,7 +88,7 @@
   conversation:
     - eval_id: create_eval_test_multinode
       eval_query: Create a multi-node cluster named 'eval-test-multinode' with OpenShift 4.18.22 and domain test.local
-      eval_types: [tool_eval, response_eval:sub-string]
+      eval_types: [tool_eval, response_eval:accuracy, response_eval:sub-string]
       expected_tool_calls:
         - - tool_name: create_cluster
             arguments:
@@ -98,7 +98,8 @@
               single_node: "(?i:false)"
               cpu_architecture: "x86_64"
               ssh_public_key: ""
-      expected_keywords: ["cluster", "eval-test-multinode", "cluster ID"]
+      expected_keywords: ["cluster", "ID"]
+      expected_response: I have created a cluster with name eval-test-cluster-name, OpenShift version 4.18.22, base domain test.local. Next, you'll need to download the Discovery ISO, then boot your hosts with it. Do you want me to download the Discovery ISO?
     - eval_id: set_ssh_key_eval_test_ssh
       eval_query: Set the SSH key for the cluster you just created to "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQCmeaBFhSJ/MLECmqUaKweRgo10ABpwdvJ7v76qLYfP0pzfzYsF3hGP/fH5OQfHi9pTbWynjaEcPHVfaTaFWHvyMtv8PEMUIDgQPWlBSYzb+3AgQ5AsChhzTJCYnRdmCdzENlV+azgtb3mVfXiyCfjxhyy3QAV4hRrMaVtJGuUQfQ== example@example.com"
       eval_types: [tool_eval, response_eval:sub-string]
@@ -130,13 +131,13 @@
   conversation:
     - eval_id: cluster_info_tool_call
       eval_query: Give me details about cluster named abc123
-      eval_types: [tool_eval, response_eval:sub-string]
+      eval_types: [tool_eval, response_eval:accuracy]
       expected_tool_calls:
         # It should list the clusters to try to match up the name
         - - tool_name: list_clusters
             arguments: {}
-      expected_keywords: ["cluster", "abc123"]
       description: Test error handling for non-existent cluster ID/Name
+      expected_response: Retrieval failed for cluster 'abc123' because the resource was not found.
 
 - conversation_group: error_handling_conv
   description: Validate graceful handling of invalid SSH key format
@@ -144,7 +145,7 @@
     - eval_id: invalid_ssh_key_handling
       eval_query: create a new single node cluster named eval-test-sno, running on version 4.19.7, configured under the base domain example.com, using the provided SSH key abc123def456.
       eval_types: [response_eval:accuracy]
-      expected_response: The cluster creation failed because the provided SSH key is not in a supported format. Supported formats are ssh-rsa, ssh-ed25519, and ecdsa. Please provide the SSH key in one of these formats.
+      expected_response: The cluster creation failed because the provided SSH key is not in a supported format. Please provide the SSH key in one of these formatsssh-rsa, ssh-ed25519 or ecdsa.
 
 - conversation_group: non_disclosure_conv
   description: Validate refusal to reveal internal details per system prompt
@@ -174,8 +175,8 @@
   conversation:
     - eval_id: create_single_node_cluser
       eval_query: Create a multi-node cluster named 'eval-test-cluster-name' with OpenShift 4.18.22 and domain test.local. I do not have an SSH key to provide.
-      eval_types: [response_eval:sub-string]
-      expected_keywords: ["cluster", "eval-test-cluster-name", "cluster ID"]
+      eval_types: [response_eval:accuracy]
+      expected_response: I have created a cluster with name eval-test-cluster-name, OpenShift version 4.18.22, base domain test.local and with cluster ID
     - eval_id: cluster_name_tool_call
       eval_query: Show me information on cluster eval-test-cluster-name
       eval_types: [tool_eval, response_eval:sub-string]
