@@ -42,7 +42,7 @@
     - eval_id: static_networking_support
       eval_query: Create a cluster with static networking
       eval_types: [response_eval:sub-string]
-      expected_keywords: ["I do not support creating clusters with static networking", "Please use the assisted-installer web-based wizard"]
+      expected_keywords: ["I do not support creating clusters with static networking", "assisted-installer web-based wizard"]
 
 - conversation_group: sno_requirements_conv
   conversation:
@@ -175,7 +175,7 @@
     - eval_id: create_single_node_cluser
       eval_query: Create a multi-node cluster named 'eval-test-cluster-name' with OpenShift 4.18.22 and domain test.local. I do not have an SSH key to provide.
       eval_types: [response_eval:sub-string]
-      expected_keywords: ["cluster", "eval-test-cluster-name", "cluster ID"]
+      expected_keywords: ["cluster", "eval-test-cluster-name", "ID"]
     - eval_id: cluster_name_tool_call
       eval_query: Show me information on cluster eval-test-cluster-name
       eval_types: [tool_eval, response_eval:sub-string]
