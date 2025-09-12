@@ -6,6 +6,9 @@ set -o pipefail
 
 SECRETS_BASE_PATH="${SECRETS_BASE_PATH:-/var/run/secrets}"
 JOB_NAME="assisted-chat-eval-test"
+UNIQUE_ID=$(head /dev/urandom | tr -dc 0-9a-z | head -c 8)
+
+echo "${UNIQUE_ID}" > ${SHARED_DIR}/eval_test_unique_id
 
 if [[ -n $ASSISTED_CHAT_TEST ]]; then
     echo "The variable ASSISTED_CHAT_TEST was proided with the value ${ASSISTED_CHAT_TEST}, using it to create the IMAGE and TAG variables for the template"
@@ -26,7 +29,10 @@ if ! oc get secret -n "$NAMESPACE" gemini &>/dev/null; then
     oc create secret generic -n $NAMESPACE gemini --from-file=api_key="${SECRETS_BASE_PATH}/gemini/api_key"
 fi
 
-oc process -p IMAGE_NAME="$ASSISTED_CHAT_TEST" -p SSL_CLIENT_SECRET_NAME=assisted-chat-ssl-ci -f test/prow/template.yaml --local | oc apply -n "$NAMESPACE" -f -
+oc process -p IMAGE_NAME="$ASSISTED_CHAT_TEST" \
+           -p SSL_CLIENT_SECRET_NAME=assisted-chat-ssl-ci \
+           -p JOB_ID=${UNIQUE_ID} \
+           -f test/prow/template.yaml --local | oc apply -n "$NAMESPACE" -f -
 
 sleep 5
 oc get pods -n "$NAMESPACE"

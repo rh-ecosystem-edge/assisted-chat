@@ -41,6 +41,8 @@ objects:
             value: ${AGENT_URL}
           - name: AGENT_PORT
             value: ${AGENT_PORT}
+          - name: UNIQUE_ID
+            value: ${JOB_ID}
 
 parameters:
 - name: JOB_ID
@@ -62,4 +64,3 @@ parameters:
   value: gemini
 - name: GEMINI_API_SECRET_KEY_NAME
   value: api_key
-
