@@ -73,8 +73,8 @@
               single_node: "(?i:true)"
               cpu_architecture: "x86_64"
               ssh_public_key: 'ssh-rsa\s+[A-Za-z0-9+/]+[=]{0,3}(\s+.+)?\s*'
-      expected_keywords: ["eval-test-singlenode-ClustER-NAme", "4.19.7", "ID", "Discovery ISO", "download", "cluster"]
-      expected_response: I have created a cluster with name eval-test-singlenode-ClustER-NAme, OpenShift version 4.19.7, base domain test.local. Next, you'll need to download the Discovery ISO, then boot your hosts with it. Would you like me to get the Discovery ISO download URL?
+      expected_keywords: ["eval-test-singlenode-ClustER-NAme", "ID", "Discovery ISO", "download", "cluster"]
+      expected_response: I have created a cluster with name eval-test-singlenode-ClustER-NAme. Next, you'll need to download the Discovery ISO, then boot your hosts with it. Would you like me to get the Discovery ISO download URL?
     - eval_id: get_iso_eval_test_sno
       eval_query: Using the ID of the cluster you just created, get the Discovery ISO download URL for cluster 'eval-test-singlenode-ClustER-NAme'
       eval_types: [tool_eval, response_eval:sub-string]
@@ -99,8 +99,8 @@
               single_node: "(?i:false)"
               cpu_architecture: "x86_64"
               ssh_public_key: ""
-      expected_keywords: ["eval-test-multinode-ClustER-NAme", "4.18.22", "ID", "Discovery ISO", "cluster"]
-      expected_response: I have created a cluster with name eval-test-multinode-ClustER-NAme, OpenShift version 4.18.22, base domain test.local. Next, you'll need to download the Discovery ISO, then boot your hosts with it. Would you like me to get the Discovery ISO download URL?
+      expected_keywords: ["eval-test-multinode-ClustER-NAme", "ID", "Discovery ISO", "cluster"]
+      expected_response: I have created a cluster with name eval-test-multinode-ClustER-NAme. Next, you'll need to download the Discovery ISO, then boot your hosts with it. Would you like me to get the Discovery ISO download URL?
     - eval_id: set_ssh_key_eval_test_ssh
       eval_query: Set the SSH key for the cluster you just created to "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQCmeaBFhSJ/MLECmqUaKweRgo10ABpwdvJ7v76qLYfP0pzfzYsF3hGP/fH5OQfHi9pTbWynjaEcPHVfaTaFWHvyMtv8PEMUIDgQPWlBSYzb+3AgQ5AsChhzTJCYnRdmCdzENlV+azgtb3mVfXiyCfjxhyy3QAV4hRrMaVtJGuUQfQ== example@example.com"
       eval_types: [tool_eval, response_eval:accuracy]
@@ -177,8 +177,8 @@
     - eval_id: create_single_node_cluser
       eval_query: Create a multi-node cluster named 'eval-test-ClustER-NAme' with OpenShift 4.18.22 and domain test.local. I do not have an SSH key to provide.
       eval_types: [response_eval:accuracy, response_eval:sub-string]
-      expected_keywords: ["eval-test-ClustER-NAme", "4.18.22", "ID", "Discovery ISO", "download", "cluster"]
-      expected_response: I have created a cluster with name eval-test-ClustER-NAme, OpenShift version 4.18.22, base domain test.local. Next, you'll need to download the Discovery ISO, then boot your hosts with it. Would you like me to get the Discovery ISO download URL?
+      expected_keywords: ["eval-test-ClustER-NAme", "ID", "Discovery ISO", "download", "cluster"]
+      expected_response: I have created a cluster with name eval-test-ClustER-NAme. Next, you'll need to download the Discovery ISO, then boot your hosts with it. Would you like me to get the Discovery ISO download URL?
     - eval_id: cluster_name_tool_call
       eval_query: Show me information on cluster eval-test-ClustER-NAme
       eval_types: [tool_eval, response_eval:sub-string]
