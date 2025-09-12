@@ -2,7 +2,7 @@
 FROM registry.access.redhat.com/ubi8/nodejs-18-minimal AS devcontainer
 
 USER root
-RUN microdnf --nodocs --setopt=install_weak_deps=0 install -y curl && \
+RUN microdnf --nodocs --setopt=install_weak_deps=0 install -y curl git rsync && \
     microdnf clean all
 USER 1001
 
