@@ -43,12 +43,12 @@ spec:
           subPath: ca-bundle.pem
           readOnly: true
     - name: assisted-service-mcp
-      image: localhost/local-ai-chat-assisted-service-mcp:latest
+      image: ${ASSISTED_MCP_IMAGE_OVERRIDE}
       env:
         - name: TRANSPORT
           value: streamable-http
     - name: ui
-      image: localhost/local-ai-chat-ui
+      image: ${UI_IMAGE_OVERRIDE}
       env:
         - name: AIUI_CHAT_API_URL
           value: http://lightspeed-stack:8090/
@@ -60,7 +60,7 @@ spec:
         - containerPort: 8080
           hostPort: 8080
     - name: mcp-inspector
-      image: localhost/local-ai-chat-inspector:latest
+      image: ${INSPECTOR_IMAGE_OVERRIDE}
       env:
         - name: HOST
           value: 0.0.0.0
