@@ -1,5 +1,6 @@
 # CI-only Dockerfile to build lightspeed-stack-plus-llama using the pipeline-built parent
-FROM rh-ecosystem-edge-assisted-chat-lightspeed-stack
+ARG BUILD_NAMESPACE
+FROM registry.ci.openshift.org/${BUILD_NAMESPACE}/pipeline:rh-ecosystem-edge-assisted-chat-lightspeed-stack
 
 USER root
 
