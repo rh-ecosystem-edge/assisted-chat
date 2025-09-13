@@ -1,5 +1,5 @@
 # CI-only Dockerfile to build lightspeed-stack-plus-llama using the pipeline-built parent
-FROM ls-base
+FROM rh-ecosystem-edge-assisted-chat-lightspeed-stack
 
 USER root
 
