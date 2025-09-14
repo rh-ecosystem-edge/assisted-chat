@@ -37,7 +37,7 @@ oc process -p IMAGE_NAME="$ASSISTED_CHAT_TEST" \
 sleep 5
 oc get pods -n "$NAMESPACE"
 
-POD_NAME=$(oc get pods -n "$NAMESPACE" -l job-name="$JOB_NAME" -o jsonpath='{.items[0].metadata.name}')
+POD_NAME=$(oc get pods -n "$NAMESPACE" -l job-name="${JOB_NAME}-${UNIQUE_ID}" -o jsonpath='{.items[0].metadata.name}')
 if [[ -z "${POD_NAME}" ]]; then
     echo "No pod found with label app=assisted-chat-eval-test in namespace ${NAMESPACE}"
     oc get pods -n "$NAMESPACE"
@@ -49,8 +49,8 @@ ELAPSED=0
 
 while [ $ELAPSED -lt $TIMEOUT ]; do
     # Check if the pod's status is "Running"
-    JOB_SUCCEEDED=$(oc get job "$JOB_NAME" -n "$NAMESPACE" -o=jsonpath='{.status.succeeded}' 2>/dev/null)
-    JOB_FAILED=$(oc get job "$JOB_NAME" -n "$NAMESPACE" -o=jsonpath='{.status.failed}' 2>/dev/null)
+    JOB_SUCCEEDED=$(oc get job "${JOB_NAME}-${UNIQUE_ID}" -n "$NAMESPACE" -o=jsonpath='{.status.succeeded}' 2>/dev/null)
+    JOB_FAILED=$(oc get job "${JOB_NAME}-${UNIQUE_ID}" -n "$NAMESPACE" -o=jsonpath='{.status.failed}' 2>/dev/null)
 
     if [[  "$JOB_SUCCEEDED" -gt 0  ]]; then
         echo "The evaluation test were successful. The logs of the tests are stored in the directory artifacts/eval-test/gather-extra/artifacts/pods/ in the logs of the pod ${POD_NAME}."
