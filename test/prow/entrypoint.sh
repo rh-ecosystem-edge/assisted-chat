@@ -20,6 +20,6 @@ cd $TEMP_DIR
 echo "$OCM_TOKEN" > ocm_token.txt
 echo "GEMINI_API_KEY=${GEMINI_API_KEY}" > .env
 
-sed -i "s/ClustER-NAme/${UNIQUE_ID}/g" $TEST_DIR/eval_data.yaml
+sed -i "s/uniq-cluster-name/${UNIQUE_ID}/g" $TEST_DIR/eval_data.yaml
 
 python $TEST_DIR/eval.py --agent_endpoint "${AGENT_URL}:${AGENT_PORT}" --agent_auth_token_file $TEMP_DIR/ocm_token.txt --eval_data_yaml $TEST_DIR/eval_data.yaml
