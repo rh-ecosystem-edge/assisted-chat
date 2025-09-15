@@ -117,6 +117,14 @@
             arguments:
               cluster_id: "[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
       expected_keywords: ["Discovery ISO"]
+    - eval_id: host_booted_but_not_discovered
+      eval_query: I booted the hosts
+      eval_types: [tool_eval, response_eval:accuracy]
+      expected_tool_calls:
+        - - tool_name: cluster_info
+            arguments:
+              cluster_id: "[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
+      expected_response: "hosts hasn't been discovered yet."
 
 - conversation_group: list_clusters_conv
   conversation:
@@ -131,13 +139,12 @@
   conversation:
     - eval_id: cluster_info_tool_call
       eval_query: Give me details about cluster named 'abc123abc'
+      description: Test handling for non-existent cluster name
       eval_types: [tool_eval, response_eval:accuracy]
+      expected_response: Retrieval failed for cluster 'abc123abc' because the resource was not found.
       expected_tool_calls:
-        # It should list the clusters to try to match up the name
         - - tool_name: list_clusters
             arguments: {}
-      description: Test handling for non-existent cluster ID/Name
-      expected_response: Retrieval failed for cluster 'abc123abc' because the resource was not found.
 
 - conversation_group: error_handling_conv
   description: Validate graceful handling of invalid SSH key format
