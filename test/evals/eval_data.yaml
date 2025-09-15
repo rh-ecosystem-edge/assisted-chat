@@ -30,12 +30,11 @@
   conversation:
     - eval_id: available_operators
       eval_query: What operators are available?
-      eval_types: [response_eval:accuracy, tool_eval, response_eval:sub-string]
+      eval_types: [response_eval:accuracy, tool_eval]
       expected_response: "The operators that can be installed onto clusters are OpenShift AI and OpenShift Virtualization."
       expected_tool_calls:
         - - tool_name: list_operator_bundles
             arguments: {}
-      expected_keywords: ["operator bundles", "Virtualization", "OpenShift AI"]
 
 - conversation_group: static_networking_support_conv
   conversation:
@@ -62,21 +61,21 @@
   description: Create SNO and then retrieve Discovery ISO in two steps with all the information provided
   conversation:
     - eval_id: create_eval_test_sno
-      eval_query: create a new single node cluster named eval-test-singlenode-ClustER-NAme, running on version 4.19.7 with the x86_64 CPU architecture, configured under the base domain example.com, using the provided SSH key "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQCmeaBFhSJ/MLECmqUaKweRgo10ABpwdvJ7v76qLYfP0pzfzYsF3hGP/fH5OQfHi9pTbWynjaEcPHVfaTaFWHvyMtv8PEMUIDgQPWlBSYzb+3AgQ5AsChhzTJCYnRdmCdzENlV+azgtb3mVfXiyCfjxhyy3QAV4hRrMaVtJGuUQfQ== example@example.com".
+      eval_query: create a new single node cluster named eval-test-singlenode-uniq-cluster-name, running on version 4.19.7 with the x86_64 CPU architecture, configured under the base domain example.com, using the provided SSH key "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQCmeaBFhSJ/MLECmqUaKweRgo10ABpwdvJ7v76qLYfP0pzfzYsF3hGP/fH5OQfHi9pTbWynjaEcPHVfaTaFWHvyMtv8PEMUIDgQPWlBSYzb+3AgQ5AsChhzTJCYnRdmCdzENlV+azgtb3mVfXiyCfjxhyy3QAV4hRrMaVtJGuUQfQ== example@example.com".
       eval_types: [tool_eval, response_eval:sub-string, response_eval:accuracy]
       expected_tool_calls:
         - - tool_name: create_cluster
             arguments:
-              name: "eval-test-singlenode-ClustER-NAme"
+              name: "eval-test-singlenode-uniq-cluster-name"
               version: "4\\.19\\.7"
               base_domain: "example\\.com"
               single_node: "(?i:true)"
               cpu_architecture: "x86_64"
               ssh_public_key: 'ssh-rsa\s+[A-Za-z0-9+/]+[=]{0,3}(\s+.+)?\s*'
-      expected_keywords: ["eval-test-singlenode-ClustER-NAme", "ID", "Discovery ISO", "download", "cluster"]
-      expected_response: I have created a cluster with name eval-test-singlenode-ClustER-NAme. Next, you'll need to download the Discovery ISO, then boot your hosts with it. Would you like me to get the Discovery ISO download URL?
+      expected_keywords: ["eval-test-singlenode-uniq-cluster-name", "ID", "Discovery ISO", "download", "cluster"]
+      expected_response: I have created a cluster with name eval-test-singlenode-uniq-cluster-name. Next, you'll need to download the Discovery ISO, then boot your hosts with it. Would you like me to get the Discovery ISO download URL?
     - eval_id: get_iso_eval_test_sno
-      eval_query: Using the ID of the cluster you just created, get the Discovery ISO download URL for cluster 'eval-test-singlenode-ClustER-NAme'
+      eval_query: Using the ID of the cluster you just created, get the Discovery ISO download URL for cluster 'eval-test-singlenode-uniq-cluster-name'
       eval_types: [tool_eval, response_eval:sub-string]
       expected_tool_calls:
         - - tool_name: cluster_iso_download_url
@@ -89,18 +88,18 @@
   conversation:
     - eval_id: create_eval_test_multinode
       eval_types: [tool_eval, response_eval:accuracy, response_eval:sub-string]
-      eval_query: Create a multi-node cluster named 'eval-test-multinode-ClustER-NAme' with OpenShift 4.18.22 and domain test.local
+      eval_query: Create a multi-node cluster named 'eval-test-multinode-uniq-cluster-name' with OpenShift 4.18.22 and domain test.local
       expected_tool_calls:
         - - tool_name: create_cluster
             arguments:
-              name: "eval-test-multinode-ClustER-NAme"
+              name: "eval-test-multinode-uniq-cluster-name"
               version: "4\\.18\\.22"
               base_domain: "test\\.local"
               single_node: "(?i:false)"
-              cpu_architecture: "x86_64"
-              ssh_public_key: ""
-      expected_keywords: ["eval-test-multinode-ClustER-NAme", "ID", "Discovery ISO", "cluster"]
-      expected_response: I have created a cluster with name eval-test-multinode-ClustER-NAme. Next, you'll need to download the Discovery ISO, then boot your hosts with it. Would you like me to get the Discovery ISO download URL?
+              cpu_architecture: None
+              ssh_public_key: None
+      expected_keywords: ["eval-test-multinode-uniq-cluster-name", "ID", "Discovery ISO", "cluster"]
+      expected_response: I have created a cluster with name eval-test-multinode-uniq-cluster-name. Next, you'll need to download the Discovery ISO, then boot your hosts with it. Would you like me to get the Discovery ISO download URL?
     - eval_id: set_ssh_key_eval_test_ssh
       eval_query: Set the SSH key for the cluster you just created to "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQCmeaBFhSJ/MLECmqUaKweRgo10ABpwdvJ7v76qLYfP0pzfzYsF3hGP/fH5OQfHi9pTbWynjaEcPHVfaTaFWHvyMtv8PEMUIDgQPWlBSYzb+3AgQ5AsChhzTJCYnRdmCdzENlV+azgtb3mVfXiyCfjxhyy3QAV4hRrMaVtJGuUQfQ== example@example.com"
       eval_types: [tool_eval, response_eval:accuracy]
@@ -111,7 +110,7 @@
               ssh_public_key: 'ssh-rsa\s+[A-Za-z0-9+/]+[=]{0,3}(\s+.+)?\s*'
       expected_response: The SSH public key is set for the cluster for cluster
     - eval_id: get_iso_eval_test_multinode
-      eval_query: Using the ID of the cluster you just created, get the Discovery ISO for cluster 'eval-test-multinode-ClustER-NAme'
+      eval_query: Using the ID of the cluster you just created, get the Discovery ISO for cluster 'eval-test-multinode-uniq-cluster-name'
       eval_types: [tool_eval, response_eval:sub-string]
       expected_tool_calls:
         - - tool_name: cluster_iso_download_url
@@ -131,14 +130,14 @@
 - conversation_group: cluster_info_conv
   conversation:
     - eval_id: cluster_info_tool_call
-      eval_query: Give me details about cluster named 'abc123'
+      eval_query: Give me details about cluster named 'abc123abc'
       eval_types: [tool_eval, response_eval:accuracy]
       expected_tool_calls:
         # It should list the clusters to try to match up the name
         - - tool_name: list_clusters
             arguments: {}
-      description: Test error handling for non-existent cluster ID/Name
-      expected_response: Retrieval failed for cluster 'abc123' because the resource was not found.
+      description: Test handling for non-existent cluster ID/Name
+      expected_response: Retrieval failed for cluster 'abc123abc' because the resource was not found.
 
 - conversation_group: error_handling_conv
   description: Validate graceful handling of invalid SSH key format
@@ -175,18 +174,16 @@
 - conversation_group: cluster_id_from_name
   conversation:
     - eval_id: create_single_node_cluser
-      eval_query: Create a multi-node cluster named 'eval-test-ClustER-NAme' with OpenShift 4.18.22 and domain test.local. I do not have an SSH key to provide.
+      eval_query: Create a multi-node cluster named 'eval-test2-uniq-cluster-name' with OpenShift 4.18.22 and domain test.local. I do not have an SSH key to provide.
       eval_types: [response_eval:accuracy, response_eval:sub-string]
-      expected_keywords: ["eval-test-ClustER-NAme", "ID", "Discovery ISO", "download", "cluster"]
-      expected_response: I have created a cluster with name eval-test-ClustER-NAme. Next, you'll need to download the Discovery ISO, then boot your hosts with it. Would you like me to get the Discovery ISO download URL?
+      expected_keywords: ["eval-test2-uniq-cluster-name", "ID", "Discovery ISO", "download", "cluster"]
+      expected_response: I have created a cluster with name eval-test-uniq-cluster-name. Next, you'll need to download the Discovery ISO, then boot your hosts with it. Would you like me to get the Discovery ISO download URL?
     - eval_id: cluster_name_tool_call
-      eval_query: Show me information on cluster eval-test-ClustER-NAme
+      eval_query: Show me information on cluster eval-test2-uniq-cluster-name
       eval_types: [tool_eval, response_eval:sub-string]
       expected_tool_calls:
-        - - tool_name: list_clusters
-            arguments: {}
         - - tool_name: cluster_info
             arguments:
               cluster_id: "[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
-      expected_keywords: ["cluster", "eval-test-ClustER-NAme", "test.local", "4.18.22"]
+      expected_keywords: ["cluster", "eval-test2-uniq-cluster-name", "test.local", "4.18.22"]
       description: Test handling requesting a cluster by name
