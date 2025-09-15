@@ -59,8 +59,13 @@ while [ $ELAPSED -lt $TIMEOUT ]; do
 
     if [[  "$JOB_FAILED" -gt 0  ]]; then
         echo "Pod ${POD_NAME} is Failed, exiting"
-        echo "The evaluation tests failed, you can see the logs of the pods under the directory artifacts/eval-test/gather-extra/artifacts/pods/."
-        echo "oc events"
+	    echo "The evaluation tests failed. Displaying logs and events below."
+
+        echo "--- Logs from failed pod: $POD_NAME ---"
+        oc logs "$POD_NAME" -n "$NAMESPACE"
+        echo "---------------------------------------"
+
+        echo "--- oc events ---"
         oc events -n "$NAMESPACE"
         exit 1
     fi
