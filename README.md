@@ -68,14 +68,15 @@ You can alternatively run the stack on any Kubernetes/OpenShift cluster you prov
 Prerequisites:
 - A logged-in cluster: `oc whoami` should succeed
 - Vertex credentials file path exported as `VERTEX_SERVICE_ACCOUNT_PATH=/absolute/path/to/service_account.json`
-- Optional: override image via `ASSISTED_CHAT_IMG=quay.io/...:tag` (defaults to latest public image)
+- Optional: override lightspeed-stack image for the main app via `ASSISTED_CHAT_IMG=quay.io/...:tag` (defaults to latest public image)
+- For local UI/MCP/inspector components, build images first: `make build-images` (or `make build-ui`, `make build-assisted-mcp`, `make build-inspector`)
 
 Quick start:
 ```bash
-# 1) Ensure config exists
-make generate
+# 1) (Optional) Build local images for UI/MCP/inspector
+make build-images
 
-# 2) Deploy to the current cluster namespace `assisted-chat`
+# 2) Deploy base app to the current cluster namespace `assisted-chat`
 VERTEX_SERVICE_ACCOUNT_PATH=/abs/path/to/service_account.json make run-k8s
 
 # 3) Tail logs
@@ -89,6 +90,7 @@ Notes:
 - The script creates secrets and a local postgres dependency in `assisted-chat` namespace.
 - On clusters without Routes (e.g., minikube), Route objects are filtered automatically.
 - You can change namespace by setting `NAMESPACE=my-namespace` in the environment.
+- Local components use images tagged as `localhost/local-ai-chat-...:latest`. You can override via env vars: `UI_IMAGE`, `ASSISTED_MCP_IMAGE`, `INSPECTOR_IMAGE`.
 
 ## Extra
 

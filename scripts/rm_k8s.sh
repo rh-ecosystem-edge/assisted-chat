@@ -14,6 +14,15 @@ oc delete deployment/assisted-chat -n "$NAMESPACE" --ignore-not-found
 oc delete service/assisted-chat -n "$NAMESPACE" --ignore-not-found
 oc delete route.route.openshift.io/assisted-chat -n "$NAMESPACE" --ignore-not-found || true
 
+# Local components (ui, mcp, inspector)
+oc delete deployment/assisted-ui -n "$NAMESPACE" --ignore-not-found
+oc delete service/assisted-ui -n "$NAMESPACE" --ignore-not-found
+oc delete deployment/assisted-service-mcp -n "$NAMESPACE" --ignore-not-found
+oc delete service/assisted-service-mcp -n "$NAMESPACE" --ignore-not-found
+oc delete deployment/mcp-inspector -n "$NAMESPACE" --ignore-not-found
+oc delete service/mcp-inspector -n "$NAMESPACE" --ignore-not-found
+oc delete secret/assisted-chat-ocm-tokens -n "$NAMESPACE" --ignore-not-found
+
 # Config and secrets
 oc delete configmap/lightspeed-stack-config -n "$NAMESPACE" --ignore-not-found
 oc delete configmap/llama-stack-client-config -n "$NAMESPACE" --ignore-not-found

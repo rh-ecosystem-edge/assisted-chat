@@ -54,6 +54,7 @@ deploy-template-local: ## Used to test the CI flow locally. Deploys the template
 # Kubernetes-native local dev helpers
 run-k8s: ## Deploy and follow logs on current cluster (requires `oc login`)
 	@$(MAKE) deploy-template-local
+	./scripts/deploy_local_components.sh
 	@$(MAKE) logs-k8s
 
 stop-k8s: ## Scale down the assisted-chat deployment to 0 replicas
