@@ -6,7 +6,7 @@
 	build-inspector build-assisted-mcp build-lightspeed-stack build-lightspeed-plus-llama-stack build-ui \
 	deploy-template ci-test deploy-template-local run-k8s stop-k8s rm-k8s logs-k8s \
 	load-images-minikube load-images-kind \
-	generate run resume stop rm logs query query-int query-stage query-prod query-interactive delete mcphost test-eval psql sqlite transcript-summaries-prod help
+	generate run resume stop rm logs query query-int query-stage query-prod query-interactive query-k8s delete mcphost test-eval psql sqlite transcript-summaries-prod help
 
 all: help ## Show help information
 
@@ -113,6 +113,10 @@ query-prod: ## Query the assisted-chat services (production environment)
 	@echo "Querying assisted-chat services (production environment)..."
 	QUERY_ENV=prod ./scripts/query.sh
 
+query-k8s: ## Query the assisted-chat services via k8s port-forward on localhost:8090
+	@echo "Hint: ensure a port-forward is running: oc port-forward -n assisted-chat svc/assisted-chat 8090:8090" 
+	QUERY_ENV=k8s ./scripts/query.sh
+
 query-interactive: query ## Query the assisted-chat services (deprecated, use 'query')
 	@echo "WARNING: 'query-interactive' is deprecated. Use 'make query' instead."
 
@@ -153,6 +157,7 @@ help: ## Show this help message
 	@echo "  make load-images-minikube"
 	@echo "  make run-k8s"
 	@echo "  make logs-k8s"
+	@echo "  make query-k8s"
 	@echo "  make run"
 	@echo "  make logs"
 	@echo "  make query"
