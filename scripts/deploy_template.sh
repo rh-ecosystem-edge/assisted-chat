@@ -79,13 +79,22 @@ else
     JQ_SET_POLICY='.'
 fi
 
+# Choose auth claims: default (CI) vs local-dev overrides
+CLAIM_USER_ID="client_id"
+CLAIM_USERNAME="clientHost"
+if [[ "${LOCAL_DEV_AUTH_CLAIMS:-false}" == "true" ]] || \
+   ([[ -n "${ASSISTED_CHAT_IMG:-}" ]] && ([[ "$ASSISTED_CHAT_IMG" == localhost/* ]] || [[ "$ASSISTED_CHAT_IMG" == 127.0.0.1/* ]])); then
+    CLAIM_USER_ID="sub"
+    CLAIM_USERNAME="preferred_username"
+fi
+
 oc process \
     -p IMAGE="$IMAGE" \
     -p IMAGE_TAG="$TAG" \
     -p VERTEX_API_SECRET_NAME=vertex-service-account \
     -p ASSISTED_CHAT_DB_SECRET_NAME=llama-stack-db \
-    -p USER_ID_CLAIM=client_id \
-    -p USERNAME_CLAIM=clientHost \
+    -p USER_ID_CLAIM="$CLAIM_USER_ID" \
+    -p USERNAME_CLAIM="$CLAIM_USERNAME" \
     -p LIGHTSSPEED_STACK_POSTGRES_SSL_MODE=disable \
     -p LLAMA_STACK_POSTGRES_SSL_MODE=disable \
     -p LIGHTSPEED_EXPORTER_AUTH_MODE=manual \
