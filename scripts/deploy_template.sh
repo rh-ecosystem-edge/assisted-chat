@@ -72,6 +72,13 @@ else
     FILTER='.'
 fi
 
+# For localhost images, set imagePullPolicy to IfNotPresent at apply time
+if [[ -n "${ASSISTED_CHAT_IMG:-}" ]] && [[ "$ASSISTED_CHAT_IMG" == localhost/* || "$ASSISTED_CHAT_IMG" == 127.0.0.1/* ]]; then
+    JQ_SET_POLICY='.items |= map(if .kind=="Deployment" and .metadata.name=="assisted-chat" then (.spec.template.spec.containers |= map(if .name=="lightspeed-stack" then (.imagePullPolicy="IfNotPresent") else . end)) else . end)'
+else
+    JQ_SET_POLICY='.'
+fi
+
 oc process \
     -p IMAGE="$IMAGE" \
     -p IMAGE_TAG="$TAG" \
@@ -84,17 +91,11 @@ oc process \
     -p LIGHTSPEED_EXPORTER_AUTH_MODE=manual \
     -f template.yaml --local |
     jq '. as $root | $root.items = [$root.items[] | '"$FILTER"']' |
+    jq "$JQ_SET_POLICY" |
     oc apply -n "$NAMESPACE" -f -
 
 sleep 5
 if  ! oc rollout status  -n $NAMESPACE deployment/assisted-chat --timeout=300s; then
     echo "Deploying assisted-chat failed, the logs of the pods are in artifacts/eval-test/gather-extra/artifacts/pods/ directory."
     exit 1
-fi
-
-# If a localhost image is used (local dev), avoid forced pulls by setting imagePullPolicy=IfNotPresent
-if [[ -n "${ASSISTED_CHAT_IMG:-}" ]] && [[ "$ASSISTED_CHAT_IMG" == localhost/* || "$ASSISTED_CHAT_IMG" == 127.0.0.1/* ]]; then
-    echo "Detected local image reference ($ASSISTED_CHAT_IMG). Patching assisted-chat imagePullPolicy to IfNotPresent."
-    oc patch deployment/assisted-chat -n "$NAMESPACE" --type='json' \
-      -p='[{"op":"replace","path":"/spec/template/spec/containers/0/imagePullPolicy","value":"IfNotPresent"}]' || true
 fi
