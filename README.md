@@ -91,6 +91,26 @@ Notes:
 - On clusters without Routes (e.g., minikube), Route objects are filtered automatically.
 - You can change namespace by setting `NAMESPACE=my-namespace` in the environment.
 - Local components use images tagged as `localhost/local-ai-chat-...:latest`. You can override via env vars: `UI_IMAGE`, `ASSISTED_MCP_IMAGE`, `INSPECTOR_IMAGE`.
+- If a `localhost` image is detected, deployments set `imagePullPolicy=IfNotPresent` to avoid forced pulls.
+
+Using local images with minikube/kind:
+- minikube:
+  - Load images into minikube’s Docker daemon:
+    ```bash
+    minikube image load localhost/local-ai-chat-lightspeed-stack-plus-llama-stack:latest
+    minikube image load localhost/local-ai-chat-ui:latest
+    minikube image load localhost/local-ai-chat-assisted-service-mcp:latest
+    minikube image load localhost/local-ai-chat-inspector:latest
+    ```
+  - Alternatively, if you run `podman` and `minikube` uses `docker`, consider re-tagging to `docker` daemon or using `podman image save | minikube image load -` flow.
+- kind:
+  - ```bash
+    kind load docker-image localhost/local-ai-chat-lightspeed-stack-plus-llama-stack:latest
+    kind load docker-image localhost/local-ai-chat-ui:latest
+    kind load docker-image localhost/local-ai-chat-assisted-service-mcp:latest
+    kind load docker-image localhost/local-ai-chat-inspector:latest
+    ```
+  - If images are in podman, use `podman save -o img.tar <image>; kind load image-archive img.tar`.
 
 ## Extra
 

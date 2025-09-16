@@ -91,3 +91,10 @@ if  ! oc rollout status  -n $NAMESPACE deployment/assisted-chat --timeout=300s; 
     echo "Deploying assisted-chat failed, the logs of the pods are in artifacts/eval-test/gather-extra/artifacts/pods/ directory."
     exit 1
 fi
+
+# If a localhost image is used (local dev), avoid forced pulls by setting imagePullPolicy=IfNotPresent
+if [[ -n "${ASSISTED_CHAT_IMG:-}" ]] && [[ "$ASSISTED_CHAT_IMG" == localhost/* || "$ASSISTED_CHAT_IMG" == 127.0.0.1/* ]]; then
+    echo "Detected local image reference ($ASSISTED_CHAT_IMG). Patching assisted-chat imagePullPolicy to IfNotPresent."
+    oc patch deployment/assisted-chat -n "$NAMESPACE" --type='json' \
+      -p='[{"op":"replace","path":"/spec/template/spec/containers/0/imagePullPolicy","value":"IfNotPresent"}]' || true
+fi

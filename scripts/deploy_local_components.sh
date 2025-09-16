@@ -29,6 +29,20 @@ UI_IMAGE="${UI_IMAGE:-localhost/local-ai-chat-ui:latest}"
 INSPECTOR_IMAGE="${INSPECTOR_IMAGE:-localhost/local-ai-chat-inspector:latest}"
 ASSISTED_MCP_IMAGE="${ASSISTED_MCP_IMAGE:-localhost/local-ai-chat-assisted-service-mcp:latest}"
 
+# Helper to determine pull policy
+pullPolicyFor() {
+	local image="$1"
+	if [[ "$image" == localhost/* || "$image" == 127.0.0.1/* ]]; then
+		echo IfNotPresent
+	else
+		echo Always
+	fi
+}
+
+UI_PULL_POLICY=$(pullPolicyFor "$UI_IMAGE")
+MCP_PULL_POLICY=$(pullPolicyFor "$ASSISTED_MCP_IMAGE")
+INSPECTOR_PULL_POLICY=$(pullPolicyFor "$INSPECTOR_IMAGE")
+
 # Create/update Deployments and Services for local-only components
 cat <<EOF | oc apply -n "$NAMESPACE" -f -
 apiVersion: apps/v1
@@ -53,6 +67,7 @@ spec:
       containers:
       - name: ui
         image: ${UI_IMAGE}
+        imagePullPolicy: ${UI_PULL_POLICY}
         env:
         - name: AIUI_CHAT_API_URL
           value: http://assisted-chat:${SERVICE_PORT:-8090}/
@@ -104,6 +119,7 @@ spec:
       containers:
       - name: assisted-service-mcp
         image: ${ASSISTED_MCP_IMAGE}
+        imagePullPolicy: ${MCP_PULL_POLICY}
         env:
         - name: TRANSPORT
           value: streamable-http
@@ -148,6 +164,7 @@ spec:
       containers:
       - name: mcp-inspector
         image: ${INSPECTOR_IMAGE}
+        imagePullPolicy: ${INSPECTOR_PULL_POLICY}
         env:
         - name: HOST
           value: 0.0.0.0

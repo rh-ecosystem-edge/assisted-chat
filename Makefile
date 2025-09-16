@@ -5,6 +5,7 @@
 	build-images \
 	build-inspector build-assisted-mcp build-lightspeed-stack build-lightspeed-plus-llama-stack build-ui \
 	deploy-template ci-test deploy-template-local run-k8s stop-k8s rm-k8s logs-k8s \
+	load-images-minikube load-images-kind \
 	generate run resume stop rm logs query query-int query-stage query-prod query-interactive delete mcphost test-eval psql sqlite transcript-summaries-prod help
 
 all: help ## Show help information
@@ -65,6 +66,12 @@ rm-k8s: ## Remove all assisted-chat resources from the current cluster
 
 logs-k8s: ## Follow logs of the assisted-chat deployment
 	./scripts/logs_k8s.sh
+
+load-images-minikube: ## Load local podman images into minikube
+	./scripts/load_images.sh minikube
+
+load-images-kind: ## Load local podman images into kind
+	./scripts/load_images.sh kind
 
 generate: ## Generate configuration files
 	@echo "Generating configuration files..."
@@ -143,6 +150,7 @@ help: ## Show this help message
 	@echo ""
 	@echo "Example usage:"
 	@echo "  make build-images"
+	@echo "  make load-images-minikube"
 	@echo "  make run-k8s"
 	@echo "  make logs-k8s"
 	@echo "  make run"
