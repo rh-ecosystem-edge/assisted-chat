@@ -61,6 +61,35 @@ If you wish to see the logs again while it's running, use `make logs`.
 
 To interact with assisted-chat, use `make query`. 
 
+## Kubernetes-based local workflow (experimental)
+
+You can alternatively run the stack on any Kubernetes/OpenShift cluster you provide (minikube, kind, real OCP). We recommend using `oc` as the CLI. You are responsible for creating and logging into the cluster.
+
+Prerequisites:
+- A logged-in cluster: `oc whoami` should succeed
+- Vertex credentials file path exported as `VERTEX_SERVICE_ACCOUNT_PATH=/absolute/path/to/service_account.json`
+- Optional: override image via `ASSISTED_CHAT_IMG=quay.io/...:tag` (defaults to latest public image)
+
+Quick start:
+```bash
+# 1) Ensure config exists
+make generate
+
+# 2) Deploy to the current cluster namespace `assisted-chat`
+VERTEX_SERVICE_ACCOUNT_PATH=/abs/path/to/service_account.json make run-k8s
+
+# 3) Tail logs
+make logs-k8s
+
+# 4) Scale down or remove
+make stop-k8s
+make rm-k8s
+```
+Notes:
+- The script creates secrets and a local postgres dependency in `assisted-chat` namespace.
+- On clusters without Routes (e.g., minikube), Route objects are filtered automatically.
+- You can change namespace by setting `NAMESPACE=my-namespace` in the environment.
+
 ## Extra
 
 You can also use `make query-int` and `make query-stage` to interact with the

@@ -17,7 +17,7 @@ if [[ -n $ASSISTED_CHAT_IMG ]]; then
     TAG=$(echo "$ASSISTED_CHAT_IMG" | cut -d ":" -f2)
 else
     IMAGE="quay.io/redhat-services-prod/assisted-installer-tenant/saas/assisted-chat"
-    echo "The variable ASSISTED_CHAT_IMG was not provieded, downloading the latest image from ${IMAGE}"
+    echo "The variable ASSISTED_CHAT_IMG was not provided, downloading the latest image from ${IMAGE}"
     TAG="latest"
 fi
 
