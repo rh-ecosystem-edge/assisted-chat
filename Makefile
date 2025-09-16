@@ -6,7 +6,7 @@
 	build-inspector build-assisted-mcp build-lightspeed-stack build-lightspeed-plus-llama-stack build-ui \
 	deploy-template ci-test deploy-template-local run-k8s stop-k8s rm-k8s logs-k8s \
 	load-images-minikube load-images-kind \
-	generate run resume stop rm logs query query-int query-stage query-prod query-interactive query-k8s delete mcphost test-eval psql sqlite transcript-summaries-prod help
+	generate run resume stop rm logs query query-int query-stage query-prod query-interactive query-k8s delete mcphost test-eval test-eval-k8s psql sqlite transcript-summaries-prod help
 
 all: help ## Show help information
 
@@ -134,6 +134,12 @@ test-eval: ## Run agent evaluation tests
 	@echo "Running agent evaluation tests..."
 	@cd test/evals && python eval.py
 
+test-eval-k8s: ## Run evaluation tests against k8s-deployed service via port-forward
+	@echo "Refreshing OCM token..."
+	@. utils/ocm-token.sh && get_ocm_token && echo "$$OCM_TOKEN" > test/evals/ocm_token.txt
+	@echo "Running agent evaluation tests (k8s)..."
+	./scripts/eval_k8s.sh
+
 psql: ## Connect to PostgreSQL database in the assisted-chat pod
 	@echo "Connecting to PostgreSQL database..."
 	@podman exec -it assisted-chat-pod-postgres env PGOPTIONS='-c search_path="lightspeed-stack",public' psql -U assisted-chat -d assisted-chat
@@ -158,6 +164,7 @@ help: ## Show this help message
 	@echo "  make run-k8s"
 	@echo "  make logs-k8s"
 	@echo "  make query-k8s"
+	@echo "  make test-eval-k8s"
 	@echo "  make run"
 	@echo "  make logs"
 	@echo "  make query"
