@@ -70,19 +70,28 @@ Prerequisites:
 - Vertex credentials file path exported as `VERTEX_SERVICE_ACCOUNT_PATH=/absolute/path/to/service_account.json`
 - Optional: override lightspeed-stack image for the main app via `ASSISTED_CHAT_IMG=quay.io/...:tag` (defaults to latest public image)
 - For local UI/MCP/inspector components, build images first: `make build-images` (or `make build-ui`, `make build-assisted-mcp`, `make build-inspector`)
+- OCM token for UI authentication:
+  - Local: `ocm login --use-auth-code` (the scripts will pick up tokens via the `ocm` CLI)
+  - CI-compatible: set environment variables `OCM_REFRESH_TOKEN` (required) and optionally `OCM_TOKEN` before running
 
 Quick start:
 ```bash
 # 1) (Optional) Build local images for UI/MCP/inspector
 make build-images
 
-# 2) Deploy base app to the current cluster namespace `assisted-chat`
-VERTEX_SERVICE_ACCOUNT_PATH=/abs/path/to/service_account.json make run-k8s
+# 2) Ensure OCM auth (for UI):
+# Local: this opens a browser flow to authenticate
+ocm login --use-auth-code
 
-# 3) Tail logs
+# 3) Deploy base app + local components to the current cluster namespace `assisted-chat`
+VERTEX_SERVICE_ACCOUNT_PATH=/abs/path/to/service_account.json \
+ASSISTED_CHAT_IMG=localhost/local-ai-chat-lightspeed-stack-plus-llama-stack:latest \
+make run-k8s
+
+# 4) Tail logs
 make logs-k8s
 
-# 4) Scale down or remove
+# 5) Scale down or remove
 make stop-k8s
 make rm-k8s
 ```
@@ -97,20 +106,13 @@ Using local images with minikube/kind:
 - minikube:
   - Load images into minikube’s Docker daemon:
     ```bash
-    minikube image load localhost/local-ai-chat-lightspeed-stack-plus-llama-stack:latest
-    minikube image load localhost/local-ai-chat-ui:latest
-    minikube image load localhost/local-ai-chat-assisted-service-mcp:latest
-    minikube image load localhost/local-ai-chat-inspector:latest
+    make load-images-minikube
     ```
-  - Alternatively, if you run `podman` and `minikube` uses `docker`, consider re-tagging to `docker` daemon or using `podman image save | minikube image load -` flow.
 - kind:
   - ```bash
-    kind load docker-image localhost/local-ai-chat-lightspeed-stack-plus-llama-stack:latest
-    kind load docker-image localhost/local-ai-chat-ui:latest
-    kind load docker-image localhost/local-ai-chat-assisted-service-mcp:latest
-    kind load docker-image localhost/local-ai-chat-inspector:latest
+    make load-images-kind
     ```
-  - If images are in podman, use `podman save -o img.tar <image>; kind load image-archive img.tar`.
+  - If images are in podman, the script uses tar archives to load them.
 
 ## Extra
 

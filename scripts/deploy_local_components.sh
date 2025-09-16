@@ -11,18 +11,38 @@ if ! command -v oc >/dev/null 2>&1; then
 	exit 1
 fi
 
-# Ensure OCM tokens are available for UI (mirrors podman flow)
-source "$PROJECT_ROOT/utils/ocm-token.sh"
-if ! export_ocm_token; then
-	echo "Failed to get OCM tokens. The UI container will not be able to authenticate with OCM."
-	exit 1
+# Obtain OCM tokens for UI auth:
+# - If OCM_REFRESH_TOKEN (and optionally OCM_TOKEN) is already set (e.g., CI), use it directly.
+# - Otherwise, try to retrieve via ocm CLI.
+: "${OCM_REFRESH_TOKEN:=}"
+: "${OCM_TOKEN:=}"
+if [[ -z "$OCM_REFRESH_TOKEN" ]]; then
+	# Only attempt CLI retrieval if token not pre-provided
+	if command -v ocm >/dev/null 2>&1; then
+		source "$PROJECT_ROOT/utils/ocm-token.sh"
+		if ! export_ocm_token; then
+			echo "Failed to get OCM tokens. The UI container will not be able to authenticate with OCM."
+			echo "Hint: run 'ocm login --use-auth-code' locally, or set OCM_REFRESH_TOKEN in the environment."
+			exit 1
+		fi
+	else
+		echo "OCM CLI not found and OCM_REFRESH_TOKEN not set."
+		echo "Install ocm and run 'ocm login --use-auth-code', or export OCM_REFRESH_TOKEN before running."
+		exit 1
+	fi
 fi
 
 # Create or update a secret with OCM tokens for the UI
 oc -n "$NAMESPACE" delete secret assisted-chat-ocm-tokens --ignore-not-found
-oc -n "$NAMESPACE" create secret generic assisted-chat-ocm-tokens \
-	--from-literal=OCM_TOKEN="$OCM_TOKEN" \
-	--from-literal=OCM_REFRESH_TOKEN="$OCM_REFRESH_TOKEN"
+# Always include refresh token; include access token only if present
+if [[ -n "${OCM_TOKEN:-}" ]]; then
+	oc -n "$NAMESPACE" create secret generic assisted-chat-ocm-tokens \
+		--from-literal=OCM_TOKEN="$OCM_TOKEN" \
+		--from-literal=OCM_REFRESH_TOKEN="$OCM_REFRESH_TOKEN"
+else
+	oc -n "$NAMESPACE" create secret generic assisted-chat-ocm-tokens \
+		--from-literal=OCM_REFRESH_TOKEN="$OCM_REFRESH_TOKEN"
+fi
 
 # Default local images to match podman tags used in assisted-chat-pod.yaml
 UI_IMAGE="${UI_IMAGE:-localhost/local-ai-chat-ui:latest}"
