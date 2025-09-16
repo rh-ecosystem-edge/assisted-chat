@@ -61,32 +61,28 @@ if [[ "${QUERY_ENV:-}" == "k8s" ]]; then
     fi
 fi
 
+# Helper to detect if curl supports --json
+curl_supports_json() {
+    curl -h 2>&1 | grep -q "--json" || curl --help all 2>&1 | grep -q "--json"
+}
+
 get_available_models() {
     curl --silent --show-error -X 'GET' "${BASE_URL}/v1/models" -H 'accept: application/json' -H "Authorization: Bearer ${OCM_TOKEN}"
 }
 
 select_model() {
     local models_json="$1"
+    if ! command -v fzf >/dev/null 2>&1; then
+        echo "Error: fzf is required for interactive model selection. Please install fzf (e.g., 'dnf install fzf' or 'apt install fzf')." >&2
+        exit 1
+    fi
     IFS=$'\t' < <(jq -r '
-        # Get all models
-        .models[] 
-
-        # Ignore models that are not LLMs, like embeddings
-        | select(.model_type == "llm") 
-
-        # Extract relevant fields
-        | . as $model
-        | $model.provider_resource_id as $model_name
-        | $model.provider_id as $provider
-
-        # Determine type label based on model identifier
-        | (if ($model_name | startswith("gemini/")) then "Gemini"
-           elif ($model_name) then "Vertex Gemini"
-           else ""
-           end) as $type_label
-
-        # Format with proper spacing for alignment
-        | "\($model_name | . + (" " * (40 - length)))\($type_label)\t\($model_name)\t\($provider)"
+            .models[] | select(.model_type == "llm")
+            | . as $m
+            | $m.provider_resource_id as $model_name
+            | $m.provider_id as $provider
+            | (if ($model_name | startswith("gemini/")) then "Gemini" elif ($model_name) then "Vertex Gemini" else "" end) as $type_label
+            | "\($model_name | . + (" " * (40 - length)))\($type_label)\t\($model_name)\t\($provider)"
         ' <<<"$models_json" | fzf --delimiter='\t' --with-nth=1 --accept-nth=2,3 --header="Model Name                               Type") read -r model_name model_provider
     echo "$model_name|$model_provider"
 }
@@ -326,10 +322,18 @@ send_curl_query() {
         }'
     fi
 
-    status=$(curl --silent --show-error --output "$tmpfile" --write-out "%{http_code}" \
-        -H "Authorization: Bearer ${OCM_TOKEN}" \
-        "${BASE_URL}/v1/query" \
-        --json "$json_payload")
+    if curl_supports_json; then
+        status=$(curl --silent --show-error --output "$tmpfile" --write-out "%{http_code}" \
+            -H "Authorization: Bearer ${OCM_TOKEN}" \
+            "${BASE_URL}/v1/query" \
+            --json "$json_payload")
+    else
+        status=$(curl --silent --show-error --output "$tmpfile" --write-out "%{http_code}" \
+            -H "Authorization: Bearer ${OCM_TOKEN}" \
+            -H 'Content-Type: application/json' \
+            -d "$json_payload" \
+            "${BASE_URL}/v1/query")
+    fi
     body=$(cat "$tmpfile")
     rm "$tmpfile"
 
