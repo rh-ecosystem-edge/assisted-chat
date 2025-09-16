@@ -63,7 +63,10 @@ fi
 
 # Helper to detect if curl supports --json
 curl_supports_json() {
-    curl -h 2>&1 | grep -q "--json" || curl --help all 2>&1 | grep -q "--json"
+    if curl -h 2>&1 | grep -q -- --json 2>/dev/null; then
+        return 0
+    fi
+    curl --help all 2>&1 | grep -q -- --json 2>/dev/null
 }
 
 get_available_models() {
