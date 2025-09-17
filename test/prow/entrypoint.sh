@@ -5,7 +5,7 @@ set -o errexit
 set -o pipefail
 
 
-OCM_TOKEN=$(curl -X POST https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token \
+export OCM_TOKEN=$(curl -X POST https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "grant_type=client_credentials" \
   -d "client_id=$CLIENT_ID" \
@@ -22,5 +22,6 @@ echo "GEMINI_API_KEY=${GEMINI_API_KEY}" > .env
 
 cp $TEST_DIR/eval_data.yaml $TEMP_DIR/eval_data.yaml
 sed -i "s/uniq-cluster-name/${UNIQUE_ID}/g" $TEMP_DIR/eval_data.yaml
+sed -i "s|<workdir-placeholder>|${WORK_DIR}|g" $TEMP_DIR/eval_data.yaml
 
 python $TEST_DIR/eval.py --agent_endpoint "${AGENT_URL}:${AGENT_PORT}" --agent_auth_token_file $TEMP_DIR/ocm_token.txt --eval_data_yaml $TEST_DIR/eval_data.yaml --eval_data_yaml $TEMP_DIR/eval_data.yaml
