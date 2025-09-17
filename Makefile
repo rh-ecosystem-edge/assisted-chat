@@ -41,22 +41,21 @@ ci-test: ## Used by the CI to test the assisted-chat services
 	./scripts/ci_test.sh
 
 deploy-template-local: ## Used to test the CI flow locally. Deploys the template on whatever cluster `oc` is currently logged in to
-	@echo "Setting up local secrets directory..."
-	@mkdir -p /tmp/secrets/vertex
-	@if [ -z "$(VERTEX_SERVICE_ACCOUNT_PATH)" ]; then \
-		echo "Error: VERTEX_SERVICE_ACCOUNT_PATH environment variable must be set"; \
-		exit 1; \
-	fi
-	@cp "$(VERTEX_SERVICE_ACCOUNT_PATH)" /tmp/secrets/vertex/service_account
-	@echo "Deploying template locally..."
-	oc create namespace assisted-chat || true
-	NAMESPACE=assisted-chat SECRETS_BASE_PATH=/tmp/secrets ASSISTED_CHAT_IMG="$(ASSISTED_CHAT_IMG)" scripts/deploy_template.sh
+	@echo "Setting up secrets directory (local if VERTEX_SERVICE_ACCOUNT_PATH is set, otherwise using /var/run/secrets)..."
+	@SECRETS_BASE_PATH=$${SECRETS_BASE_PATH:-/var/run/secrets}; \
+	if [ -n "$$VERTEX_SERVICE_ACCOUNT_PATH" ]; then \
+		mkdir -p /tmp/secrets/vertex; \
+		cp "$$VERTEX_SERVICE_ACCOUNT_PATH" /tmp/secrets/vertex/service_account; \
+		SECRETS_BASE_PATH=/tmp/secrets; \
+	fi; \
+	echo "Using SECRETS_BASE_PATH=$$SECRETS_BASE_PATH"; \
+	oc create namespace assisted-chat || true; \
+	NAMESPACE=assisted-chat SECRETS_BASE_PATH=$$SECRETS_BASE_PATH ASSISTED_CHAT_IMG="$(ASSISTED_CHAT_IMG)" scripts/deploy_template.sh
 
 # Kubernetes-native local dev helpers
 run-k8s: ## Deploy and follow logs on current cluster (requires `oc login`)
 	@$(MAKE) deploy-template-local
 	./scripts/deploy_local_components.sh
-	@$(MAKE) logs-k8s
 
 stop-k8s: ## Scale down the assisted-chat deployment to 0 replicas
 	./scripts/stop_k8s.sh
