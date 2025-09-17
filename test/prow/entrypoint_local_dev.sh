@@ -13,3 +13,4 @@ export OCM_TOKEN=$(ocm token)
 export OCM_REFRESH_TOKEN=$(ocm token --refresh)
 
 echo "GEMINI_API_KEY=${GEMINI_API_KEY}" > .env
+
