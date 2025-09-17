@@ -14,10 +14,13 @@ if ! command -v oc >/dev/null 2>&1; then
 fi
 
 # Obtain OCM bearer token
-. "$PROJECT_ROOT/utils/ocm-token.sh"
-if ! get_ocm_token; then
-	echo "Error: unable to obtain OCM token. Run 'ocm login --use-auth-code' or set OCM_REFRESH_TOKEN/OCM_TOKEN." >&2
-	exit 1
+: "${OCM_TOKEN:=}"
+if [[ -z "${OCM_TOKEN}" ]]; then
+	. "$PROJECT_ROOT/utils/ocm-token.sh"
+	if ! get_ocm_token; then
+		echo "Error: unable to obtain OCM token. Run 'ocm login --use-auth-code' or set OCM_TOKEN/OCM_REFRESH_TOKEN." >&2
+		exit 1
+	fi
 fi
 
 # Establish port-forward if not already serving

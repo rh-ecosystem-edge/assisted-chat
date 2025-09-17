@@ -29,6 +29,17 @@ if ! oc get secret -n "$NAMESPACE" vertex-service-account &>/dev/null; then
     oc create secret generic -n "$NAMESPACE" vertex-service-account --from-file=service_account="$SECRETS_BASE_PATH/vertex/service_account"
 fi
 
+# Optionally create Gemini API key secret if provided
+if ! oc get secret -n "$NAMESPACE" gemini &>/dev/null; then
+    if [[ -n "${GEMINI_API_KEY:-}" ]]; then
+        echo "Creating gemini secret from GEMINI_API_KEY env in namespace $NAMESPACE"
+        oc create secret generic -n "$NAMESPACE" gemini --from-literal=api_key="$GEMINI_API_KEY"
+    elif [[ -f "$SECRETS_BASE_PATH/gemini/api_key" ]]; then
+        echo "Creating gemini secret from file in namespace $NAMESPACE"
+        oc create secret generic -n "$NAMESPACE" gemini --from-file=api_key="$SECRETS_BASE_PATH/gemini/api_key"
+    fi
+fi
+
 if ! oc get secret -n "$NAMESPACE" insights-ingress &>/dev/null; then
     echo "Creating insights-ingress secret in namespace $NAMESPACE"
     oc create secret generic -n "$NAMESPACE" insights-ingress --from-literal=auth_token="dummy-token"
@@ -88,6 +99,15 @@ if [[ "${LOCAL_DEV_AUTH_CLAIMS:-false}" == "true" ]] || \
     CLAIM_USERNAME="preferred_username"
 fi
 
+# Inject GEMINI_API_KEY env (optional) into assisted-chat container
+JQ_ADD_GEMINI_ENV='.items |= map(
+  if .kind=="Deployment" and .metadata.name=="assisted-chat" then
+    (.spec.template.spec.containers |= map(
+      if .name=="lightspeed-stack" then
+        (.env |= (. + [{"name":"GEMINI_API_KEY","valueFrom":{"secretKeyRef":{"name":"gemini","key":"api_key","optional":true}}}]))
+      else . end))
+  else . end)'
+
 oc process \
     -p IMAGE="$IMAGE" \
     -p IMAGE_TAG="$TAG" \
@@ -101,6 +121,7 @@ oc process \
     -f template.yaml --local |
     jq '. as $root | $root.items = [$root.items[] | '"$FILTER"']' |
     jq "$JQ_SET_POLICY" |
+    jq "$JQ_ADD_GEMINI_ENV" |
     oc apply -n "$NAMESPACE" -f -
 
 sleep 5
