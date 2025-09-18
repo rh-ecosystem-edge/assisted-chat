@@ -56,7 +56,6 @@ deploy-template-local: ## Used to test the CI flow locally. Deploys the template
 run-k8s: ## Deploy and follow logs on current cluster (requires `oc login`)
 	@$(MAKE) deploy-template-local
 	NAMESPACE=assisted-chat ./scripts/deploy_local_components.sh
-	NAMESPACE=assisted-chat ./scripts/logs_k8s.sh
 
 stop-k8s: ## Scale down the assisted-chat deployment to 0 replicas
 	./scripts/stop_k8s.sh
