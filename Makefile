@@ -56,7 +56,7 @@ deploy-template-local: ## Used to test the CI flow locally. Deploys the template
 run-k8s: ## Deploy and follow logs on current cluster (requires `oc login`)
 	@$(MAKE) deploy-template-local
 	NAMESPACE=assisted-chat ./scripts/deploy_local_components.sh
-	@$(MAKE) logs-k8s
+	NAMESPACE=assisted-chat ./scripts/logs_k8s.sh
 
 stop-k8s: ## Scale down the assisted-chat deployment to 0 replicas
 	./scripts/stop_k8s.sh
@@ -118,7 +118,7 @@ query-k8s: ## Query the assisted-chat services via k8s port-forward on localhost
 	QUERY_ENV=k8s ./scripts/query.sh
 
 query-k8s-curl: ## Non-interactive k8s query via curl (default: "Show me all my clusters")
-	./scripts/query_k8s_curl.sh
+	NAMESPACE=assisted-chat ./scripts/query_k8s_curl.sh
 
 query-interactive: query ## Query the assisted-chat services (deprecated, use 'query')
 	@echo "WARNING: 'query-interactive' is deprecated. Use 'make query' instead."
