@@ -88,7 +88,7 @@ evaluator.run_evaluation()
 result_summary = evaluator.get_result_summary()
 
 failed_evals_count = result_summary["FAIL"] + result_summary["ERROR"]
-if failed_evals_count > 2:
+if failed_evals_count:
     print(f"❌ {failed_evals_count} evaluation(s) failed!")
     sys.exit(1)
 
