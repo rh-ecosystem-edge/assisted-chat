@@ -5,6 +5,7 @@ set -euo pipefail
 NAMESPACE="${NAMESPACE:-assisted-chat}"
 SERVICE_NAME="${SERVICE_NAME:-assisted-chat}"
 LOCAL_PORT="${ASSISTED_CHAT_PORT:-8090}"
+PORT_FORWARD_PID_FILE="${PORT_FORWARD_PID_FILE:-/tmp/pf-${SERVICE_NAME}.pid}"
 
 if ! command -v oc >/dev/null 2>&1; then
   echo "Error: oc CLI is required to port-forward to the cluster." >&2
@@ -18,10 +19,11 @@ if curl -sf "http://localhost:${LOCAL_PORT}/readiness" >/dev/null 2>&1 || \
   exit 0
 fi
 
-# Start a background port-forward
+# Start a background port-forward and keep it running after this script exits
 oc port-forward -n "${NAMESPACE}" svc/"${SERVICE_NAME}" "${LOCAL_PORT}:${LOCAL_PORT}" >/dev/null 2>&1 &
 PF_PID=$!
-trap 'kill ${PF_PID} >/dev/null 2>&1 || true' EXIT
+# Record PID for caller cleanup
+echo "${PF_PID}" > "${PORT_FORWARD_PID_FILE}"
 
 # Wait up to 30s for the port to respond
 for i in $(seq 1 30); do
