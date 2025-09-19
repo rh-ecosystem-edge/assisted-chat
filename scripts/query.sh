@@ -37,10 +37,10 @@ case "${QUERY_ENV:-}" in
 
 # If targeting k8s, start a temporary port-forward if the port isn't already reachable
 if [[ "${QUERY_ENV:-}" == "k8s" ]]; then
-    NAMESPACE="${NAMESPACE:-assisted-chat}"
-    SERVICE_NAME="assisted-chat"
-    ASSISTED_CHAT_PORT="${ASSISTED_CHAT_PORT:-8090}"
-    bash "$PROJECT_ROOT/utils/port_forward.sh"
+    NAMESPACE="${NAMESPACE:-assisted-chat}" \
+    SERVICE_NAME="assisted-chat" \
+    ASSISTED_CHAT_PORT="${ASSISTED_CHAT_PORT:-8090}" \
+      bash "$PROJECT_ROOT/utils/port_forward.sh"
 fi
 
 # Helper to detect if curl supports --json
