@@ -5,7 +5,7 @@ set -euo pipefail
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 PROJECT_ROOT=$(dirname "$SCRIPT_DIR")
 NAMESPACE="${NAMESPACE:-assisted-chat}"
-PORT="${ASSISTED_CHAT_PORT:-8090}"
+ASSISTED_CHAT_PORT="${ASSISTED_CHAT_PORT:-8090}"
 QUERY_TEXT="${QUERY_TEXT:-Show me all my clusters}"
 
 if ! command -v oc >/dev/null 2>&1; then
@@ -23,22 +23,8 @@ if [[ -z "${OCM_TOKEN}" ]]; then
 	fi
 fi
 
-# Establish port-forward if not already serving
-if ! curl -sf "http://localhost:${PORT}/readiness" >/dev/null 2>&1 \
-   && ! curl -sf "http://localhost:${PORT}/liveness" >/dev/null 2>&1 \
-   && ! curl -sf "http://localhost:${PORT}/" >/dev/null 2>&1; then
-	oc port-forward -n "${NAMESPACE}" svc/assisted-chat "${PORT}:${PORT}" >/dev/null 2>&1 &
-	PF_PID=$!
-	trap 'kill ${PF_PID} >/dev/null 2>&1 || true' EXIT
-	for i in $(seq 1 30); do
-		if curl -sf "http://localhost:${PORT}/readiness" >/dev/null 2>&1 \
-			|| curl -sf "http://localhost:${PORT}/liveness" >/dev/null 2>&1 \
-			|| curl -sf "http://localhost:${PORT}/" >/dev/null 2>&1; then
-			break
-		fi
-		sleep 1
-	done
-fi
+# Ensure port-forward is established
+bash "$PROJECT_ROOT/utils/port_forward.sh"
 
 # Compose request payload without explicit model to use server default
 read -r -d '' JSON_PAYLOAD <<EOF || true
@@ -53,7 +39,7 @@ HTTP_CODE=$(curl --silent --show-error --output /tmp/assisted_chat_query_out.jso
   -H "Authorization: Bearer ${OCM_TOKEN}" \
   -H 'Content-Type: application/json' \
   -d "${JSON_PAYLOAD}" \
-  "http://localhost:${PORT}/v1/query")
+  "http://localhost:${ASSISTED_CHAT_PORT}/v1/query")
 
 cat /tmp/assisted_chat_query_out.json
 

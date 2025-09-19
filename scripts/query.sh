@@ -38,27 +38,9 @@ case "${QUERY_ENV:-}" in
 # If targeting k8s, start a temporary port-forward if the port isn't already reachable
 if [[ "${QUERY_ENV:-}" == "k8s" ]]; then
     NAMESPACE="${NAMESPACE:-assisted-chat}"
-    PORT="${ASSISTED_CHAT_PORT:-8090}"
-    if command -v oc >/dev/null 2>&1; then
-        if ! curl -sf "http://localhost:${PORT}/readiness" >/dev/null 2>&1 \
-           && ! curl -sf "http://localhost:${PORT}/liveness" >/dev/null 2>&1 \
-           && ! curl -sf "http://localhost:${PORT}/" >/dev/null 2>&1; then
-            oc port-forward -n "${NAMESPACE}" svc/assisted-chat "${PORT}:${PORT}" >/dev/null 2>&1 &
-            PF_PID=$!
-            trap 'kill ${PF_PID} >/dev/null 2>&1 || true' EXIT
-            # Wait for port to respond
-            for i in $(seq 1 30); do
-                if curl -sf "http://localhost:${PORT}/readiness" >/dev/null 2>&1 \
-                   || curl -sf "http://localhost:${PORT}/liveness" >/dev/null 2>&1 \
-                   || curl -sf "http://localhost:${PORT}/" >/dev/null 2>&1; then
-                    break
-                fi
-                sleep 1
-            done
-        fi
-    else
-        echo "Warning: oc not found; cannot establish port-forward automatically. Ensure access to ${BASE_URL}." >&2
-    fi
+    SERVICE_NAME="assisted-chat"
+    ASSISTED_CHAT_PORT="${ASSISTED_CHAT_PORT:-8090}"
+    bash "$PROJECT_ROOT/utils/port_forward.sh"
 fi
 
 # Helper to detect if curl supports --json

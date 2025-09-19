@@ -140,7 +140,7 @@ test-eval-k8s: ## Run evaluation tests against k8s-deployed service via port-for
 	@echo "Refreshing OCM token..."
 	@. utils/ocm-token.sh && get_ocm_token && echo "$$OCM_TOKEN" > test/evals/ocm_token.txt
 	@echo "Running agent evaluation tests (k8s)..."
-	./scripts/eval_k8s.sh
+	NAMESPACE=assisted-chat ./scripts/eval_k8s.sh
 
 psql: ## Connect to PostgreSQL database in the assisted-chat pod
 	@echo "Connecting to PostgreSQL database..."
