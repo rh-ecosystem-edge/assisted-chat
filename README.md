@@ -113,8 +113,8 @@ make build-images
 ocm login --use-auth-code
 
 # 3) Deploy base app + local components to the current cluster namespace `assisted-chat`
-VERTEX_SERVICE_ACCOUNT_PATH=/abs/path/to/service_account.json \
-ASSISTED_CHAT_IMG=localhost/local-ai-chat-lightspeed-stack-plus-llama-stack:latest \
+export VERTEX_SERVICE_ACCOUNT_PATH=/abs/path/to/service_account.json \
+export ASSISTED_CHAT_IMG=localhost/local-ai-chat-lightspeed-stack-plus-llama-stack:latest \
 make run-k8s
 
 # Non-interactive checks
