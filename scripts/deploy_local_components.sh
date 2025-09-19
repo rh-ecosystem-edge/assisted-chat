@@ -6,10 +6,23 @@ SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 PROJECT_ROOT=$(dirname "$SCRIPT_DIR")
 NAMESPACE="${NAMESPACE:-assisted-chat}"
 
+# Ensure oc is available (include CLI sidecar path if present)
+if ! command -v oc >/dev/null 2>&1 && [ -x /cli/oc ]; then
+	export PATH="/cli:${PATH}"
+fi
+
+# Debug info
+echo "[deploy_local_components] PATH=$PATH"
+command -v oc >/dev/null 2>&1 && echo "[deploy_local_components] oc=$(command -v oc)" || echo "[deploy_local_components] oc not found"
+oc version --client=true 2>/dev/null || true
+
 if ! command -v oc >/dev/null 2>&1; then
 	echo "Error: oc CLI is required. Please install and login to a cluster (e.g., minikube, kind, OpenShift)." >&2
 	exit 1
 fi
+
+echo "[deploy_local_components] Using namespace: $NAMESPACE"
+oc get namespace "$NAMESPACE" >/dev/null 2>&1 || echo "[deploy_local_components] Namespace $NAMESPACE not found yet (will be created earlier by run-k8s)"
 
 # Obtain OCM tokens for UI auth:
 # - If OCM_REFRESH_TOKEN (and optionally OCM_TOKEN) is already set (e.g., CI), use it directly.
@@ -65,20 +78,12 @@ UI_PULL_POLICY=$(pullPolicyFor "$UI_IMAGE")
 MCP_PULL_POLICY=$(pullPolicyFor "$ASSISTED_MCP_IMAGE")
 INSPECTOR_PULL_POLICY=$(pullPolicyFor "$INSPECTOR_IMAGE")
 
-# Apply external manifest with substitutions
-env -i \
-  NAMESPACE="$NAMESPACE" \
-  UI_IMAGE="$UI_IMAGE" \
-  UI_PULL_POLICY="$UI_PULL_POLICY" \
-  SERVICE_PORT="$SERVICE_PORT" \
-  ASSISTED_MCP_IMAGE="$ASSISTED_MCP_IMAGE" \
-  MCP_PULL_POLICY="$MCP_PULL_POLICY" \
-  INSPECTOR_IMAGE="$INSPECTOR_IMAGE" \
-  INSPECTOR_PULL_POLICY="$INSPECTOR_PULL_POLICY" \
-  bash -c 'envsubst < "'$PROJECT_ROOT'/resources/local-dev-components.yaml" | oc apply -n "'$NAMESPACE'" -f -'
+echo "[deploy_local_components] Applying local components manifest"
+# Apply external manifest with substitutions (preserve PATH and oc in env)
+export UI_IMAGE UI_PULL_POLICY SERVICE_PORT ASSISTED_MCP_IMAGE MCP_PULL_POLICY INSPECTOR_IMAGE INSPECTOR_PULL_POLICY
+envsubst < "$PROJECT_ROOT/resources/local-dev-components.yaml" | oc apply -n "$NAMESPACE" -f -
 
 echo "Local components (UI, assisted-service-mcp, inspector) deployed to namespace $NAMESPACE"
 
-# Wait briefly and show status
-sleep 3
-oc get pods -n "$NAMESPACE" -l app=assisted-chat 
+# Brief status for debugging
+oc get pods -n "$NAMESPACE" -l app=assisted-chat -o wide || true 
