@@ -6,6 +6,7 @@ SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 PROJECT_ROOT=$(dirname "$SCRIPT_DIR")
 NAMESPACE="${NAMESPACE:-assisted-chat}"
 ASSISTED_CHAT_PORT="${ASSISTED_CHAT_PORT:-8090}"
+export NAMESPACE ASSISTED_CHAT_PORT
 
 if ! command -v oc >/dev/null 2>&1; then
 	echo "Error: oc CLI is required to port-forward to the cluster." >&2

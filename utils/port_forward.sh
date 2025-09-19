@@ -20,16 +20,28 @@ if curl -sf "http://localhost:${LOCAL_PORT}/readiness" >/dev/null 2>&1 || \
 fi
 
 # Start a background port-forward and keep it running after this script exits
-oc port-forward -n "${NAMESPACE}" svc/"${SERVICE_NAME}" "${LOCAL_PORT}:${LOCAL_PORT}" >/dev/null 2>&1 &
+# Use nohup to survive SIGHUP when this script exits.
+nohup oc port-forward -n "${NAMESPACE}" svc/"${SERVICE_NAME}" "${LOCAL_PORT}:${LOCAL_PORT}" >/dev/null 2>&1 &
 PF_PID=$!
 # Record PID for caller cleanup
 echo "${PF_PID}" > "${PORT_FORWARD_PID_FILE}"
 
+# Ensure we clean up the PF on failure/interrupt, but keep it alive on success.
+success=0
+trap 'if [[ ${success} -eq 0 ]]; then kill "${PF_PID}" >/dev/null 2>&1 || true; rm -f "${PORT_FORWARD_PID_FILE}"; fi' INT TERM EXIT
+
 # Wait up to 30s for the port to respond
-for i in $(seq 1 30); do
+for _ in {1..30}; do
+  # Bail out early if the port-forward process died
+  if ! kill -0 "${PF_PID}" 2>/dev/null; then
+    echo "Port-forward process exited early (PID ${PF_PID})." >&2
+    exit 1
+  fi
   if curl -sf "http://localhost:${LOCAL_PORT}/readiness" >/dev/null 2>&1 || \
      curl -sf "http://localhost:${LOCAL_PORT}/liveness" >/dev/null 2>&1 || \
      curl -sf "http://localhost:${LOCAL_PORT}/" >/dev/null 2>&1; then
+    success=1
+    trap - INT TERM EXIT
     exit 0
   fi
   sleep 1

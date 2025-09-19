@@ -33,16 +33,17 @@ if [[ -z "$OCM_REFRESH_TOKEN" ]]; then
 fi
 
 # Create or update a secret with OCM tokens for the UI
-oc -n "$NAMESPACE" delete secret assisted-chat-ocm-tokens --ignore-not-found
-# Always include refresh token; include access token only if present
-if [[ -n "${OCM_TOKEN:-}" ]]; then
-	oc -n "$NAMESPACE" create secret generic assisted-chat-ocm-tokens \
-		--from-literal=OCM_TOKEN="$OCM_TOKEN" \
-		--from-literal=OCM_REFRESH_TOKEN="$OCM_REFRESH_TOKEN"
-else
-	oc -n "$NAMESPACE" create secret generic assisted-chat-ocm-tokens \
-		--from-literal=OCM_REFRESH_TOKEN="$OCM_REFRESH_TOKEN"
-fi
+cat <<'EOF' | OCM_REFRESH_TOKEN="$OCM_REFRESH_TOKEN" OCM_TOKEN="${OCM_TOKEN:-}" envsubst | oc -n "$NAMESPACE" apply -f -
+apiVersion: v1
+kind: Secret
+metadata:
+  name: assisted-chat-ocm-tokens
+type: Opaque
+stringData:
+  OCM_REFRESH_TOKEN: "${OCM_REFRESH_TOKEN}"
+  # OCM_TOKEN is optional
+  OCM_TOKEN: "${OCM_TOKEN}"
+EOF
 
 # Default local images to match podman tags used in assisted-chat-pod.yaml
 UI_IMAGE="${UI_IMAGE:-localhost/local-ai-chat-ui:latest}"

@@ -138,7 +138,12 @@ test-eval: ## Run agent evaluation tests
 
 test-eval-k8s: ## Run evaluation tests against k8s-deployed service via port-forward
 	@echo "Refreshing OCM token..."
-	@. utils/ocm-token.sh && get_ocm_token && echo "$$OCM_TOKEN" > test/evals/ocm_token.txt
+	@mkdir -p test/evals
+	@if [ -n "$$OCM_TOKEN" ]; then \
+		echo "$$OCM_TOKEN" > test/evals/ocm_token.txt; \
+	else \
+		. utils/ocm-token.sh && get_ocm_token && echo "$$OCM_TOKEN" > test/evals/ocm_token.txt; \
+	fi
 	@echo "Running agent evaluation tests (k8s)..."
 	NAMESPACE=assisted-chat ./scripts/eval_k8s.sh
 
