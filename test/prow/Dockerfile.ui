@@ -1,0 +1,50 @@
+# Build the Assisted Installer UI from the monorepo root without relying on submodule .git layout
+FROM registry.access.redhat.com/ubi8/nodejs-18-minimal AS devcontainer
+
+USER root
+RUN microdnf --nodocs --setopt=install_weak_deps=0 install -y curl git rsync && \
+    microdnf clean all
+USER 1001
+
+ARG AIUI_APP_CLUSTER_PERMISSIONS=''
+ARG AIUI_APP_IMAGE_REPO='N/A'
+ARG AIUI_APP_API_ROOT='/api/assisted-install'
+ARG AIUI_APP_GIT_SHA='N/A'
+ARG AIUI_APP_VERSION='latest'
+ENV AIUI_APP_CLUSTER_PERMISSIONS=$AIUI_APP_CLUSTER_PERMISSIONS
+ENV AIUI_APP_IMAGE_REPO=$AIUI_APP_IMAGE_REPO
+ENV AIUI_APP_API_ROOT=$AIUI_APP_API_ROOT
+ENV AIUI_APP_GIT_SHA=$AIUI_APP_GIT_SHA
+ENV AIUI_APP_VERSION=$AIUI_APP_VERSION
+ENV NODE_OPTIONS='--max-old-space-size=8192'
+ENV CI='true'
+
+# Copy only the UI repo into expected location
+COPY --chown=1001:0 assisted-installer-ui/ /opt/app-root/src/repo/
+
+# Provide a lightweight git wrapper so builds don't require a real .git directory
+USER root
+RUN printf '#!/bin/sh\nif [ "$1" = "rev-parse" ] && [ "$2" = "--short" ] && [ "${3:-}" = "HEAD" ]; then\n  printf "%s\\n" "${AIUI_APP_GIT_SHA}"\nelse\n  exec /usr/bin/git "$@" 2>/dev/null || { echo "git not available" >&2; exit 0; }\nfi\n' > /usr/local/bin/git && \
+    chmod +x /usr/local/bin/git && \
+    chown 1001:0 /usr/local/bin/git
+USER 1001
+
+RUN npm install -g corepack@0.24.1
+WORKDIR /opt/app-root/src/repo
+
+# Install deps with retries
+RUN for i in 1 2 3; do yarn install --immutable && break || { echo "[retry] yarn install failed ($i)"; sleep 5; }; done
+
+# Build workspaces sequentially to avoid flakiness
+# Build disconnected UI first
+RUN for i in 1 2 3; do yarn --cwd apps/assisted-disconnected-ui build && break || { echo "[retry] disconnected-ui build failed ($i)"; sleep 5; }; done
+# Then build main assisted-ui
+RUN for i in 1 2 3; do yarn --cwd apps/assisted-ui build && break || { echo "[retry] assisted-ui build failed ($i)"; sleep 5; }; done
+
+# Ensure env template is present in the build output
+COPY assisted-installer-ui/apps/assisted-ui/env.template.js /opt/app-root/src/repo/apps/assisted-ui/build/
+
+FROM registry.access.redhat.com/ubi8/nginx-122 AS assisted-ui
+COPY --from=devcontainer /opt/app-root/src/repo/apps/assisted-ui/build/ ${NGINX_APP_ROOT}/src/
+COPY --from=devcontainer /opt/app-root/src/repo/apps/assisted-ui/deploy/ /deploy/
+CMD [ "/deploy/start.sh" ] 
