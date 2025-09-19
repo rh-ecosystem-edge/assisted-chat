@@ -12,7 +12,7 @@ SECRETS_BASE_PATH="${SECRETS_BASE_PATH:-/var/run/secrets}"
 #The template needs the tag, and it references the image by <image name>:<tag> so splitting the variable by ":" works for now
 
 if [[ -n $ASSISTED_CHAT_IMG ]]; then
-    echo "The variable ASSISTED_CHAT_IMG was proided with the value ${ASSISTED_CHAT_IMG}, using it to create the IMAGE and TAG variables for the template"
+    echo "The variable ASSISTED_CHAT_IMG was provided with the value ${ASSISTED_CHAT_IMG}, using it to create the IMAGE and TAG variables for the template"
     IMAGE=$(echo "$ASSISTED_CHAT_IMG" | cut -d ":" -f1)
     TAG=$(echo "$ASSISTED_CHAT_IMG" | cut -d ":" -f2)
 else
