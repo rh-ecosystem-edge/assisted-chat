@@ -23,35 +23,17 @@ if [[ -z "${OCM_TOKEN}" ]]; then
 	fi
 fi
 
-# Wait for local components to be available before querying
-oc wait -n "${NAMESPACE}" --for=condition=available --timeout=300s deployment/assisted-chat || true
-oc wait -n "${NAMESPACE}" --for=condition=available --timeout=300s deployment/assisted-ui || true
-oc wait -n "${NAMESPACE}" --for=condition=available --timeout=300s deployment/assisted-service-mcp || true
-oc wait -n "${NAMESPACE}" --for=condition=available --timeout=300s deployment/mcp-inspector || true
+# Wait for deployments to successfully roll out before querying
+echo "[query_k8s_curl] Waiting for deployments to roll out in namespace ${NAMESPACE}"
+oc rollout status -n "${NAMESPACE}" deployment/assisted-chat --timeout=300s || true
+oc rollout status -n "${NAMESPACE}" deployment/assisted-ui --timeout=300s || true
+oc rollout status -n "${NAMESPACE}" deployment/assisted-service-mcp --timeout=300s || true
+oc rollout status -n "${NAMESPACE}" deployment/mcp-inspector --timeout=300s || true
 
 # Ensure port-forward is established
 bash "$PROJECT_ROOT/utils/port_forward.sh"
 
 BASE_URL="http://localhost:${ASSISTED_CHAT_PORT}"
-
-# Probe readiness with retries
-echo "[query_k8s_curl] Probing readiness at ${BASE_URL}/readiness"
-READY_OK=false
-for i in $(seq 1 60); do
-  if curl -sf "${BASE_URL}/readiness" >/dev/null 2>&1; then
-    READY_OK=true
-    break
-  fi
-  sleep 2
-  if (( i % 10 == 0 )); then
-    echo "  still waiting (${i}/60) ..."
-  fi
-done
-
-if [[ "${READY_OK}" != "true" ]]; then
-  echo "[query_k8s_curl] Assisted-chat readiness probe timed out; printing pods"
-  oc get pods -n "${NAMESPACE}" -o wide || true
-fi
 
 # Compose request payload without explicit model to use server default
 read -r -d '' JSON_PAYLOAD <<EOF || true
