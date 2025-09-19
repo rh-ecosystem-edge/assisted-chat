@@ -128,7 +128,7 @@ parameters:
 - name: USERNAME_CLAIM
   value: "preferred_username"
   description: "The claim to use as the username in the authentication module"
-- name: LIGHTSSPEED_STACK_POSTGRES_SSL_MODE
+- name: LIGHTSPEED_STACK_POSTGRES_SSL_MODE
   value: "verify-full"
   description: "SSL mode for the PostgreSQL database connection used by lightspeed-stack"
 - name: LLAMA_STACK_POSTGRES_SSL_MODE
@@ -195,7 +195,7 @@ objects:
           db: ${env.ASSISTED_CHAT_POSTGRES_NAME}
           user: ${env.ASSISTED_CHAT_POSTGRES_USER}
           password: ${env.ASSISTED_CHAT_POSTGRES_PASSWORD}
-          ssl_mode: ${LIGHTSSPEED_STACK_POSTGRES_SSL_MODE}
+          ssl_mode: ${LIGHTSPEED_STACK_POSTGRES_SSL_MODE}
           ca_cert_path: /etc/tls/ca-bundle.pem
           namespace: lightspeed-stack
     system_prompt: |
