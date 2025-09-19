@@ -61,14 +61,17 @@ select_model() {
         echo "Error: fzf is required for interactive model selection. Please install fzf (e.g., 'dnf install fzf' or 'apt install fzf')." >&2
         exit 1
     fi
-    IFS=$'\t' < <(jq -r '
-            .models[] | select(.model_type == "llm")
-            | . as $m
-            | $m.provider_resource_id as $model_name
-            | $m.provider_id as $provider
-            | (if ($model_name | startswith("gemini/")) then "Gemini" elif ($model_name) then "Vertex Gemini" else "" end) as $type_label
-            | "\($model_name | . + (" " * (40 - length)))\($type_label)\t\($model_name)\t\($provider)"
-        ' <<<"$models_json" | fzf --delimiter='\t' --with-nth=1 --accept-nth=2,3 --header="Model Name                               Type") read -r model_name model_provider
+    selection=$(
+      jq -r '
+        .models[] | select(.model_type == "llm") as $m
+        | $m.provider_resource_id as $model_name
+        | $m.provider_id as $provider
+        | (if ($model_name | startswith("gemini/")) then "Gemini" else "Vertex Gemini" end) as $type_label
+        | "\($model_name) \($type_label)\t\($model_name)\t\($provider)"
+      ' <<<"$models_json" \
+      | fzf --delimiter=$'\t' --with-nth=1 --header="Model Name | Type"
+    )
+    IFS=$'\t' read -r _display model_name model_provider <<<"$selection"
     echo "$model_name|$model_provider"
 }
 

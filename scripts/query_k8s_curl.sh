@@ -35,13 +35,8 @@ bash "$PROJECT_ROOT/utils/port_forward.sh"
 
 BASE_URL="http://localhost:${ASSISTED_CHAT_PORT}"
 
-# Compose request payload without explicit model to use server default
-read -r -d '' JSON_PAYLOAD <<EOF || true
-{
-  "conversation_id": "",
-  "query": "${QUERY_TEXT}"
-}
-EOF
+# Compose request payload safely
+JSON_PAYLOAD="$(jq -n --arg q "$QUERY_TEXT" '{conversation_id:"", query:$q}')"
 
 # Retry the POST up to 5 times if we get transport errors or non-2xx responses
 ATTEMPTS=5

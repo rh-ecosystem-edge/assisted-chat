@@ -115,7 +115,7 @@ oc process \
     -p ASSISTED_CHAT_DB_SECRET_NAME=llama-stack-db \
     -p USER_ID_CLAIM="$CLAIM_USER_ID" \
     -p USERNAME_CLAIM="$CLAIM_USERNAME" \
-    -p LIGHTSSPEED_STACK_POSTGRES_SSL_MODE=disable \
+    -p LIGHTSPEED_STACK_POSTGRES_SSL_MODE=disable \
     -p LLAMA_STACK_POSTGRES_SSL_MODE=disable \
     -p LIGHTSPEED_EXPORTER_AUTH_MODE=manual \
     -f template.yaml --local |
