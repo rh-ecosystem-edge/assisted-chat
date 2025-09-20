@@ -1,0 +1,14 @@
+FROM registry.access.redhat.com/ubi9/python-311:latest
+
+USER 0
+RUN dnf -y install jq patch tar gzip gettext && dnf clean all
+RUN pip install yq
+RUN pip install git+https://github.com/lightspeed-core/lightspeed-evaluation.git#subdirectory=lsc_agent_eval
+
+RUN curl -fsSL -o /usr/local/bin/ocm \
+    https://github.com/openshift-online/ocm-cli/releases/download/v0.1.76/ocm-linux-amd64 && \
+    chmod +x /usr/local/bin/ocm
+    
+RUN mkdir -p /opt/app-root/src
+WORKDIR /opt/app-root/src
+COPY . .
