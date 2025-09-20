@@ -104,9 +104,8 @@ Quick start:
 # 1) (Optional) Build local images for UI/MCP/inspector
 make build-images
 
-# Load images (only when using minikube/kind)
+# Load images (only when using minikube)
 # make load-images-minikube
-# make load-images-kind
 
 # 2) Ensure OCM auth (for UI):
 # Local: this opens a browser flow to authenticate
