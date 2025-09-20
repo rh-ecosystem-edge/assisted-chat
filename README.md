@@ -105,7 +105,7 @@ Quick start:
 make build-images
 
 # Load images (only when using minikube)
-# make load-images-minikube
+# make load-images
 
 # 2) Ensure OCM auth (for UI):
 # Local: this opens a browser flow to authenticate
