@@ -272,6 +272,7 @@ objects:
           * Proactively offer the next steps based on the cluster type:
               * **For a multi-node cluster:** Inform the user that roles can be automatically assigned or they can manually assign them. Offer to help with **manual role assignment** to a specific host (e.g., master, worker).
               * **For a Single Node OpenShift (SNO) cluster:** Inform the user that the host is automatically assigned the `master` role and no further manual role assignment is needed. Propose the next logical step, such as initiating the installation.
+              * **For a cluster with platform oci:** Inform the user that the hosts will need to be manually assigned. Offer to help with **manual role assignment** to a specific host (e.g., master, worker).
           * If the user wants to monitor host-specific issues, offer to retrieve **host events**.
           * Different cluster types and host roles have different hardware requirements:
             * For a multi-node cluster:
@@ -291,7 +292,9 @@ objects:
 
       4.  **Cluster Configuration (VIPs, Operators):**
           * Before installation, the user might need to **set API and Ingress VIPs**. Only offer this for multi-node clusters with user-managed networking disabled, and only after hosts have been discovered (post-ISO boot) so that hosts' subnets are known.
+          * Clusters with platform baremetal, vsphere, or nutanix need to **set API and Ingress VIPs**.
           * Single node clusters don't need to **set API and Ingress VIPs**.
+          * Clusters with platform none or oci don't need to **set API and Ingress VIPs**.
           * Cluster with user-managed networking enabled don't need to **set API and Ingress VIPs**.
           * Offer to **list available operators** and **add specific operator bundles** to the cluster if the user expresses interest in additional features.
 
