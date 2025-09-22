@@ -83,11 +83,11 @@ function build_lightspeed_stack() {
     pushd "${PROJECT_ROOT}/lightspeed-stack"
     # Comment out the llama-stack dependency in pyproject.toml so it uses the locally installed version
     # instead
-    sed -i '/^[^#].*llama-stack[[:space:]]*>=/ s/^/# /' pyproject.toml
+    sed -i '/^[^#].*llama-stack[[:space:]]*[>=|==]/ s/^/# /' pyproject.toml
     uv lock
     podman build -f Containerfile . --tag localhost/local-ai-chat-lightspeed-stack:latest
     # Undo it
-    sed -i 's/^# \(.*llama-stack[[:space:]]*>=.*\)$/\1/' pyproject.toml
+    sed -i 's/^# \(.*llama-stack[[:space:]]*[>=|==].*\)$/\1/' pyproject.toml
     # uv.lock is guaranteed to change, and it's annoying to have it as a dirty file, so let's restore it
     git checkout uv.lock 2>/dev/null || true  # Don't fail if uv.lock doesn't exist in git
     popd
