@@ -1,11 +1,14 @@
 # Makefile for assisted-chat project
 # This Makefile provides convenient targets for managing the assisted-chat services
 
+# Default namespace for k8s operations
+NAMESPACE ?= assisted-chat
+
 .PHONY: all \
 	build-images \
 	build-inspector build-assisted-mcp build-lightspeed-stack build-lightspeed-plus-llama-stack build-ui \
-	deploy-template ci-test deploy-template-local \
-	generate run resume stop rm logs query query-int query-stage query-prod query-interactive delete mcphost test-eval psql sqlite transcript-summaries-prod help
+	deploy-template ci-test deploy-template-local run-k8s stop-k8s rm-k8s logs-k8s load-images \
+	generate run resume stop rm logs query query-int query-stage query-prod query-interactive query-k8s query-k8s-curl delete mcphost test-eval test-eval-k8s psql sqlite transcript-summaries-prod help
 
 all: help ## Show help information
 
@@ -40,20 +43,27 @@ ci-test: ## Used by the CI to test the assisted-chat services
 	./scripts/ci_test.sh
 
 deploy-template-local: ## Used to test the CI flow locally. Deploys the template on whatever cluster `oc` is currently logged in to
-	@echo "Setting up local secrets directory..."
-	@mkdir -p /tmp/secrets/vertex
-	@if [ -z "$(VERTEX_SERVICE_ACCOUNT_PATH)" ]; then \
-		echo "Error: VERTEX_SERVICE_ACCOUNT_PATH environment variable must be set"; \
-		exit 1; \
-	fi
-	@if [ -z "$(ASSISTED_CHAT_IMG)" ]; then \
-		echo "Error: ASSISTED_CHAT_IMG environment variable must be set"; \
-		exit 1; \
-	fi
-	@cp "$(VERTEX_SERVICE_ACCOUNT_PATH)" /tmp/secrets/vertex/service_account
-	@echo "Deploying template locally..."
-	oc create namespace assisted-chat || true
-	NAMESPACE=assisted-chat SECRETS_BASE_PATH=/tmp/secrets ASSISTED_CHAT_IMG="$(ASSISTED_CHAT_IMG)" scripts/deploy_template.sh
+	@set -euo pipefail; \
+	SECRETS_BASE_PATH=$$(scripts/setup_secrets.sh); \
+	oc create namespace $(NAMESPACE) || true; \
+	NAMESPACE=$(NAMESPACE) SECRETS_BASE_PATH="$$SECRETS_BASE_PATH" ASSISTED_CHAT_IMG="$(ASSISTED_CHAT_IMG)" scripts/deploy_template.sh
+
+# Kubernetes-native local dev helpers
+run-k8s: ## Deploy and follow logs on current cluster (requires `oc login`)
+	@$(MAKE) deploy-template-local
+	NAMESPACE=$(NAMESPACE) ./scripts/deploy_local_components.sh
+
+stop-k8s: ## Scale down the assisted-chat deployment to 0 replicas
+	./scripts/stop_k8s.sh
+
+rm-k8s: ## Remove all assisted-chat resources from the current cluster
+	./scripts/rm_k8s.sh
+
+logs-k8s: ## Follow logs of the assisted-chat deployment
+	./scripts/logs_k8s.sh
+
+load-images: ## Load local podman images into minikube
+	./scripts/load_images.sh
 
 generate: ## Generate configuration files
 	@echo "Generating configuration files..."
@@ -95,6 +105,13 @@ query-prod: ## Query the assisted-chat services (production environment)
 	@echo "Querying assisted-chat services (production environment)..."
 	QUERY_ENV=prod ./scripts/query.sh
 
+query-k8s: ## Query the assisted-chat services via k8s port-forward on localhost:8090
+	@echo "Hint: ensure a port-forward is running: oc port-forward -n $(NAMESPACE) svc/assisted-chat 8090:8090" 
+	QUERY_ENV=k8s ./scripts/query.sh
+
+query-k8s-curl: ## Non-interactive k8s query via curl (default: "Show me all my clusters")
+	NAMESPACE=$(NAMESPACE) ./scripts/query_k8s_curl.sh
+
 query-interactive: query ## Query the assisted-chat services (deprecated, use 'query')
 	@echo "WARNING: 'query-interactive' is deprecated. Use 'make query' instead."
 
@@ -111,6 +128,22 @@ test-eval: ## Run agent evaluation tests
 	@. utils/ocm-token.sh && get_ocm_token && echo "$$OCM_TOKEN" > test/evals/ocm_token.txt
 	@echo "Running agent evaluation tests..."
 	@cd test/evals && python eval.py
+
+.ONESHELL:
+test-eval-k8s: ## Run evaluation tests against k8s-deployed service via port-forward
+	set -euo pipefail
+	echo "Refreshing OCM token..."
+	mkdir -p test/evals
+	if [ -n "$$OCM_TOKEN" ]; then
+		umask 077
+		printf '%s\n' "$$OCM_TOKEN" > test/evals/ocm_token.txt
+	else
+		. utils/ocm-token.sh && get_ocm_token
+		umask 077
+		printf '%s\n' "$$OCM_TOKEN" > test/evals/ocm_token.txt
+	fi
+	echo "Running agent evaluation tests (k8s)..."
+	NAMESPACE=$(NAMESPACE) ./scripts/eval_k8s.sh
 
 psql: ## Connect to PostgreSQL database in the assisted-chat pod
 	@echo "Connecting to PostgreSQL database..."
@@ -132,6 +165,12 @@ help: ## Show this help message
 	@echo ""
 	@echo "Example usage:"
 	@echo "  make build-images"
+	@echo "  make load-images"
+	@echo "  make run-k8s"
+	@echo "  make logs-k8s"
+	@echo "  make query-k8s"
+	@echo "  make query-k8s-curl"
+	@echo "  make test-eval-k8s"
 	@echo "  make run"
 	@echo "  make logs"
 	@echo "  make query"

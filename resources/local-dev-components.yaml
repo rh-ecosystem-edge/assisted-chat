@@ -1,0 +1,145 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: assisted-ui
+  labels:
+    app: assisted-chat
+    component: ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: assisted-chat
+      component: ui
+  template:
+    metadata:
+      labels:
+        app: assisted-chat
+        component: ui
+    spec:
+      containers:
+      - name: ui
+        image: ${UI_IMAGE}
+        imagePullPolicy: ${UI_PULL_POLICY}
+        env:
+        - name: AIUI_CHAT_API_URL
+          value: http://assisted-chat:${SERVICE_PORT}/
+        - name: AIUI_SSO_API_URL
+          value: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
+        - name: AIUI_OCM_REFRESH_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: assisted-chat-ocm-tokens
+              key: OCM_REFRESH_TOKEN
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: assisted-ui
+  labels:
+    app: assisted-chat
+    component: ui
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: assisted-chat
+    component: ui
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: assisted-service-mcp
+  labels:
+    app: assisted-chat
+    component: assisted-service-mcp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: assisted-chat
+      component: assisted-service-mcp
+  template:
+    metadata:
+      labels:
+        app: assisted-chat
+        component: assisted-service-mcp
+    spec:
+      containers:
+      - name: assisted-service-mcp
+        image: ${ASSISTED_MCP_IMAGE}
+        imagePullPolicy: ${MCP_PULL_POLICY}
+        env:
+        - name: TRANSPORT
+          value: streamable-http
+        ports:
+        - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: assisted-service-mcp
+  labels:
+    app: assisted-chat
+    component: assisted-service-mcp
+spec:
+  ports:
+  - name: http
+    port: 8000
+    targetPort: 8000
+  selector:
+    app: assisted-chat
+    component: assisted-service-mcp
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-inspector
+  labels:
+    app: assisted-chat
+    component: inspector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: assisted-chat
+      component: inspector
+  template:
+    metadata:
+      labels:
+        app: assisted-chat
+        component: inspector
+    spec:
+      containers:
+      - name: mcp-inspector
+        image: ${INSPECTOR_IMAGE}
+        imagePullPolicy: ${INSPECTOR_PULL_POLICY}
+        env:
+        - name: HOST
+          value: 0.0.0.0
+        ports:
+        - containerPort: 6274
+        - containerPort: 6277
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcp-inspector
+  labels:
+    app: assisted-chat
+    component: inspector
+spec:
+  ports:
+  - name: ui
+    port: 6274
+    targetPort: 6274
+  - name: agent
+    port: 6277
+    targetPort: 6277
+  selector:
+    app: assisted-chat
+    component: inspector

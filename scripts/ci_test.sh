@@ -11,10 +11,10 @@ UNIQUE_ID=$(head /dev/urandom | tr -dc 0-9a-z | head -c 8)
 echo "${UNIQUE_ID}" > ${SHARED_DIR}/eval_test_unique_id
 
 if [[ -n $ASSISTED_CHAT_TEST ]]; then
-    echo "The variable ASSISTED_CHAT_TEST was proided with the value ${ASSISTED_CHAT_TEST}, using it to create the IMAGE and TAG variables for the template"
+    echo "The variable ASSISTED_CHAT_TEST was provided with the value ${ASSISTED_CHAT_TEST}, using it to create the IMAGE and TAG variables for the template"
 else
     IMAGE="quay.io/redhat-user-workloads/assisted-installer-tenant/assisted-chat-test-image-saas-main/assisted-chat-test-image-saas-main"
-    echo "The variable ASSISTED_CHAT_TEST was not provieded, downloading the latest image from ${IMAGE}"
+    echo "The variable ASSISTED_CHAT_TEST was not provided, downloading the latest image from ${IMAGE}"
     ASSISTED_CHAT_TEST="${IMAGE}:latest"
 fi
 

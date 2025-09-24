@@ -27,10 +27,21 @@ case "${QUERY_ENV:-}" in
     "prod")
         BASE_URL="https://assisted-chat.api.openshift.com"
         ;;
+    "k8s")
+        BASE_URL="http://localhost:${ASSISTED_CHAT_PORT:-8090}"
+        ;;
     *)
         BASE_URL="http://localhost:8090"
         ;;
-esac
+ esac
+
+# If targeting k8s, start a temporary port-forward if the port isn't already reachable
+if [[ "${QUERY_ENV:-}" == "k8s" ]]; then
+    NAMESPACE="${NAMESPACE:-assisted-chat}" \
+    SERVICE_NAME="assisted-chat" \
+    ASSISTED_CHAT_PORT="${ASSISTED_CHAT_PORT:-8090}" \
+      bash "$PROJECT_ROOT/utils/port_forward.sh"
+fi
 
 get_available_models() {
     curl --silent --show-error -X 'GET' "${BASE_URL}/v1/models" -H 'accept: application/json' -H "Authorization: Bearer ${OCM_TOKEN}"
@@ -38,27 +49,25 @@ get_available_models() {
 
 select_model() {
     local models_json="$1"
-    IFS=$'\t' < <(jq -r '
-        # Get all models
-        .models[] 
-
-        # Ignore models that are not LLMs, like embeddings
-        | select(.model_type == "llm") 
-
-        # Extract relevant fields
-        | . as $model
-        | $model.provider_resource_id as $model_name
-        | $model.provider_id as $provider
-
-        # Determine type label based on model identifier
-        | (if ($model_name | startswith("gemini/")) then "Gemini"
-           elif ($model_name) then "Vertex Gemini"
-           else ""
-           end) as $type_label
-
-        # Format with proper spacing for alignment
-        | "\($model_name | . + (" " * (40 - length)))\($type_label)\t\($model_name)\t\($provider)"
-        ' <<<"$models_json" | fzf --delimiter='\t' --with-nth=1 --accept-nth=2,3 --header="Model Name                               Type") read -r model_name model_provider
+    if ! command -v fzf >/dev/null 2>&1; then
+        echo "Error: fzf is required for interactive model selection. Please install fzf (e.g., 'dnf install fzf' or 'apt install fzf')." >&2
+        exit 1
+    fi
+    selection=$(
+      jq -r '
+        .models[] | select(.model_type == "llm") as $m
+        | $m.provider_resource_id as $model_name
+        | $m.provider_id as $provider
+        | (if ($model_name | startswith("gemini/")) then "Gemini" else "Vertex Gemini" end) as $type_label
+        | "\($model_name) \($type_label)\t\($model_name)\t\($provider)"
+      ' <<<"$models_json" \
+      | fzf --delimiter=$'\t' --with-nth=1 --header="Model Name | Type"
+    )
+    if [[ -z "${selection:-}" ]]; then
+        echo "No model selected. Exiting." >&2
+        exit 1
+    fi    
+    IFS=$'\t' read -r _display model_name model_provider <<<"$selection"
     echo "$model_name|$model_provider"
 }
 
@@ -299,8 +308,10 @@ send_curl_query() {
 
     status=$(curl --silent --show-error --output "$tmpfile" --write-out "%{http_code}" \
         -H "Authorization: Bearer ${OCM_TOKEN}" \
-        "${BASE_URL}/v1/query" \
-        --json "$json_payload")
+        -H 'Content-Type: application/json' \
+        -d "$json_payload" \
+        "${BASE_URL}/v1/query")
+
     body=$(cat "$tmpfile")
     rm "$tmpfile"
 

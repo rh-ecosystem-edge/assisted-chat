@@ -4,6 +4,8 @@
 /config/vertex-credentials.json
 .vscode
 ocm_token.txt
+# Token files in test/evals directory
+test/evals/*token*
 .venv
 .python-version
 
