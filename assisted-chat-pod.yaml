@@ -47,6 +47,10 @@ spec:
       env:
         - name: TRANSPORT
           value: streamable-http
+        - name: INVENTORY_URL
+          value: "https://api.stage.openshift.com/api/assisted-install/v2"
+        - name: PULL_SECRET_URL
+          value: "https://api.stage.openshift.com/api/accounts_mgmt/v1/access_token"
     - name: ui
       image: localhost/local-ai-chat-ui
       env:
