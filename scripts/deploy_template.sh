@@ -107,7 +107,8 @@ JQ_ADD_GEMINI_ENV='.items |= map(
     ))
   else . end)'
 
-oc process \
+echo "Processing template for validation..."
+PROCESSED_TEMPLATE=$(oc process \
     -p IMAGE="$IMAGE" \
     -p IMAGE_TAG="$TAG" \
     -p VERTEX_API_SECRET_NAME=vertex-service-account \
@@ -117,7 +118,23 @@ oc process \
     -p LIGHTSPEED_STACK_POSTGRES_SSL_MODE=disable \
     -p LLAMA_STACK_POSTGRES_SSL_MODE=disable \
     -p LIGHTSPEED_EXPORTER_AUTH_MODE=manual \
-    -f template.yaml --local |
+    -f template.yaml --local)
+    
+ # Validate that oc process resolved all template variables (${VAR} syntax)
+# This catches:
+# 1. Missing parameters: ${NEW_VAR} used but not defined in template parameters section
+# 2. Malformed syntax: ${\{VAR}} instead of ${VAR} (causes pydantic validation errors)
+# 3. Any other template variables that oc process failed to resolve
+# Note: Excludes legitimate runtime environment variables like ${env.POSTGRES_HOST}
+UNRESOLVED_VARS=$(echo "$PROCESSED_TEMPLATE" | grep '\${[^}]*}' | grep -v '\${env\.' || true)
+if [[ -n "$UNRESOLVED_VARS" ]]; then
+    echo "ERROR: Unresolved template variables found:"
+    echo "$UNRESOLVED_VARS"
+    exit 1
+fi
+
+echo "Applying processed template..."
+echo "$PROCESSED_TEMPLATE" |
     jq '. as $root | $root.items = [$root.items[] | '"$FILTER"']' |
     jq "$JQ_SET_POLICY" |
     jq "$JQ_ADD_GEMINI_ENV" |
