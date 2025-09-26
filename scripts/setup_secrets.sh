@@ -6,7 +6,7 @@ set -euo pipefail
 # This script handles setting up the secrets directory, either using a local
 # VERTEX_SERVICE_ACCOUNT_PATH or the default /var/run/secrets path
 
-echo "Setting up secrets directory"
+echo "Setting up secrets directory" >&2
 
 # Set default secrets base path
 SECRETS_BASE_PATH="${SECRETS_BASE_PATH:-/var/run/secrets}"
