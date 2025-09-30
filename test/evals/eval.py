@@ -3,6 +3,7 @@
 import argparse
 import logging
 import sys
+import os
 
 from lsc_agent_eval import AgentGoalEval
 
@@ -80,6 +81,9 @@ def parse_args():
 
 # Parse command line arguments
 args = parse_args()
+if os.getenv('UNIQUE_ID') is None:
+    print("The environmental varialbe 'UNIQUE_ID' has to be set so the cluster creation and removal can happen properly.")
+    sys.exit(1)
 
 evaluator = AgentGoalEval(args)
 # Run Evaluation
@@ -88,7 +92,7 @@ evaluator.run_evaluation()
 result_summary = evaluator.get_result_summary()
 
 failed_evals_count = result_summary["FAIL"] + result_summary["ERROR"]
-if failed_evals_count > 2:
+if failed_evals_count:
     print(f"❌ {failed_evals_count} evaluation(s) failed!")
     sys.exit(1)
 

@@ -52,10 +52,11 @@
 
 - conversation_group: sno_creation_with_all_info_conv
   description: Create SNO and then retrieve Discovery ISO in two steps with all the information provided
+  cleanup_script: ../scripts/delete_cluster.sh
   conversation:
     - eval_id: create_eval_test_sno
       eval_query: create a new single node cluster named eval-test-singlenode-uniq-cluster-name, running on version 4.19.7 with the x86_64 CPU architecture, configured under the base domain example.com, using the provided SSH key "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQCmeaBFhSJ/MLECmqUaKweRgo10ABpwdvJ7v76qLYfP0pzfzYsF3hGP/fH5OQfHi9pTbWynjaEcPHVfaTaFWHvyMtv8PEMUIDgQPWlBSYzb+3AgQ5AsChhzTJCYnRdmCdzENlV+azgtb3mVfXiyCfjxhyy3QAV4hRrMaVtJGuUQfQ== example@example.com".
-      eval_types: [tool_eval, response_eval:sub-string, response_eval:accuracy]
+      eval_types: [tool_eval, response_eval:sub-string, response_eval:accuracy, action_eval]
       expected_tool_calls:
         - - tool_name: create_cluster
             arguments:
@@ -65,6 +66,8 @@
               single_node: "(?i:true)"
               cpu_architecture: "x86_64"
               ssh_public_key: 'ssh-rsa\s+[A-Za-z0-9+/]+[=]{0,3}(\s+.+)?\s*'
+              platform: "none"
+      eval_verify_script: ../scripts/cluster_created_check.sh
       expected_keywords: ["eval-test-singlenode-uniq-cluster-name", "ID", "Discovery ISO", "download", "cluster"]
       expected_response: I have created a cluster with name eval-test-singlenode-uniq-cluster-name. Next, you'll need to download the Discovery ISO, then boot your hosts with it. Would you like me to get the Discovery ISO download URL?
     - eval_id: get_iso_eval_test_sno
@@ -78,10 +81,11 @@
 
 - conversation_group: mno_cluster_workflow_conv
   description: Create multi-node cluster and then retrieve ISO in two steps
+  cleanup_script: ../scripts/delete_cluster.sh
   conversation:
     - eval_id: create_eval_test_multinode
-      eval_types: [tool_eval, response_eval:accuracy, response_eval:sub-string]
-      eval_query: Create a multi-node cluster named 'eval-test-multinode-uniq-cluster-name' with OpenShift 4.18.22 and domain test.local
+      eval_types: [tool_eval, response_eval:accuracy, response_eval:sub-string, action_eval]
+      eval_query: Create a multi-node cluster named 'eval-test-multinode-uniq-cluster-name' with OpenShift 4.18.22 and domain test.local and with the x86_64 CPU architecture.
       expected_tool_calls:
         - - tool_name: create_cluster
             arguments:
@@ -89,10 +93,12 @@
               version: "4\\.18\\.22"
               base_domain: "test\\.local"
               single_node: "(?i:false)"
-              cpu_architecture: None
-              ssh_public_key: None
+              cpu_architecture: "x86_64"
+              ssh_public_key: ""
+              platform: "baremetal"
+      eval_verify_script: ../scripts/cluster_created_check.sh
       expected_keywords: ["eval-test-multinode-uniq-cluster-name", "ID", "Discovery ISO", "cluster"]
-      expected_response: I have created a cluster with name eval-test-multinode-uniq-cluster-name. Next, you'll need to download the Discovery ISO, then boot your hosts with it. Would you like me to get the Discovery ISO download URL?
+      expected_response: I have created a cluster with name eval-test-multinode-uniq-cluster-name. Before downloading the Discovery ISO, would you like to configure static network configuration for the hosts? If not, the cluster will use Dynamic Host Configuration Protocol (DHCP) for host networking configuration by default.
     - eval_id: set_ssh_key_eval_test_ssh
       eval_query: Set the SSH key for the cluster you just created to "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQCmeaBFhSJ/MLECmqUaKweRgo10ABpwdvJ7v76qLYfP0pzfzYsF3hGP/fH5OQfHi9pTbWynjaEcPHVfaTaFWHvyMtv8PEMUIDgQPWlBSYzb+3AgQ5AsChhzTJCYnRdmCdzENlV+azgtb3mVfXiyCfjxhyy3QAV4hRrMaVtJGuUQfQ== example@example.com"
       eval_types: [tool_eval, response_eval:accuracy]
@@ -111,12 +117,8 @@
               cluster_id: "[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
       expected_keywords: ["Discovery ISO"]
     - eval_id: host_booted_but_not_discovered
-      eval_query: I booted the hosts
-      eval_types: [tool_eval, response_eval:accuracy]
-      expected_tool_calls:
-        - - tool_name: cluster_info
-            arguments:
-              cluster_id: "[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
+      eval_query: I booted the hosts for the cluster you just created
+      eval_types: [response_eval:accuracy]
       expected_response: "hosts hasn't been discovered yet."
 
 - conversation_group: list_clusters_conv
@@ -143,7 +145,7 @@
   description: Validate graceful handling of invalid SSH key format
   conversation:
     - eval_id: invalid_ssh_key_handling
-      eval_query: create a new single node cluster named eval-test-sno, running on version 4.19.7, configured under the base domain example.com, using the provided SSH key abc123def456.
+      eval_query: create a new single node cluster named eval-test-sno, running on version 4.19.7, configured under the base domain example.com, and with cpu architecture x86_64 using the provided SSH key abc123def456.
       eval_types: [response_eval:accuracy]
       expected_response: The cluster creation failed because the provided SSH key is not in a supported format. Please provide the SSH key in one of these formats ssh-rsa, ssh-ed25519 or ecdsa.
 
@@ -159,8 +161,8 @@
   conversation:
     - eval_id: refuse_azure_request
       eval_query: Can you create a cluster on Azure?
-      eval_types: [response_eval:sub-string]
-      expected_keywords: ["Azure", "cannot create", "Assisted Installer", "on-prem"]
+      eval_types: [response_eval:accuracy]
+      expected_response: Sorry, I can't create clusters directly on public clouds like Azure. I am designed to assist with on-premise OpenShift installations using the Assisted Installer. For installing OpenShift on Azure, you can explore Red Hat OpenShift Service on Azure or use the standard OpenShift Installer.
       description: Refuse out-of-scope request to create clusters on Azure; clarify on-prem scope and Assisted Installer
 
 - conversation_group: capabilities_scope_conv
@@ -168,56 +170,54 @@
     - eval_id: supported_platforms_summary
       eval_query: Which platforms can you help me install on?
       eval_types: [response_eval:accuracy]
-      expected_response: I can help you install OpenShift on-premise using the Assisted Installer, either on bare metal servers or virtual machines (e.g., vSphere, KVM, libvirt). I do not support public cloud platforms like AWS, Azure, or GCP.
+      expected_response: I can help you install OpenShift on-premise using the Assisted Installer, either on bare metal servers or virtual machines (e.g., vSphere, KVM, libvirt). I do not support public cloud platforms like Amazon Web Services (AWS), Azure, or Google Cloud Platform (GCP).
       description: Ensure the assistant concisely states supported on-prem baremetal/VM scope and references Assisted Installer
 
 - conversation_group: cluster_id_from_name
+  setup_script: ../scripts/cluster_create_test_setup.sh
+  cleanup_script: ../scripts/delete_cluster.sh
   conversation:
-    - eval_id: create_single_node_cluser
-      eval_query: Create a multi-node cluster named 'eval-test2-uniq-cluster-name' with OpenShift 4.18.22 and domain test.local. I do not have an SSH key to provide.
-      eval_types: [response_eval:accuracy, response_eval:sub-string]
-      expected_keywords: ["eval-test2-uniq-cluster-name", "ID", "Discovery ISO", "download", "cluster"]
-      expected_response: I have created a cluster with name eval-test-uniq-cluster-name. Next, you'll need to download the Discovery ISO, then boot your hosts with it. Would you like me to get the Discovery ISO download URL?
     - eval_id: cluster_name_tool_call
-      eval_query: Show me information on cluster eval-test2-uniq-cluster-name
+      eval_query: Show me all the available information on cluster named 'eval-testcluster-uniq-cluster-name'
       eval_types: [tool_eval, response_eval:sub-string]
       expected_tool_calls:
+        - - tool_name: list_clusters
+            arguments: {}
         - - tool_name: cluster_info
             arguments:
               cluster_id: "[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
-      expected_keywords: ["cluster", "eval-test2-uniq-cluster-name", "test.local", "4.18.22"]
+      expected_keywords: ["cluster", "eval-testcluster-uniq-cluster-name", "4.18.22"]
       description: Test handling requesting a cluster by name
 
 - conversation_group: static_net_config_vlan
-  description: Configure a basic static network config for two hosts with vlans
+  description: Configure a basic static network config for the sno cluster
+  cleanup_script: ../scripts/delete_cluster.sh
   conversation:
     - eval_id: create_eval_test_sno
-      eval_query: create a new single node cluster named eval-test-static-net-cluster, running on version 4.19.7 with the x86_64 CPU architecture, configured under the base domain example.com, without an ssh key.
-      eval_types: [tool_eval]
+      eval_query: create a new single node cluster named eval-test-static-net-cluster-uniq-cluster-name, running on version 4.19.7 with the x86_64 CPU architecture, configured under the base domain example.com, without an ssh key.
+      eval_types: [tool_eval, action_eval]
+      eval_verify_script: ../scripts/cluster_created_check.sh
       expected_tool_calls:
         - - tool_name: create_cluster
             arguments:
-              name: "eval-test-static-net-cluster"
+              name: "eval-test-static-net-cluster-uniq-cluster-name"
               version: "4\\.19\\.7"
               base_domain: "example\\.com"
               single_node: "(?i:true)"
               cpu_architecture: "x86_64"
-              ssh_public_key: null
+              ssh_public_key: ""
+              platform: "none"
     - eval_id: configure_hosts
       eval_query: |
-        I want to configure static networking. Create configs for two hosts: both have a single vlan interface backed by an ethernet interface.  The first has an ethernet interface with mac address c5:d6:bc:f0:05:20, and the vlan interface has ip address 10.0.0.5/24. The second has an ethernet mac address of a0:a9:b6:81:c7:a6 and a vlan ip address of 10.0.0.6/24. The vlan id for both is 400. Use the name eth0 for the ethernet interface and vlan0 as the name of the vlan interface for both hosts. Also I want DNS config for both of these configs with a DNS server 8.8.8.8.
+        I want to configure static networking. Create configs with a single vlan interface backed by an ethernet interface. It should have an ethernet interface with mac address c5:d6:bc:f0:05:20, and the vlan interface has ip address 10.0.0.5/24. The vlan id is 400. Use the name eth0 for the ethernet interface and vlan0 as the name of the vlan interface. Also I want DNS config with a DNS server 8.8.8.8.
       eval_types: [tool_eval]
       expected_tool_calls:
         - - tool_name: generate_nmstate_yaml
             arguments: 
               params: |-
                 \{"ethernet_ifaces": \[\{"mac_address": "c5:d6:bc:f0:05:20", "name": "eth0"}\], "vlan_ifaces": \[{"name": "vlan0", "vlan_id": 400, "base_interface_name": "eth0", "ipv4_address": {"address": "10.0.0.5", "cidr_length": 24}}\], "dns": {"dns_servers": \["8.8.8.8"\]}}
-        - - tool_name: generate_nmstate_yaml
-            arguments: 
-              params: |-
-                {"ethernet_ifaces": \[{"mac_address": "a0:a9:b6:81:c7:a6", "name": "eth0"}\], "vlan_ifaces": \[{"name": "vlan0", "vlan_id": 400, "base_interface_name": "eth0", "ipv4_address": {"address": "10.0.0.6", "cidr_length": 24}}\], "dns": {"dns_servers": \["8.8.8.8"\]}}
     - eval_id: apply_to_cluster
-      eval_query: Yes, apply it to the cluster.
+      eval_query: Yes, apply it to the cluster you just created.
       eval_types: [tool_eval]
       expected_tool_calls:
         - - tool_name: alter_static_network_config_nmstate_for_host
@@ -225,8 +225,3 @@
               cluster_id: "[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
               index: null
               new_nmstate_yaml: "10.0.0.5"
-        - - tool_name: alter_static_network_config_nmstate_for_host
-            arguments:
-              cluster_id: "[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
-              index: null
-              new_nmstate_yaml: "10.0.0.6"
