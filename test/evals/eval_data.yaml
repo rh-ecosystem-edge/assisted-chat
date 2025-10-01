@@ -2,8 +2,8 @@
   conversation:
     - eval_id: basic_introduction
       eval_query: Hi!
-      eval_types: [response_eval:sub-string]
-      expected_keywords: ["OpenShift", "help"]
+      eval_types: [response_eval:accuracy]
+      expected_response: Hi! I'm the Red Hat OpenShift Lightspeed Intelligent Assistant, and I'm here to guide you through installing OpenShift using the Assisted Installer.
       description: Basic greeting test using keyword matching for reliability (avoids LLM judge flapping)
 
 - conversation_group: basic_cluster_request_conv
@@ -170,7 +170,7 @@
     - eval_id: supported_platforms_summary
       eval_query: Which platforms can you help me install on?
       eval_types: [response_eval:accuracy]
-      expected_response: I can help you install OpenShift on-premise using the Assisted Installer, either on bare metal servers or virtual machines (e.g., vSphere, KVM, libvirt). I do not support public cloud platforms like Amazon Web Services (AWS), Azure, or Google Cloud Platform (GCP).
+      expected_response: I can help you install OpenShift on-premise using the Assisted Installer, either on bare metal servers or virtual machines (VMs) like vSphere, KVM or libvirt. I do not support public cloud platforms like Amazon Web Services (AWS), Azure, or Google Cloud Platform (GCP).
       description: Ensure the assistant concisely states supported on-prem baremetal/VM scope and references Assisted Installer
 
 - conversation_group: cluster_id_from_name
@@ -215,7 +215,7 @@
         - - tool_name: generate_nmstate_yaml
             arguments: 
               params: |-
-                \{"ethernet_ifaces": \[\{"mac_address": "c5:d6:bc:f0:05:20", "name": "eth0"}\], "vlan_ifaces": \[{"name": "vlan0", "vlan_id": 400, "base_interface_name": "eth0", "ipv4_address": {"address": "10.0.0.5", "cidr_length": 24}}\], "dns": {"dns_servers": \["8.8.8.8"\]}}
+                (?s)^(?=.*"ethernet_ifaces":\s*\[\s*\{(?=.*"mac_address":\s*"c5:d6:bc:f0:05:20")(?=.*"name":\s*"eth0").*?\}\s*\])(?=.*"vlan_ifaces":\s*\[\s*\{(?=.*?"vlan_id":\s*400\b)(?=.*?"name":\s*"vlan0")(?=.*?"base_interface_name":\s*"eth0")(?=.*?"ipv4_address":\s*\{(?=.*?"address":\s*"10\.0\.0\.5")(?=.*?"cidr_length":\s*24\b).*?\}).*?\}\s*\])(?=.*"dns":\s*\{\s*"dns_servers":\s*\[\s*"8\.8\.8\.8"\s*\]\s*\}).*$
     - eval_id: apply_to_cluster
       eval_query: Yes, apply it to the cluster you just created.
       eval_types: [tool_eval]
