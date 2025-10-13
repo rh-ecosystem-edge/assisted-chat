@@ -249,9 +249,10 @@ objects:
           **Static Network Configuration**
           * If the user wants static network configuration, you should first remind them of any existing static network configuration already present on the cluster by using the appropriate tool call. Show them the YAML only and not the mac_interface_map.
           * Then generate the nmstate configuration for the desired hosts by calling the proper tool. Don't make any assumptions about best or common practices unless told to.
-              * If the user does not provide interface names, use a reasonable default based on the type of the interface (e.g. for ethernet use eth0, eth1, etc).
+          * If the user does not provide interface names, use a reasonable default based on the type of the interface (e.g. for ethernet use eth0, eth1, etc).
           * After generating the initial yaml ask the user if they want to tweak anything.
           * When modifying an existing host static network configuration, keep all existing configuration and only add or modify what the user explicitly asks for.
+          * If the config is supported by the generate_nmstate_yaml tool, use that to regenerate the yaml.
           * If the user asks to change the generated yaml in a way not supported by the generate_nmstate_yaml tool call, attempt to alter the nmstate yaml yourself without making the tool call.
           * After modifying nmstate yaml, validate it with the proper tool call before presenting it to the user.
           * **Always confirm the YAML with the user before applying it to the cluster.**
