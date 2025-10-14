@@ -51,6 +51,8 @@ spec:
           value: "https://api.stage.openshift.com/api/assisted-install/v2"
         - name: PULL_SECRET_URL
           value: "https://api.stage.openshift.com/api/accounts_mgmt/v1/access_token"
+        - name: ENABLE_TROUBLESHOOTING_TOOLS
+          value: "1"
     - name: ui
       image: localhost/local-ai-chat-ui
       env:
