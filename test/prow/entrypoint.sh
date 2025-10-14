@@ -19,10 +19,12 @@ TEMP_DIR=$(mktemp -d)
 cd $TEMP_DIR
 
 echo "$OCM_TOKEN" > ocm_token.txt
-echo "GEMINI_API_KEY=${GEMINI_API_KEY}" > .env
+
+echo "GEMINI_API_KEY=dummy" > .env
+echo "GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}" >> .env
 
 cp $TEST_DIR/eval_data.yaml $TEMP_DIR/eval_data.yaml
 sed -i "s/uniq-cluster-name/${UNIQUE_ID}/g" $TEMP_DIR/eval_data.yaml
 sed -i "s|: ../scripts|: ${WORK_DIR}/test/scripts|g" $TEMP_DIR/eval_data.yaml
 
-python $TEST_DIR/eval.py --agent_endpoint "${AGENT_URL}:${AGENT_PORT}" --agent_auth_token_file $TEMP_DIR/ocm_token.txt --eval_data_yaml $TEMP_DIR/eval_data.yaml
+python $TEST_DIR/eval.py --agent_endpoint "${AGENT_URL}:${AGENT_PORT}" --agent_auth_token_file $TEMP_DIR/ocm_token.txt --eval_data_yaml $TEMP_DIR/eval_data.yaml --judge_provider="vertex"
