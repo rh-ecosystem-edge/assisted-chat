@@ -1,0 +1,46 @@
+From fd466b0459bfa7cc696ac80dba90b6e02d5869bd Mon Sep 17 00:00:00 2001
+From: Omer Tuchfeld <omer@tuchfeld.dev>
+Date: Thu, 28 Aug 2025 16:13:39 +0200
+Subject: [PATCH] fix(env): env var replacement preserve types
+
+During env var replacement, we're implicitly converting all config types
+to their apparent types (e.g., "true" to True, "123" to 123). This may
+be arguably useful for when doing an env var substitution, as those are
+always strings, but we should definitely avoid touching config values
+that have explicit types and are uninvolved in env var substitution.
+---
+ llama_stack/core/stack.py                  | 5 ++++-
+ tests/unit/server/test_replace_env_vars.py | 7 +++++++
+ 2 files changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/llama_stack/core/stack.py b/llama_stack/core/stack.py
+index 87a3978c1f..f734d0285c 100644
+--- a/llama_stack/core/stack.py
++++ b/llama_stack/core/stack.py
+@@ -225,7 +225,10 @@ def get_env_var(match: re.Match):
+ 
+         try:
+             result = re.sub(pattern, get_env_var, config)
+-            return _convert_string_to_proper_type(result)
++            # Only apply type conversion if substitution actually happened
++            if result != config:
++                return _convert_string_to_proper_type(result)
++            return result
+         except EnvVarError as e:
+             raise EnvVarError(e.var_name, e.path) from None
+ 
+diff --git a/tests/unit/server/test_replace_env_vars.py b/tests/unit/server/test_replace_env_vars.py
+index 0dda682c06..14b3b72318 100644
+--- a/tests/unit/server/test_replace_env_vars.py
++++ b/tests/unit/server/test_replace_env_vars.py
+@@ -88,3 +88,10 @@ def test_nested_structures(setup_env_vars):
+     }
+     expected = {"key1": "test_value", "key2": ["default", "conditional"], "key3": {"nested": None}}
+     assert replace_env_vars(data) == expected
++
++
++def test_explicit_strings_preserved(setup_env_vars):
++    # Explicit strings that look like numbers/booleans should remain strings
++    data = {"port": "8080", "enabled": "true", "count": "123", "ratio": "3.14"}
++    expected = {"port": "8080", "enabled": "true", "count": "123", "ratio": "3.14"}
++    assert replace_env_vars(data) == expected

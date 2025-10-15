@@ -5,9 +5,13 @@ FROM quay.io/lightspeed-core/lightspeed-stack@sha256:de47235addac063d647c741921d
 USER 1001
 USER root
 RUN microdnf install -y patch
-RUN curl -L https://github.com/meta-llama/llama-stack/commit/fd466b0459bfa7cc696ac80dba90b6e02d5869bd.patch \
+
+# Patch generated from https://github.com/meta-llama/llama-stack/commit/fd466b0459bfa7cc696ac80dba90b6e02d5869bd.patch
+COPY meta-llama.llama-stack.commit.fd466b0459bfa7cc696ac80dba90b6e02d5869bd.patch /tmp/
+RUN cat /tmp/meta-llama.llama-stack.commit.fd466b0459bfa7cc696ac80dba90b6e02d5869bd.patch \
   | sed '/^diff --git a\/tests\/unit\/server\/test_replace_env_vars.py b\/tests\/unit\/server\/test_replace_env_vars.py/,/^diff --git /{ /^diff --git /!d }' \
   | patch -p1 -d "$(dirname "$(dirname "$(python3 -c "import llama_stack; print(llama_stack.__file__)")")")"
+
 USER 1001
 
 EXPOSE 8080

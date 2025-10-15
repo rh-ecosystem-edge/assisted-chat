@@ -12,10 +12,14 @@ RUN cd /app-root/llama-stack && python3.12 -m pip install --editable .
 RUN cd /app-root/ && python3.12 -m pip install .
 
 # Apply upstream patch required by current revision (make it optional if it fails)
+
+# Patch taken from https://github.com/meta-llama/llama-stack/commit/fd466b0459bfa7cc696ac80dba90b6e02d5869bd.patch
+COPY meta-llama.llama-stack.commit.fd466b0459bfa7cc696ac80dba90b6e02d5869bd.patch /tmp/
+
 RUN microdnf install -y patch && \
     LLAMA_STACK_PATH=$(python3.12 -c "import llama_stack; import os; print(os.path.dirname(os.path.dirname(llama_stack.__file__)))") && \
     echo "Applying patch to: $LLAMA_STACK_PATH" && \
-    curl -L https://github.com/meta-llama/llama-stack/commit/fd466b0459bfa7cc696ac80dba90b6e02d5869bd.patch \
+    cat /tmp/meta-llama.llama-stack.commit.fd466b0459bfa7cc696ac80dba90b6e02d5869bd.patch \
       | sed '/^diff --git a\/tests\/unit\/server\/test_replace_env_vars.py b\/tests\/unit\/server\/test_replace_env_vars.py/,/^diff --git /{ /^diff --git /!d }' \
       | patch -p1 -d "$LLAMA_STACK_PATH" || echo "Patch application failed, continuing anyway"
 
