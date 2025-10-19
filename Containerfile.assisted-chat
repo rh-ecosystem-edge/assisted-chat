@@ -1,16 +1,6 @@
 # vim: set filetype=dockerfile
-# This is the digest of quay.io/lightspeed-core/lightspeed-stack:dev-20250904-3c0c98b
-FROM quay.io/lightspeed-core/lightspeed-stack@sha256:de47235addac063d647c741921de754b7413b0af6384c460291100e1a20d301c
-
-USER 1001
-USER root
-RUN microdnf install -y patch
-
-# Patch generated from https://github.com/meta-llama/llama-stack/commit/fd466b0459bfa7cc696ac80dba90b6e02d5869bd.patch
-COPY meta-llama.llama-stack.commit.fd466b0459bfa7cc696ac80dba90b6e02d5869bd.patch /tmp/
-RUN cat /tmp/meta-llama.llama-stack.commit.fd466b0459bfa7cc696ac80dba90b6e02d5869bd.patch \
-  | sed '/^diff --git a\/tests\/unit\/server\/test_replace_env_vars.py b\/tests\/unit\/server\/test_replace_env_vars.py/,/^diff --git /{ /^diff --git /!d }' \
-  | patch -p1 -d "$(dirname "$(dirname "$(python3 -c "import llama_stack; print(llama_stack.__file__)")")")"
+# This is the digest of quay.io/lightspeed-core/lightspeed-stack:0.3.0
+FROM quay.io/lightspeed-core/lightspeed-stack@sha256:d1805df92f4de55d662e6274328830e2c1300f308c258abfcfad825a241cb50d
 
 USER 1001
 
