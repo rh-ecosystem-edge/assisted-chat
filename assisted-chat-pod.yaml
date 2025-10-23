@@ -21,6 +21,8 @@ spec:
           value: assisted-chat
         - name: ASSISTED_CHAT_POSTGRES_NAME
           value: assisted-chat
+        - name: LIGHTSPEED_STACK_POSTGRES_SSL_MODE
+          value: ${LIGHTSPEED_STACK_POSTGRES_SSL_MODE}
       ports:
         - containerPort: 8090
           hostPort: 8090
@@ -109,9 +111,10 @@ spec:
           value: assisted-chat
       ports:
         - containerPort: 5432
+          hostPort: 5432
       volumeMounts:
         - name: pgdata
-          mountPath: /var/lib/pgsql/data
+          mountPath: /var/lib/pgsql/data:Z
   volumes:
     - name: config
       hostPath:
@@ -119,3 +122,7 @@ spec:
         type: Directory
     - name: pgdata
       emptyDir: {}
+      # Uncomment this and comment out emptyDir to persist data between pod restarts
+      # hostPath:
+      #   path: /home/$USER/.local/share/assisted-chat/pgdata
+      #   type: DirectoryOrCreate
