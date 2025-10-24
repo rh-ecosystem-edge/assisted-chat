@@ -2,9 +2,8 @@
   conversation:
     - eval_id: basic_introduction
       eval_query: Hi!
-      eval_types: [response_eval:accuracy]
-      expected_response: Hi! I'm the Red Hat OpenShift Lightspeed Intelligent Assistant, and I'm here to guide you through installing OpenShift using the Assisted Installer.
-      description: Basic greeting test using keyword matching for reliability (avoids LLM judge flapping)
+      eval_types: [response_eval:intent]
+      expected_intent: A basic greeting that indicates willingess to help with installing OpenShift
 
 - conversation_group: basic_cluster_request_conv
   conversation:
