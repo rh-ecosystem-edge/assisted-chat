@@ -55,18 +55,8 @@
   conversation:
     - eval_id: create_eval_test_sno
       eval_query: create a new single node cluster named eval-test-singlenode-uniq-cluster-name, running on version 4.19.7 with the x86_64 CPU architecture, configured under the base domain example.com, using the provided SSH key "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQCmeaBFhSJ/MLECmqUaKweRgo10ABpwdvJ7v76qLYfP0pzfzYsF3hGP/fH5OQfHi9pTbWynjaEcPHVfaTaFWHvyMtv8PEMUIDgQPWlBSYzb+3AgQ5AsChhzTJCYnRdmCdzENlV+azgtb3mVfXiyCfjxhyy3QAV4hRrMaVtJGuUQfQ== example@example.com".
-      eval_types: [tool_eval, response_eval:sub-string, response_eval:accuracy, action_eval]
-      expected_tool_calls:
-        - - tool_name: create_cluster
-            arguments:
-              name: "eval-test-singlenode-uniq-cluster-name"
-              version: "4\\.19\\.7"
-              base_domain: "example\\.com"
-              single_node: "(?i:true)"
-              cpu_architecture: "x86_64"
-              ssh_public_key: 'ssh-rsa\s+[A-Za-z0-9+/]+[=]{0,3}(\s+.+)?\s*'
-              platform: "none"
-      eval_verify_script: ../scripts/cluster_created_check.sh
+      eval_types: [response_eval:sub-string, response_eval:accuracy, action_eval]
+      eval_verify_script: ../scripts/verify_create_eval_test_sno.sh
       expected_keywords: ["eval-test-singlenode-uniq-cluster-name", "ID", "Discovery ISO", "download", "cluster"]
       expected_response: I have created a cluster with name eval-test-singlenode-uniq-cluster-name. Next, you'll need to download the Discovery ISO, then boot your hosts with it. Would you like me to get the Discovery ISO download URL?
     - eval_id: get_iso_eval_test_sno
@@ -83,19 +73,9 @@
   cleanup_script: ../scripts/delete_cluster.sh
   conversation:
     - eval_id: create_eval_test_multinode
-      eval_types: [tool_eval, response_eval:accuracy, response_eval:sub-string, action_eval]
+      eval_types: [response_eval:accuracy, response_eval:sub-string, action_eval]
       eval_query: Create a multi-node cluster named 'eval-test-multinode-uniq-cluster-name' with OpenShift 4.18.22 and domain test.local and with the x86_64 CPU architecture.
-      expected_tool_calls:
-        - - tool_name: create_cluster
-            arguments:
-              name: "eval-test-multinode-uniq-cluster-name"
-              version: "4\\.18\\.22"
-              base_domain: "test\\.local"
-              single_node: "(?i:false)"
-              cpu_architecture: "x86_64"
-              ssh_public_key: ""
-              platform: "baremetal"
-      eval_verify_script: ../scripts/cluster_created_check.sh
+      eval_verify_script: ../scripts/verify_create_eval_test_multinode.sh
       expected_keywords: ["eval-test-multinode-uniq-cluster-name", "ID", "Discovery ISO", "cluster"]
       expected_response: I have created a cluster with name eval-test-multinode-uniq-cluster-name. Before downloading the Discovery ISO, would you like to configure static network configuration for the hosts? If not, the cluster will use Dynamic Host Configuration Protocol (DHCP) for host networking configuration by default.
     - eval_id: set_ssh_key_eval_test_ssh
@@ -194,18 +174,8 @@
   conversation:
     - eval_id: create_eval_test_sno
       eval_query: create a new single node cluster named eval-test-static-net-cluster-uniq-cluster-name, running on version 4.19.7 with the x86_64 CPU architecture, configured under the base domain example.com, without an ssh key.
-      eval_types: [tool_eval, action_eval]
-      eval_verify_script: ../scripts/cluster_created_check.sh
-      expected_tool_calls:
-        - - tool_name: create_cluster
-            arguments:
-              name: "eval-test-static-net-cluster-uniq-cluster-name"
-              version: "4\\.19\\.7"
-              base_domain: "example\\.com"
-              single_node: "(?i:true)"
-              cpu_architecture: "x86_64"
-              ssh_public_key: ""
-              platform: "none"
+      eval_types: [action_eval]
+      eval_verify_script: ../scripts/verify_create_eval_test_sno_static_net.sh
     - eval_id: configure_hosts
       eval_query: |
         I want to configure static networking. Create configs with a single vlan interface backed by an ethernet interface. It should have an ethernet interface with mac address c5:d6:bc:f0:05:20, and the vlan interface has ip address 10.0.0.5/24. The vlan id is 400. Use the name eth0 for the ethernet interface and vlan0 as the name of the vlan interface. Also I want DNS config with a DNS server 8.8.8.8.
