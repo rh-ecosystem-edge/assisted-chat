@@ -11,6 +11,9 @@ RUN cd /app-root/llama-stack && python3.12 -m pip install --editable .
 
 RUN cd /app-root/ && python3.12 -m pip install .
 
+COPY migrate.py /app/migrate.py
+ENTRYPOINT ["/bin/sh", "-c", "python3.12 /app/migrate.py && python3.12 src/lightspeed_stack.py"]
+
 USER 1001
 
 EXPOSE 8080
