@@ -179,18 +179,9 @@
     - eval_id: configure_hosts
       eval_query: |
         I want to configure static networking. Create configs with a single vlan interface backed by an ethernet interface. It should have an ethernet interface with mac address c5:d6:bc:f0:05:20, and the vlan interface has ip address 10.0.0.5/24. The vlan id is 400. Use the name eth0 for the ethernet interface and vlan0 as the name of the vlan interface. Also I want DNS config with a DNS server 8.8.8.8.
-      eval_types: [tool_eval]
-      expected_tool_calls:
-        - - tool_name: generate_nmstate_yaml
-            arguments: 
-              params: |-
-                (?s)^(?=.*"ethernet_ifaces":\s*\[\s*\{(?=.*"mac_address":\s*"c5:d6:bc:f0:05:20")(?=.*"name":\s*"eth0").*?\}\s*\])(?=.*"vlan_ifaces":\s*\[\s*\{(?=.*?"vlan_id":\s*400\b)(?=.*?"name":\s*"vlan0")(?=.*?"base_interface_name":\s*"eth0")(?=.*?"ipv4_address":\s*\{(?=.*?"address":\s*"10\.0\.0\.5")(?=.*?"cidr_length":\s*24\b).*?\}).*?\}\s*\])(?=.*"dns":\s*\{\s*"dns_servers":\s*\[\s*"8\.8\.8\.8"\s*\]\s*\}).*$
+      eval_types: [response_eval:intent]
+      expected_intent: Acknowledgement of the desired configuration and a request for the user to validate the configuration before applying it.
     - eval_id: apply_to_cluster
       eval_query: Yes, apply it to the cluster you just created.
-      eval_types: [tool_eval]
-      expected_tool_calls:
-        - - tool_name: alter_static_network_config_nmstate_for_host
-            arguments:
-              cluster_id: "[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
-              index: null
-              new_nmstate_yaml: "10.0.0.5"
+      eval_types: [action_eval]
+      eval_verify_script: ../scripts/verify_static_net_apply_to_cluster.sh
