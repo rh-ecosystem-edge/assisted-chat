@@ -24,11 +24,6 @@ if ! oc get secret -n "$NAMESPACE" assisted-chat-ssl-ci &>/dev/null; then
                                                                   --from-file=client_secret="${SECRETS_BASE_PATH}/sso-ci/client_secret"
 fi
 
-if ! oc get secret -n "$NAMESPACE" gemini &>/dev/null; then
-    echo "Creating gemini secret in namespace $NAMESPACE"
-    oc create secret generic -n $NAMESPACE gemini --from-file=api_key="${SECRETS_BASE_PATH}/gemini/api_key"
-fi
-
 oc process -p IMAGE_NAME="$ASSISTED_CHAT_TEST" \
            -p SSL_CLIENT_SECRET_NAME=assisted-chat-ssl-ci \
            -p JOB_ID=${UNIQUE_ID} \

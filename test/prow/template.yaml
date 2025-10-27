@@ -32,11 +32,6 @@ objects:
               secretKeyRef:
                 key: ${SSL_CLIENT_SECRET_KEY}
                 name: ${SSL_CLIENT_SECRET_NAME}
-          - name: GEMINI_API_KEY
-            valueFrom:
-              secretKeyRef:
-                key: ${GEMINI_API_SECRET_KEY_NAME}
-                name: ${GEMINI_API_SECRET_NAME}
           - name: GOOGLE_APPLICATION_CREDENTIALS
             value: /opt/app-root/google-vertex-service-account.json
           - name: AGENT_URL
@@ -72,10 +67,6 @@ parameters:
   value: http://assisted-chat
 - name: AGENT_PORT
   value: "8090"
-- name: GEMINI_API_SECRET_NAME
-  value: gemini
-- name: GEMINI_API_SECRET_KEY_NAME
-  value: api_key
 - name: VERTEX_API_SECRET_NAME
   value: vertex-service-account
 - name: VERTEX_API_SECRET_KEY_NAME
