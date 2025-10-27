@@ -11,7 +11,6 @@ Evaluation mechanism to validate Agent task completion (e2e)
 ```bash
 pip install git+https://github.com/lightspeed-core/lightspeed-evaluation.git#subdirectory=lsc_agent_eval
 ```
-- `GEMINI_API_KEY` env var is set
 
 ## Running tests
 
