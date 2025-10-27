@@ -2,6 +2,9 @@
 # This is the digest of quay.io/lightspeed-core/lightspeed-stack:0.3.0
 FROM quay.io/lightspeed-core/lightspeed-stack@sha256:d1805df92f4de55d662e6274328830e2c1300f308c258abfcfad825a241cb50d
 
+COPY migrate.py /app/migrate.py
+ENTRYPOINT ["/bin/sh", "-c", "python3.12 /app/migrate.py && python3.12 src/lightspeed_stack.py"]
+
 USER 1001
 
 EXPOSE 8080
