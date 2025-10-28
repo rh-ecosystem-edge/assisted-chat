@@ -148,8 +148,8 @@
   conversation:
     - eval_id: supported_platforms_summary
       eval_query: Which platforms can you help me install on?
-      eval_types: [response_eval:accuracy]
-      expected_response: I can help you install OpenShift on-premise using the Assisted Installer, either on bare metal servers or virtual machines (VMs) like vSphere, KVM or libvirt. I do not support public cloud platforms like Amazon Web Services (AWS), Azure, or Google Cloud Platform (GCP).
+      eval_types: [response_eval:intent]
+      expected_intent: An explanation that indicates on-premise platforms are supported, but public cloud platforms are not.
       description: Ensure the assistant concisely states supported on-prem baremetal/VM scope and references Assisted Installer
 
 - conversation_group: cluster_id_from_name
