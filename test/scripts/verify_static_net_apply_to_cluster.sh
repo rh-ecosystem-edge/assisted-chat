@@ -32,43 +32,59 @@ while true; do
       fi
 
       # Parse the network YAML for validation
-      DNS_SERVER=$(echo "$NETWORK_YAML" | yq '.dns-resolver.config.server[0]')
+      DNS_SERVER=$(echo "$NETWORK_YAML" | yq '."dns-resolver".config.server[0]')
       if [[ "$DNS_SERVER" == "null" || -z "$DNS_SERVER" ]]; then
         echo "ERROR: DNS server configuration is missing"
+        echo "Network YAML content:"
+        echo "$NETWORK_YAML"
         exit 1
       fi
       if [[ "$DNS_SERVER" != "$EXPECTED_DNS_SERVER" ]]; then
         echo "ERROR: DNS server mismatch. Expected: $EXPECTED_DNS_SERVER, Found: $DNS_SERVER"
+        echo "Network YAML content:"
+        echo "$NETWORK_YAML"
         exit 1
       fi
 
       MAC_ADDRESS=$(echo "$NETWORK_YAML" | yq '.interfaces[] | select(.type == "ethernet") | .mac-address')
       if [[ "$MAC_ADDRESS" == "null" || -z "$MAC_ADDRESS" ]]; then
         echo "ERROR: MAC address not found in ethernet interface"
+        echo "Network YAML content:"
+        echo "$NETWORK_YAML"
         exit 1
       fi
       if [[ "$MAC_ADDRESS" != "$EXPECTED_MAC_ADDRESS" ]]; then
         echo "ERROR: MAC address mismatch. Expected: $EXPECTED_MAC_ADDRESS, Found: $MAC_ADDRESS"
+        echo "Network YAML content:"
+        echo "$NETWORK_YAML"
         exit 1
       fi
 
       VLAN_ADDRESS=$(echo "$NETWORK_YAML" | yq '.interfaces[] | select(.type == "vlan") | .ipv4.address[0].ip')
       if [[ "$VLAN_ADDRESS" == "null" || -z "$VLAN_ADDRESS" ]]; then
         echo "ERROR: VLAN interface address not found"
+        echo "Network YAML content:"
+        echo "$NETWORK_YAML"
         exit 1
       fi
       if [[ "$VLAN_ADDRESS" != "$EXPECTED_VLAN_ADDRESS" ]]; then
         echo "ERROR: VLAN interface address mismatch. Expected: $EXPECTED_VLAN_ADDRESS, Found: $VLAN_ADDRESS"
+        echo "Network YAML content:"
+        echo "$NETWORK_YAML"
         exit 1
       fi
 
       VLAN_ID=$(echo "$NETWORK_YAML" | yq '.interfaces[] | select(.type == "vlan") | .vlan.id')
       if [[ "$VLAN_ID" == "null" || -z "$VLAN_ID" ]]; then
         echo "ERROR: VLAN ID not found"
+        echo "Network YAML content:"
+        echo "$NETWORK_YAML"
         exit 1
       fi
       if [[ "$VLAN_ID" != "$EXPECTED_VLAN_ID" ]]; then
         echo "ERROR: VLAN ID mismatch. Expected: $EXPECTED_VLAN_ID, Found: $VLAN_ID"
+        echo "Network YAML content:"
+        echo "$NETWORK_YAML"
         exit 1
       fi
 
