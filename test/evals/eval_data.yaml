@@ -114,8 +114,8 @@
     - eval_id: cluster_info_tool_call
       eval_query: Give me details about cluster named 'abc123abc'
       description: Test handling for non-existent cluster name
-      eval_types: [tool_eval, response_eval:accuracy]
-      expected_response: Retrieval failed for cluster 'abc123abc' because the resource was not found.
+      eval_types: [tool_eval, response_eval:intent]
+      expected_intent: An explanation indicating that a cluster with the name abc123abc does not exist
       expected_tool_calls:
         - - tool_name: list_clusters
             arguments: {}
@@ -140,8 +140,8 @@
   conversation:
     - eval_id: refuse_azure_request
       eval_query: Can you create a cluster on Azure?
-      eval_types: [response_eval:accuracy]
-      expected_response: Sorry, I can't create clusters directly on public clouds like Azure. I am designed to assist with on-premise OpenShift installations using the Assisted Installer. For installing OpenShift on Azure, you can explore Red Hat OpenShift Service on Azure or use the standard OpenShift Installer.
+      eval_types: [response_eval:intent]
+      expected_intent: An explanation that indicates clusters cannot be created on public clouds and a reminder that the scope of this installer is on-premise installations
       description: Refuse out-of-scope request to create clusters on Azure; clarify on-prem scope and Assisted Installer
 
 - conversation_group: capabilities_scope_conv
