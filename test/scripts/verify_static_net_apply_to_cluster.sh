@@ -1,16 +1,17 @@
 #!/bin/bash
 
-set -o nounset
-set -o errexit
-set -o pipefail
+# Source the common helper functions
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/common.sh"
 
-: "${OCM_TOKEN:?OCM_TOKEN is required}"
-: "${UNIQUE_ID:?UNIQUE_ID is required}"
-ASSISTED_SERVICE_URL="${OCM_BASE_URL:-https://api.stage.openshift.com}/api/assisted-install/v2"
+setup_shell_options
+validate_environment
+
+INFRA_ENV_NAME="eval-test-static-net-cluster-${UNIQUE_ID}"
 
 COUNTER=0
 while true; do
-    INFRA_ENV_DATA=$(curl -sSf -H "Authorization: Bearer ${OCM_TOKEN}" "${ASSISTED_SERVICE_URL}/infra-envs" | jq -r ".[] | select(.name == \"eval-test-static-net-cluster-${UNIQUE_ID}\")")
+    INFRA_ENV_DATA=$(fetch_infra_env_data "$INFRA_ENV_NAME")
 
     if [[ -n "$INFRA_ENV_DATA" && "$INFRA_ENV_DATA" != "null" ]]; then
       STATIC_NETWORK_CONFIG=$(echo "$INFRA_ENV_DATA" | jq -r '.static_network_config')

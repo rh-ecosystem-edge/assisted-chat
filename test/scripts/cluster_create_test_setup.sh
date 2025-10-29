@@ -1,13 +1,14 @@
 #!/bin/bash
 
-set -o nounset
-set -o errexit
-set -o pipefail
+# Source the common helper functions
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/common.sh"
 
-: "${OCM_TOKEN:?OCM_TOKEN is required}"
-: "${UNIQUE_ID:?UNIQUE_ID is required}"
+setup_shell_options
+validate_environment
+
 OCM_BASE_URL=${OCM_BASE_URL:-https://api.stage.openshift.com}
-ASSISTED_SERVICE_URL="${OCM_BASE_URL}/api/assisted-install/v2"
+ASSISTED_SERVICE_URL=$(get_assisted_service_url)
 
 PULL_SECRET_RAW="$(
   curl -sSf -X POST \
