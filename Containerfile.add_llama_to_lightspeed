@@ -1,3 +1,4 @@
+FROM quay.io/redhat-user-workloads/assisted-installer-tenant/assisted-chat-rag:latest AS rag
 # vim: set filetype=dockerfile
 FROM localhost/local-ai-chat-lightspeed-stack:latest
 
@@ -11,8 +12,11 @@ RUN cd /app-root/llama-stack && python3.12 -m pip install --editable .
 
 RUN cd /app-root/ && python3.12 -m pip install .
 
+COPY --from=rag /app/all-mpnet-base-v2/ /app-root/all-mpnet-base-v2/
+COPY --from=rag /app/llama_stack_vector_db/ /app-root/llama_stack_vector_db/
 COPY migrate.py /app/migrate.py
-ENTRYPOINT ["/bin/sh", "-c", "python3.12 /app/migrate.py && python3.12 src/lightspeed_stack.py"]
+COPY --chmod=755 --chown=1001:1001 scripts/entrypoint.sh entrypoint.sh
+ENTRYPOINT ["entrypoint.sh"]
 
 USER 1001
 

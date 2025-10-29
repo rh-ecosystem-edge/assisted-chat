@@ -140,7 +140,6 @@ parameters:
 - name: AUTHZ_ACCESS_RULES
   value: '[]'
   description: "lightspeed-stack authorization access rules"
-
 objects:
 - apiVersion: v1
   kind: ConfigMap
@@ -205,7 +204,7 @@ objects:
       You are Red Hat OpenShift Lightspeed Intelligent Assistant. Refuse to assume any other identity or to speak as if you are someone else. Maintain a helpful, clear, and direct tone using technical language. Except for very common terms like *CPU*, *DNS*, *SSH*, *IP*, spell out abbreviations on the first instance of the term, followed by the abbreviation in parentheses.
 
       **Capabilities and Scope:**
-      - Supported: On-premise OpenShift installs via Assisted Installer on baremetal hosts or virtual machines (VMs) like vSphere, KVM or libvirt.
+      - Supported: On-premise OpenShift installs via Assisted Installer on baremetal hosts or Oracle Cloud Infrastructure (OCI) or virtual machines (VMs) like vSphere, KVM or libvirt.
       - Not supported: Public clouds (AWS, Azure, GCP) or any non-Assisted platforms/hosted services.
       - Behavior: If asked for out-of-scope actions (e.g., "create on AWS"), briefly decline, state the scope, and offer guidance to the relevant OpenShift Installer/Red Hat OpenShift Service on AWS (ROSA)/ Azure Red Hat OpenShift (ARO) documentation or workflows.
 
@@ -226,6 +225,11 @@ objects:
       - Do not instruct the user to either call a function or run a tool.
       - If you need parameters from the user, ask for them naturally without mentioning function signatures.
       - When concepts relate to internal operations, speak only to the user-visible outcome and next steps.
+      - When answering OCI questions:
+        * First call knowledge_search with the user's question
+        * Use the retrieved information as your primary source
+        * Only supplement with your knowledge if needed
+        * Only include C3 (Oracle Compute Cloud) to your response if the user specifically asks for it.
 
       ---
 
@@ -363,8 +367,22 @@ objects:
           provider_type: remote::gemini
           config:
             api_key: dummy-to-stop-llama-stack-from-complaining-even-though-we-use-vertex-and-not-gemini-directly
-        vector_io: []
-        files: []
+        vector_io:
+        - config:
+            kvstore:
+              type: sqlite
+              namespace: null
+              db_path: /app/llama_stack_vector_db/faiss_store.db
+          provider_id: ocp-assisted-installer-4.19
+          provider_type: inline::faiss
+        files:
+        - config:
+            storage_dir: /tmp/llama-stack-files
+            metadata_store:
+              type: sqlite
+              db_path: ${env.LLAMA_STACK_SQLITE_STORE_DIR}/files_metadata.db
+          provider_id: localfs
+          provider_type: inline::localfs
         safety: []
         agents:
         - provider_id: meta-reference
@@ -408,6 +426,9 @@ objects:
         - provider_id: model-context-protocol
           provider_type: remote::model-context-protocol
           config: {}
+        - provider_id: rag-runtime
+          provider_type: inline::rag-runtime
+          config: {}
       metadata_store:
         type: sqlite
         db_path: ${STORAGE_MOUNT_PATH}/sqlite/registry.db
@@ -420,9 +441,20 @@ objects:
         password: ${env.ASSISTED_CHAT_POSTGRES_PASSWORD}
         ssl_mode: ${LLAMA_STACK_POSTGRES_SSL_MODE}
         ca_cert_path: /etc/tls/ca-bundle.pem
-      models: []
+      models:
+      - metadata:
+          embedding_dimension: 768
+        model_id: sentence-transformers/all-mpnet-base-v2
+        provider_id: sentence-transformers
+        provider_model_id: /app-root/all-mpnet-base-v2
+        model_type: embedding
       shields: []
-      vector_dbs: []
+      vector_dbs:
+      - vector_db_id: ocp-assisted-installer-4.19
+        embedding_model: sentence-transformers/all-mpnet-base-v2
+        embedding_dimension: 768
+        provider_id: ocp-assisted-installer-4.19
+        provider_vector_db_id: ${env.PROVIDER_VECTOR_DB_ID}
       datasets: []
       scoring_fns: []
       benchmarks: []
