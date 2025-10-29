@@ -56,7 +56,7 @@ curl -sSf -X POST \
 COUNTER=0
 while ! curl -sSf -H "Authorization: Bearer ${OCM_TOKEN}" "${ASSISTED_SERVICE_URL}/clusters/${CLUSTER_ID}"; do
     if [[ $COUNTER -gt 3 ]]; then
-        echo "Cluster creation timed out"
+        echo_err "Cluster creation timed out"
         exit 1
     fi
     ((COUNTER++))

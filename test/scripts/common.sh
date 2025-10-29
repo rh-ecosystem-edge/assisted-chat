@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# Helper function to print to stderr
+echo_err() {
+    echo "$@" >&2
+}
+
+# Helper function to print to stdout (for clarity, though echo does this by default)
+echo_out() {
+    echo "$@"
+}
+
 # Setup common bash settings
 setup_shell_options() {
     set -o nounset
@@ -97,31 +107,31 @@ wait_and_validate_cluster() {
         if [[ -n "$cluster_data" && "$cluster_data" != "null" ]]; then
             extract_cluster_properties "$cluster_data"
             if validate_cluster_properties "$expected_version" "$expected_domain" "$expected_single_node" "$expected_cpu_arch" "$expected_ssh_key"; then
-                echo "The ${cluster_type} cluster was successfully created with correct configuration:"
-                echo "  Name: ${cluster_name}"
-                echo "  Version: ${ACTUAL_VERSION}"
-                echo "  Domain: ${ACTUAL_DOMAIN}"
-                echo "  Single Node: ${ACTUAL_SINGLE_NODE}"
-                echo "  CPU Architecture: ${ACTUAL_CPU_ARCH}"
+                echo_out "The ${cluster_type} cluster was successfully created with correct configuration:"
+                echo_out "  Name: ${cluster_name}"
+                echo_out "  Version: ${ACTUAL_VERSION}"
+                echo_out "  Domain: ${ACTUAL_DOMAIN}"
+                echo_out "  Single Node: ${ACTUAL_SINGLE_NODE}"
+                echo_out "  CPU Architecture: ${ACTUAL_CPU_ARCH}"
                 if [[ -n "$expected_ssh_key" ]]; then
-                    echo "  SSH Key: ${ACTUAL_SSH_KEY}"
+                    echo_out "  SSH Key: ${ACTUAL_SSH_KEY}"
                 fi
                 exit 0
             else
-                echo "Cluster found but configuration mismatch:"
-                echo "  Expected version: ${expected_version}, got: ${ACTUAL_VERSION}"
-                echo "  Expected domain: ${expected_domain}, got: ${ACTUAL_DOMAIN}"
-                echo "  Expected single node: ${expected_single_node}, got: ${ACTUAL_SINGLE_NODE}"
-                echo "  Expected CPU architecture: ${expected_cpu_arch}, got: ${ACTUAL_CPU_ARCH}"
+                echo_err "Cluster found but configuration mismatch:"
+                echo_err "  Expected version: ${expected_version}, got: ${ACTUAL_VERSION}"
+                echo_err "  Expected domain: ${expected_domain}, got: ${ACTUAL_DOMAIN}"
+                echo_err "  Expected single node: ${expected_single_node}, got: ${ACTUAL_SINGLE_NODE}"
+                echo_err "  Expected CPU architecture: ${expected_cpu_arch}, got: ${ACTUAL_CPU_ARCH}"
                 if [[ -n "$expected_ssh_key" ]]; then
-                    echo "  Expected SSH key: ${expected_ssh_key}, got: ${ACTUAL_SSH_KEY}"
+                    echo_err "  Expected SSH key: ${expected_ssh_key}, got: ${ACTUAL_SSH_KEY}"
                 fi
                 exit 1
             fi
         fi
 
         if [[ $counter -ge 3 ]]; then
-            echo "Cluster creation timed out"
+            echo_err "Cluster creation timed out"
             exit 1
         fi
         ((counter++))
