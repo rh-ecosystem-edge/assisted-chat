@@ -47,7 +47,7 @@ while true; do
         exit 1
       fi
 
-      MAC_ADDRESS=$(echo "$NETWORK_YAML" | yq -r '.interfaces[] | select(.type == "ethernet") | .mac-address')
+      MAC_ADDRESS=$(echo "$NETWORK_YAML" | yq -r '.interfaces[] | select(.type == "ethernet") | ."mac-address"')
       if [[ "$MAC_ADDRESS" == "null" || -z "$MAC_ADDRESS" ]]; then
         echo_err "ERROR: MAC address not found in ethernet interface"
         echo_err "Network YAML content:"
