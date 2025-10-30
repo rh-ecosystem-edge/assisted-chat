@@ -33,7 +33,7 @@ while true; do
       fi
 
       # Parse the network YAML for validation
-      DNS_SERVER=$(echo "$NETWORK_YAML" | yq '."dns-resolver".config.server[0]')
+      DNS_SERVER=$(echo "$NETWORK_YAML" | yq -r '."dns-resolver".config.server[0]')
       if [[ "$DNS_SERVER" == "null" || -z "$DNS_SERVER" ]]; then
         echo_err "ERROR: DNS server configuration is missing"
         echo_err "Network YAML content:"
@@ -47,7 +47,7 @@ while true; do
         exit 1
       fi
 
-      MAC_ADDRESS=$(echo "$NETWORK_YAML" | yq '.interfaces[] | select(.type == "ethernet") | .mac-address')
+      MAC_ADDRESS=$(echo "$NETWORK_YAML" | yq -r '.interfaces[] | select(.type == "ethernet") | .mac-address')
       if [[ "$MAC_ADDRESS" == "null" || -z "$MAC_ADDRESS" ]]; then
         echo_err "ERROR: MAC address not found in ethernet interface"
         echo_err "Network YAML content:"
@@ -61,7 +61,7 @@ while true; do
         exit 1
       fi
 
-      VLAN_ADDRESS=$(echo "$NETWORK_YAML" | yq '.interfaces[] | select(.type == "vlan") | .ipv4.address[0].ip')
+      VLAN_ADDRESS=$(echo "$NETWORK_YAML" | yq -r '.interfaces[] | select(.type == "vlan") | .ipv4.address[0].ip')
       if [[ "$VLAN_ADDRESS" == "null" || -z "$VLAN_ADDRESS" ]]; then
         echo_err "ERROR: VLAN interface address not found"
         echo_err "Network YAML content:"
@@ -75,7 +75,7 @@ while true; do
         exit 1
       fi
 
-      VLAN_ID=$(echo "$NETWORK_YAML" | yq '.interfaces[] | select(.type == "vlan") | .vlan.id')
+      VLAN_ID=$(echo "$NETWORK_YAML" | yq -r '.interfaces[] | select(.type == "vlan") | .vlan.id')
       if [[ "$VLAN_ID" == "null" || -z "$VLAN_ID" ]]; then
         echo_err "ERROR: VLAN ID not found"
         echo_err "Network YAML content:"
