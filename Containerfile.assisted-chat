@@ -2,6 +2,15 @@
 # This is the digest of quay.io/lightspeed-core/lightspeed-stack:0.3.0
 FROM quay.io/lightspeed-core/lightspeed-stack@sha256:d1805df92f4de55d662e6274328830e2c1300f308c258abfcfad825a241cb50d
 
+USER root
+
+RUN microdnf install -y patch
+
+# Patch created based on https://github.com/llamastack/llama-stack/pull/3957
+COPY  llama-stack-make-tool-call-args-fully-recursive.patch /tmp/
+RUN cat /tmp/llama-stack-make-tool-call-args-fully-recursive.patch \
+  | patch -p1 -d "$(dirname "$(dirname "$(python3.12 -c "import llama_stack; print(llama_stack.__file__)")")")"
+
 COPY migrate.py /app/migrate.py
 ENTRYPOINT ["/bin/sh", "-c", "python3.12 /app/migrate.py && python3.12 src/lightspeed_stack.py"]
 

@@ -1,12 +1,13 @@
 #!/bin/bash
 
-set -o nounset
-set -o errexit
-set -o pipefail
+# Source the common helper functions
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/common.sh"
 
-: "${OCM_TOKEN:?OCM_TOKEN is required}"
-: "${UNIQUE_ID:?UNIQUE_ID is required}"
-ASSISTED_SERVICE_URL="${OCM_BASE_URL:-https://api.stage.openshift.com}/api/assisted-install/v2"
+setup_shell_options
+validate_environment
+
+ASSISTED_SERVICE_URL=$(get_assisted_service_url)
 
 curl -fsS -H "Authorization: Bearer ${OCM_TOKEN}" "${ASSISTED_SERVICE_URL}/clusters" | jq '[.[] |{id, name}]' | jq -c '.[]' | while read item; do
   id=$(echo "$item" | jq -r '.id')
