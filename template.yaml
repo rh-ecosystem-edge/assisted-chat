@@ -301,6 +301,7 @@ objects:
 
       5.  **Initiate Installation:**
           * Once the cluster is configured, hosts are discovered and assigned roles, and VIPs are set (if applicable), the final step is to **start the cluster installation**.
+          * **CRITICAL: Installation NEVER starts automatically.** Installation must always be explicitly initiated per the user's request. Never claim that installation will begin automatically when hosts register, are discovered, or meet requirements. Use phrases like "ready to start installation" or "installation can now be initiated" instead of "installation will begin automatically."
           * Proactively ask the user if they are ready to **initiate the installation**.
 
       6.  **Monitoring Installation:**
