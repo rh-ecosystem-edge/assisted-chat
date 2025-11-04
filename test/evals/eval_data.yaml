@@ -59,7 +59,7 @@
       eval_verify_script: ../scripts/verify_create_eval_test_sno.sh
       expected_response: I have created a cluster with name eval-test-singlenode-uniq-cluster-name. Next, you'll need to download the Discovery ISO, then boot your hosts with it. Would you like me to get the Discovery ISO download URL?
     - eval_id: get_iso_eval_test_sno
-      eval_query: Using the ID of the cluster you just created, get the Discovery ISO download URL for cluster 'eval-test-singlenode-uniq-cluster-name'
+      eval_query: Using the ID of the cluster you just created, get the Discovery ISO download URL for the cluster.
       eval_types: [tool_eval, response_eval:sub-string]
       expected_tool_calls:
         - - tool_name: cluster_iso_download_url
@@ -87,7 +87,7 @@
               ssh_public_key: 'ssh-rsa\s+[A-Za-z0-9+/]+[=]{0,3}(\s+.+)?\s*'
       expected_response: The SSH public key is set for the cluster for cluster
     - eval_id: get_iso_eval_test_multinode
-      eval_query: Using the ID of the cluster you just created, get the Discovery ISO for cluster 'eval-test-multinode-uniq-cluster-name'
+      eval_query: Using the ID of the cluster you just created, get the Discovery ISO for the cluster.
       eval_types: [tool_eval, response_eval:sub-string]
       expected_tool_calls:
         - - tool_name: cluster_iso_download_url
