@@ -139,6 +139,21 @@ test-eval: ## Run agent evaluation tests
 	cd test/evals && python eval.py --eval_data_yaml $$TEMP_DIR/eval_data.yaml
 
 .ONESHELL:
+qe-test-eval: ## Run agent QE evaluation tests
+	#!/bin/bash
+	set -e
+	set -o pipefail
+	export TEMP_DIR=$(shell mktemp -d)
+	trap 'rm -rf "$$TEMP_DIR"' EXIT
+	export UNIQUE_ID=$(shell head /dev/urandom | tr -dc 0-9a-z | head -c 8)
+	. utils/ocm-token.sh
+	get_ocm_token
+	echo "$$OCM_TOKEN" > test/evals/ocm_token.txt
+	cp test/evals/qe_eval_data.yaml $$TEMP_DIR/qe_eval_data.yaml
+	sed -i "s/uniq-cluster-name/$${UNIQUE_ID}/g" $$TEMP_DIR/qe_eval_data.yaml
+	cd test/evals && python eval.py --eval_data_yaml $$TEMP_DIR/qe_eval_data.yaml
+
+.ONESHELL:
 test-eval-k8s: ## Run evaluation tests against k8s-deployed service via port-forward
 	set -euo pipefail
 	echo "Refreshing OCM token..."

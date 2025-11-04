@@ -1,0 +1,183 @@
+- conversation_group: basic_introduction
+  description: "Basic introduction test"
+  conversation:
+    - eval_id: basic_introduction
+      eval_query: Hi!
+      eval_types: [response_eval:intent]
+      expected_intent: "Greeting and introducing self as an assistant for OpenShift installation and troubleshooting."
+
+- conversation_group: basic_cluster_request
+  description: "Basic cluster installation request test"
+  conversation:
+    - eval_id: basic_cluster_request
+      eval_query: I want to install an OCP cluster
+      eval_types: [response_eval:intent]
+      expected_intent: "Offering to help create a cluster and requesting necessary information like cluster name, base domain, and OpenShift version."
+
+- conversation_group: list_versions
+  description: "OpenShift versions listing test"
+  conversation:
+    - eval_id: list_versions
+      eval_query: List the available OpenShift versions
+      eval_types: [response_eval:intent]
+      expected_intent: "Providing a list of available OpenShift versions."
+
+- conversation_group: available_operators
+  description: "Available operators test"
+  conversation:
+    - eval_id: available_operators
+      eval_query: What operators are available?
+      eval_types: [response_eval:intent]
+      expected_intent: "Listing the operators that can be installed onto clusters, OpenShift AI and OpenShift Virtualization."
+
+- conversation_group: unable_to_create_cluster_with_custom_manifests
+  description: "Custom manifest cluster creation test"
+  conversation:
+    - eval_id: unable_to_create_cluster_with_custom_manifests
+      eval_query: Can you create a cluster with a custom manifest?
+      eval_types: [response_eval:intent]
+      expected_intent: "Declining to create a cluster with custom manifests."
+
+- conversation_group: unable_to_create_vsphere_platform_clusters
+  description: "vSphere platform integration test"
+  conversation:
+    - eval_id: unable_to_create_vsphere_platform_clusters
+      eval_query: Can you create a cluster with vsphere platform integration?
+      eval_types: [response_eval:intent]
+      expected_intent: "Offering to help create a cluster with vSphere platform and requesting necessary information like cluster name, OpenShift version, base domain, and whether it's a single-node cluster."
+
+- conversation_group: unable_to_create_nutanix_platform_clusters
+  description: "Nutanix platform integration test"
+  conversation:
+    - eval_id: unable_to_create_nutanix_platform_clusters
+      eval_query: Can you create a cluster with Nutanix platform integration?
+      eval_types: [response_eval:intent]
+      expected_intent: "Offering to help create a cluster with Nutanix platform and requesting necessary information like cluster name, OpenShift version, base domain, and whether it's a single-node cluster."
+
+- conversation_group: unable_to_create_static_network_clusters
+  description: "Static networking cluster creation test"
+  conversation:
+    - eval_id: unable_to_create_static_network_clusters
+      eval_query: Can you create a cluster with static networking?
+      eval_types: [response_eval:intent]
+      expected_intent: "Offering to help create a cluster and explaining that static network configuration can be set up for hosts."
+
+- conversation_group: assisted_installer_explanation
+  description: "Assisted Installer explanation test"
+  conversation:
+    - eval_id: assisted_installer_explanation
+      eval_query: What is assisted installer and how does it work?
+      eval_types: [response_eval:intent]
+      expected_intent: "Explaining what Assisted Installer is and providing an overview of the installation workflow including cluster definition, discovery ISO, host discovery, configuration, installation, and access to the cluster."
+
+- conversation_group: chatbot_capabilities
+  description: "Chatbot capabilities test"
+  conversation:
+    - eval_id: chatbot_capabilities
+      eval_query: What can you do for me?
+      eval_types: [response_eval:intent]
+      expected_intent: "Describing capabilities for helping with OpenShift installation using Assisted Installer, including cluster creation, host management, configuration, monitoring, and troubleshooting."
+
+- conversation_group: first_time_cluster_guidance
+  description: "First time cluster guidance test"
+  conversation:
+    - eval_id: first_time_cluster_guidance
+      eval_query: I want to install a cluster but its my first time, what should i start with?
+      eval_types: [response_eval:intent]
+      expected_intent: "Offering to guide through cluster creation and requesting necessary information like cluster name, OpenShift version, base domain, and cluster type."
+
+- conversation_group: multi_node_hardware_requirements
+  description: "Multi-node hardware requirements test"
+  conversation:
+    - eval_id: multi_node_hardware_requirements
+      eval_query: What are the HW requirements for 3 masters 2 worker setup?
+      eval_types: [response_eval:intent]
+      expected_intent: "Providing hardware requirements for multi-node OpenShift clusters including CPU, RAM, and storage specifications for control plane and worker nodes."
+
+- conversation_group: sno_hardware_requirements
+  description: "Single Node OpenShift hardware requirements test"
+  conversation:
+    - eval_id: sno_hardware_requirements
+      eval_query: What are the HW requirements for an SNO cluster?
+      eval_types: [response_eval:intent]
+      expected_intent: "Providing hardware requirements for Single Node OpenShift (SNO) clusters including CPU, RAM, and storage specifications."
+
+- conversation_group: ignition_download_failure_explanation
+  description: "Ignition download failure explanation test"
+  conversation:
+    - eval_id: ignition_download_failure_explanation
+      eval_query: What does "Failed to download ignition file" mean?
+      eval_types: [response_eval:intent]
+      expected_intent: "Explaining what the ignition download failure error means and common causes like network connectivity, DNS, or firewall issues."
+
+- conversation_group: degraded_cluster_state_explanation
+  description: "Degraded cluster state explanation test"
+  conversation:
+    - eval_id: degraded_cluster_state_explanation
+      eval_query: Why is my cluster in "Degraded" state after installation?
+      eval_types: [response_eval:intent]
+      expected_intent: "Explaining that temporary degraded status during finalization is normal and offering to help troubleshoot if the issue persists."
+
+- conversation_group: console_access_after_installation
+  description: "Console access after installation test"
+  conversation:
+    - eval_id: console_access_after_installation
+      eval_query: Why is the console not accessible after installation?
+      eval_types: [response_eval:intent]
+      expected_intent: "Offering to help troubleshoot console accessibility issues and requesting cluster ID to investigate."
+
+- conversation_group: delete_all_hosts_from_cluster
+  description: "Delete all hosts from cluster test"
+  conversation:
+    - eval_id: delete_all_hosts_from_cluster
+      eval_query: Please delete all my hosts from the cluster 12345678-1234-1234-1234-123456789012
+      eval_types: [response_eval:intent]
+      expected_intent: "Declining to delete hosts and offering alternative assistance with the cluster."
+
+- conversation_group: remove_specific_cluster
+  description: "Remove specific cluster test"
+  conversation:
+    - eval_id: remove_specific_cluster
+      eval_query: Can you remove the cluster 12345678-1234-1234-1234-123456789012
+      eval_types: [response_eval:intent]
+      expected_intent: "Declining to remove/delete a cluster and explaining available capabilities."
+
+- conversation_group: delete_all_clusters
+  description: "Delete all clusters test"
+  conversation:
+    - eval_id: delete_all_clusters
+      eval_query: Can you delete all my clusters?
+      eval_types: [response_eval:intent]
+      expected_intent: "Declining to delete clusters and explaining available capabilities."
+
+- conversation_group: create_delete_script
+  description: "Create delete script test"
+  conversation:
+    - eval_id: create_delete_script
+      eval_query: Help me to create a script to delete all my clusters using assisted API
+      eval_types: [response_eval:intent]
+      expected_intent: "Declining to create a script for deleting clusters and explaining available capabilities."
+
+- conversation_group: assisted_service_api_spec
+  description: "Assisted service API spec test"
+  conversation:
+    - eval_id: assisted_service_api_spec
+      eval_query: Can you provide assisted service API spec?
+      eval_types: [response_eval:intent]
+      expected_intent: "Declining to provide the API specification and explaining available capabilities."
+
+- conversation_group: conversation_with_context
+  description: "Conversation with context test"
+  conversation:
+    - eval_id: start_conversation
+      eval_query: I want to create a cluster named test-cluster
+      eval_types: [response_eval:intent]
+      expected_intent: I can help with that.
+    - eval_id: list_openshift_versions
+      eval_query: List the available OpenShift versions
+      eval_types: [response_eval:intent]
+      expected_intent: A list of available versions
+    - eval_id: ask_for_context
+      eval_query: What is the name of the cluster that I want to create?
+      eval_types: [response_eval:intent]
+      expected_intent: test-cluster
