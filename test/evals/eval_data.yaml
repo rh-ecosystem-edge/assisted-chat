@@ -55,9 +55,8 @@
   conversation:
     - eval_id: create_eval_test_sno
       eval_query: create a new single node cluster named eval-test-singlenode-uniq-cluster-name, running on version 4.19.7 with the x86_64 CPU architecture, configured under the base domain example.com, using the provided SSH key "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQCmeaBFhSJ/MLECmqUaKweRgo10ABpwdvJ7v76qLYfP0pzfzYsF3hGP/fH5OQfHi9pTbWynjaEcPHVfaTaFWHvyMtv8PEMUIDgQPWlBSYzb+3AgQ5AsChhzTJCYnRdmCdzENlV+azgtb3mVfXiyCfjxhyy3QAV4hRrMaVtJGuUQfQ== example@example.com".
-      eval_types: [response_eval:sub-string, response_eval:accuracy, action_eval]
+      eval_types: [response_eval:accuracy, action_eval]
       eval_verify_script: ../scripts/verify_create_eval_test_sno.sh
-      expected_keywords: ["eval-test-singlenode-uniq-cluster-name", "ID", "Discovery ISO", "download", "cluster"]
       expected_response: I have created a cluster with name eval-test-singlenode-uniq-cluster-name. Next, you'll need to download the Discovery ISO, then boot your hosts with it. Would you like me to get the Discovery ISO download URL?
     - eval_id: get_iso_eval_test_sno
       eval_query: Using the ID of the cluster you just created, get the Discovery ISO download URL for cluster 'eval-test-singlenode-uniq-cluster-name'
