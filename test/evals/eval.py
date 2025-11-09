@@ -4,6 +4,8 @@ import argparse
 import logging
 import sys
 import os
+import yaml
+import tempfile
 
 from lsc_agent_eval import AgentGoalEval
 
@@ -76,7 +78,29 @@ def parse_args():
         help="Directory for evaluation results (default: eval_output)",
     )
 
+    parser.add_argument(
+        "--tags",
+        nargs="+",
+        default=None,
+        help="Filter tests by tags (e.g., --tags smoke). Optional - if not provided, all tests will be run.",
+    )
+
     return parser.parse_args()
+
+
+def filter_by_tags(path, tags):
+    """Filter YAML data by tags, return filtered path."""
+    if not tags:
+        return path
+    with open(path) as f:
+        data = [g for g in yaml.safe_load(f) if any(t in g.get('tags', []) for t in tags)]
+    if not data:
+        sys.exit(f"⚠️  No tests found with tags: {tags}")
+    print(f"📋 Running {len(data)} test(s) with tags: {tags}")
+    tmp = tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False)
+    yaml.dump(data, tmp, default_flow_style=False, sort_keys=False)
+    tmp.close()
+    return tmp.name
 
 
 # Parse command line arguments
@@ -84,6 +108,8 @@ args = parse_args()
 if os.getenv('UNIQUE_ID') is None:
     print("The environmental varialbe 'UNIQUE_ID' has to be set so the cluster creation and removal can happen properly.")
     sys.exit(1)
+
+args.eval_data_yaml = filter_by_tags(args.eval_data_yaml, args.tags)
 
 evaluator = AgentGoalEval(args)
 # Run Evaluation

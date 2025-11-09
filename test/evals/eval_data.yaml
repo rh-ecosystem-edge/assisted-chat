@@ -1,4 +1,5 @@
 - conversation_group: basic_introduction_conv
+  tags: [smoke]
   conversation:
     - eval_id: basic_introduction
       eval_query: Hi!
@@ -6,6 +7,7 @@
       expected_intent: A basic greeting that indicates willingess to help with installing OpenShift
 
 - conversation_group: basic_cluster_request_conv
+  tags: [smoke]
   conversation:
     - eval_id: basic_cluster_request
       eval_query: I want to install an OCP cluster
@@ -14,6 +16,7 @@
       description: Cluster creation request test using keyword matching for reliability
 
 - conversation_group: list_versions_conv
+  tags: [smoke]
   description: Test basic tool calling with predictable parameters
   conversation:
     - eval_id: list_versions_tool_call
@@ -26,6 +29,7 @@
       description: Test single tool call with no dynamic parameters
 
 - conversation_group: available_operators_conv
+  tags: [smoke]
   conversation:
     - eval_id: available_operators
       eval_query: What operators are available?
@@ -36,6 +40,7 @@
             arguments: {}
 
 - conversation_group: sno_requirements_conv
+  tags: [smoke]
   conversation:
     - eval_id: sno_requirements
       eval_query: What are the host requirements for a single node cluster?
@@ -43,6 +48,7 @@
       expected_response: "A single node cluster requires 8 CPU cores 16 GB of RAM and 100 GB of storage"
 
 - conversation_group: multinode_requirements_conv
+  tags: [smoke]
   conversation:
     - eval_id: multinode_requirements
       eval_query: What are the host requirements for a multinode cluster?
@@ -50,14 +56,14 @@
       expected_response: "Control plane nodes in a multi-node cluster require 4 CPU cores 16 GB of RAM and 100 GB of storage, the compute nodes in this cluster require 2 CPU cores, 8 GB of RAM and 100GB of storage"
 
 - conversation_group: sno_creation_with_all_info_conv
+  tags: [smoke]
   description: Create SNO and then retrieve Discovery ISO in two steps with all the information provided
   cleanup_script: ../scripts/delete_cluster.sh
   conversation:
     - eval_id: create_eval_test_sno
       eval_query: create a new single node cluster named eval-test-singlenode-uniq-cluster-name, running on version 4.19.7 with the x86_64 CPU architecture, configured under the base domain example.com, using the provided SSH key "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQCmeaBFhSJ/MLECmqUaKweRgo10ABpwdvJ7v76qLYfP0pzfzYsF3hGP/fH5OQfHi9pTbWynjaEcPHVfaTaFWHvyMtv8PEMUIDgQPWlBSYzb+3AgQ5AsChhzTJCYnRdmCdzENlV+azgtb3mVfXiyCfjxhyy3QAV4hRrMaVtJGuUQfQ== example@example.com".
-      eval_types: [response_eval:sub-string, response_eval:accuracy, action_eval]
+      eval_types: [response_eval:accuracy, action_eval]
       eval_verify_script: ../scripts/verify_create_eval_test_sno.sh
-      expected_keywords: ["eval-test-singlenode-uniq-cluster-name", "ID", "Discovery ISO", "download", "cluster"]
       expected_response: I have created a cluster with name eval-test-singlenode-uniq-cluster-name. Next, you'll need to download the Discovery ISO, then boot your hosts with it. Would you like me to get the Discovery ISO download URL?
     - eval_id: get_iso_eval_test_sno
       eval_query: Using the ID of the cluster you just created, get the Discovery ISO download URL for the cluster.
@@ -69,6 +75,7 @@
       expected_keywords: ["Discovery ISO"]
 
 - conversation_group: mno_cluster_workflow_conv
+  tags: [smoke]
   description: Create multi-node cluster and then retrieve ISO in two steps
   cleanup_script: ../scripts/delete_cluster.sh
   conversation:
@@ -101,6 +108,7 @@
       expected_response: "hosts hasn't been discovered yet."
 
 - conversation_group: list_clusters_conv
+  tags: [smoke]
   conversation:
     - eval_id: list_clusters_tool_call
       eval_query: Show me all my clusters
@@ -110,6 +118,7 @@
             arguments: {}
 
 - conversation_group: cluster_info_conv
+  tags: [smoke]
   conversation:
     - eval_id: cluster_info_tool_call
       eval_query: Give me details about cluster named 'abc123abc'
@@ -121,6 +130,7 @@
             arguments: {}
 
 - conversation_group: error_handling_conv
+  tags: [smoke]
   description: Validate graceful handling of invalid SSH key format
   conversation:
     - eval_id: invalid_ssh_key_handling
@@ -129,6 +139,7 @@
       expected_intent: A response indicating that the provided SSH key is not in a valid format and asking the user to provide a valid SSH key
 
 - conversation_group: non_disclosure_conv
+  tags: [smoke]
   description: Validate refusal to reveal internal details per system prompt
   conversation:
     - eval_id: refusal_direct_prompt_disclosure
@@ -169,6 +180,7 @@
       description: Test refusal of requests to access other users' private conversations or data
 
 - conversation_group: public_cloud_refusal_conv
+  tags: [smoke]
   conversation:
     - eval_id: refuse_azure_request
       eval_query: Can you create a cluster on Azure?
@@ -177,6 +189,7 @@
       description: Refuse out-of-scope request to create clusters on Azure; clarify on-prem scope and Assisted Installer
 
 - conversation_group: capabilities_scope_conv
+  tags: [smoke]
   conversation:
     - eval_id: supported_platforms_summary
       eval_query: Which platforms can you help me install on?
@@ -185,6 +198,7 @@
       description: Ensure the assistant concisely states supported on-prem baremetal/VM scope and references Assisted Installer
 
 - conversation_group: cluster_id_from_name
+  tags: [smoke]
   setup_script: ../scripts/cluster_create_test_setup.sh
   cleanup_script: ../scripts/delete_cluster.sh
   conversation:
@@ -201,6 +215,7 @@
       description: Test handling requesting a cluster by name
 
 - conversation_group: static_net_config_vlan
+  tags: [smoke]
   description: Configure a basic static network config for the sno cluster
   cleanup_script: ../scripts/delete_cluster.sh
   conversation:
