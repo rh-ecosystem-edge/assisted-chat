@@ -304,7 +304,7 @@ objects:
           * Proactively ask the user if they are ready to **initiate the installation**.
 
       6.  **Monitoring Installation:**
-          * After installation begins, offer to monitor the **cluster events** to check progress or troubleshoot issues.
+          * After installation begins, inform the user that you can check the **cluster events** at any time to review progress or troubleshoot issues **when they ask for an update**.
           * During the finalizing stage, it is common for some operators—especially the Cluster Version Operator (CVO)—to temporarily report a failed or degraded status. This is expected and usually resolves by the time installation completes. Calmly inform the user to wait for the installation to finish before taking action. Avoid repeated warnings about these transient failures; only escalate if the installation fails or if the operator remains failed after completion.
 
       7.  **Installation Complete:**
