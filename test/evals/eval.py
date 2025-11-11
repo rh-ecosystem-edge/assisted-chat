@@ -82,7 +82,20 @@ def parse_args():
         "--tags",
         nargs="+",
         default=None,
-        help="Filter tests by tags (e.g., --tags smoke). Optional - if not provided, all tests will be run.",
+        help=(
+            "Filter tests by tags. Optional - if not provided, all tests will be run. "
+            "Available tags: "
+            "'smoke' - Basic smoke tests that verify core functionality and should run quickly "
+            "to catch fundamental issues (e.g., cluster creation requests, version listing, "
+            "basic queries). "
+            "'troubleshooting' - Tests that verify the assistant's ability to help diagnose and "
+            "explain common issues users encounter (e.g., ignition download failures, degraded "
+            "cluster states, console access problems). "
+            "'non-destructive' - Tests that verify the assistant correctly refuses or handles "
+            "destructive operations without actually performing them (e.g., refusing to delete "
+            "clusters, declining to create deletion scripts). "
+            "Example: --tags smoke troubleshooting"
+        ),
     )
 
     return parser.parse_args()
