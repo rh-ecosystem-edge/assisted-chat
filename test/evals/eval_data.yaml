@@ -46,19 +46,23 @@
 
 - conversation_group: sno_requirements_conv
   tags: [smoke]
+  description: "Single Node OpenShift hardware requirements test"
   conversation:
     - eval_id: sno_requirements
       eval_query: What are the host requirements for a single node cluster?
-      eval_types: [response_eval:accuracy]
+      eval_types: [response_eval:accuracy, response_eval:intent]
       expected_response: "A single node cluster requires 8 CPU cores 16 GB of RAM and 100 GB of storage"
+      expected_intent: "Providing hardware requirements for Single Node OpenShift (SNO) clusters including CPU, RAM, and storage specifications."
 
 - conversation_group: multinode_requirements_conv
   tags: [smoke]
+  description: "Multi-node hardware requirements test"
   conversation:
     - eval_id: multinode_requirements
       eval_query: What are the host requirements for a multinode cluster?
-      eval_types: [response_eval:accuracy]
+      eval_types: [response_eval:accuracy, response_eval:intent]
       expected_response: "Control plane nodes in a multi-node cluster require 4 CPU cores 16 GB of RAM and 100 GB of storage, the compute nodes in this cluster require 2 CPU cores, 8 GB of RAM and 100GB of storage"
+      expected_intent: "Providing hardware requirements for multi-node OpenShift clusters including CPU, RAM, and storage specifications for control plane and worker nodes."
 
 - conversation_group: sno_creation_with_all_info_conv
   tags: [smoke]
@@ -375,22 +379,6 @@
       eval_query: I want to install a cluster but its my first time, what should i start with?
       eval_types: [response_eval:intent]
       expected_intent: "Offering to guide through cluster creation and requesting necessary information like cluster name, OpenShift version, base domain, and cluster type."
-
-- conversation_group: multi_node_hardware_requirements_conv
-  description: "Multi-node hardware requirements test"
-  conversation:
-    - eval_id: multi_node_hardware_requirements
-      eval_query: What are the HW requirements for 3 masters 2 worker setup?
-      eval_types: [response_eval:intent]
-      expected_intent: "Providing hardware requirements for multi-node OpenShift clusters including CPU, RAM, and storage specifications for control plane and worker nodes."
-
-- conversation_group: sno_hardware_requirements_intent_conv
-  description: "Single Node OpenShift hardware requirements test"
-  conversation:
-    - eval_id: sno_hardware_requirements
-      eval_query: What are the HW requirements for an SNO cluster?
-      eval_types: [response_eval:intent]
-      expected_intent: "Providing hardware requirements for Single Node OpenShift (SNO) clusters including CPU, RAM, and storage specifications."
 
 - conversation_group: ignition_download_failure_explanation_conv
   description: "Ignition download failure explanation test"
