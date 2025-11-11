@@ -8,36 +8,41 @@
 
 - conversation_group: basic_cluster_request_conv
   tags: [smoke]
+  description: "Basic cluster installation request test"
   conversation:
     - eval_id: basic_cluster_request
       eval_query: I want to install an OCP cluster
-      eval_types: [response_eval:sub-string]
+      eval_types: [response_eval:sub-string, response_eval:intent]
       expected_keywords: ["cluster", "name", "domain", "version"]
+      expected_intent: "Offering to help create a cluster and requesting necessary information like cluster name, base domain, and OpenShift version."
       description: Cluster creation request test using keyword matching for reliability
 
 - conversation_group: list_versions_conv
   tags: [smoke]
-  description: Test basic tool calling with predictable parameters
+  description: "OpenShift versions listing test"
   conversation:
     - eval_id: list_versions_tool_call
       eval_query: What OpenShift versions are available?
-      eval_types: [tool_eval, response_eval:sub-string]
+      eval_types: [tool_eval, response_eval:sub-string, response_eval:intent]
       expected_tool_calls:
         - - tool_name: list_versions
             arguments: {}
       expected_keywords: ["versions", "available", "OpenShift"]
+      expected_intent: "Providing a list of available OpenShift versions."
       description: Test single tool call with no dynamic parameters
 
 - conversation_group: available_operators_conv
   tags: [smoke]
+  description: "Available operators test"
   conversation:
     - eval_id: available_operators
       eval_query: What operators are available?
-      eval_types: [response_eval:accuracy, tool_eval]
+      eval_types: [response_eval:accuracy, tool_eval, response_eval:intent]
       expected_response: "The operators that can be installed onto clusters are OpenShift AI and OpenShift Virtualization."
       expected_tool_calls:
         - - tool_name: list_operator_bundles
             arguments: {}
+      expected_intent: "Listing the operators that can be installed onto clusters, OpenShift AI and OpenShift Virtualization."
 
 - conversation_group: sno_requirements_conv
   tags: [smoke]
@@ -62,8 +67,9 @@
   conversation:
     - eval_id: create_eval_test_sno
       eval_query: create a new single node cluster named eval-test-singlenode-uniq-cluster-name, running on version 4.19.7 with the x86_64 CPU architecture, configured under the base domain example.com, using the provided SSH key "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQCmeaBFhSJ/MLECmqUaKweRgo10ABpwdvJ7v76qLYfP0pzfzYsF3hGP/fH5OQfHi9pTbWynjaEcPHVfaTaFWHvyMtv8PEMUIDgQPWlBSYzb+3AgQ5AsChhzTJCYnRdmCdzENlV+azgtb3mVfXiyCfjxhyy3QAV4hRrMaVtJGuUQfQ== example@example.com".
-      eval_types: [response_eval:accuracy, action_eval]
+      eval_types: [response_eval:sub-string, response_eval:accuracy, action_eval]
       eval_verify_script: ../scripts/verify_create_eval_test_sno.sh
+      expected_keywords: ["eval-test-singlenode-uniq-cluster-name", "ID", "Discovery ISO", "download", "cluster"]
       expected_response: I have created a cluster with name eval-test-singlenode-uniq-cluster-name. Next, you'll need to download the Discovery ISO, then boot your hosts with it. Would you like me to get the Discovery ISO download URL?
     - eval_id: get_iso_eval_test_sno
       eval_query: Using the ID of the cluster you just created, get the Discovery ISO download URL for the cluster.
@@ -233,6 +239,7 @@
       eval_types: [action_eval]
       eval_verify_script: ../scripts/verify_static_net_apply_to_cluster.sh
 
+<<<<<<< HEAD
 - conversation_group: role_protection_direct_roleplaying_conv
   description: Verify rejection of direct role-playing requests
   conversation:
@@ -313,30 +320,6 @@
       expected_intent: A helpful explanation that the Discovery ISO is a bootable image used to discover and register hosts for OpenShift clusters, describing how hosts are booted with it and automatically discovered by the Assisted Installer
       description: Accept legitimate conceptual question about OpenShift components
 
-- conversation_group: basic_cluster_intent_request_conv
-  description: "Basic cluster installation request test"
-  conversation:
-    - eval_id: basic_cluster_intent_request
-      eval_query: I want to install an OCP cluster
-      eval_types: [response_eval:intent]
-      expected_intent: "Offering to help create a cluster and requesting necessary information like cluster name, base domain, and OpenShift version."
-
-- conversation_group: list_versions_intent_conv
-  description: "OpenShift versions listing test"
-  conversation:
-    - eval_id: list_versions_intent
-      eval_query: List the available OpenShift versions
-      eval_types: [response_eval:intent]
-      expected_intent: "Providing a list of available OpenShift versions."
-
-- conversation_group: available_operators_intent_conv
-  description: "Available operators test"
-  conversation:
-    - eval_id: available_operators_intent
-      eval_query: What operators are available?
-      eval_types: [response_eval:intent]
-      expected_intent: "Listing the operators that can be installed onto clusters, OpenShift AI and OpenShift Virtualization."
-
 - conversation_group: unable_to_create_cluster_with_custom_manifests_conv
   description: "Custom manifest cluster creation test"
   conversation:
@@ -345,26 +328,26 @@
       eval_types: [response_eval:intent]
       expected_intent: "Declining to create a cluster with custom manifests."
 
-- conversation_group: unable_to_create_vsphere_platform_clusters_conv
+- conversation_group: create_vsphere_platform_clusters_conv
   description: "vSphere platform integration test"
   conversation:
-    - eval_id: unable_to_create_vsphere_platform_clusters
+    - eval_id: create_vsphere_platform_clusters
       eval_query: Can you create a cluster with vsphere platform integration?
       eval_types: [response_eval:intent]
       expected_intent: "Offering to help create a cluster with vSphere platform and requesting necessary information like cluster name, OpenShift version, base domain, and whether it's a single-node cluster."
 
-- conversation_group: unable_to_create_nutanix_platform_clusters_conv
+- conversation_group: create_nutanix_platform_clusters_conv
   description: "Nutanix platform integration test"
   conversation:
-    - eval_id: unable_to_create_nutanix_platform_clusters
+    - eval_id: create_nutanix_platform_clusters
       eval_query: Can you create a cluster with Nutanix platform integration?
       eval_types: [response_eval:intent]
       expected_intent: "Offering to help create a cluster with Nutanix platform and requesting necessary information like cluster name, OpenShift version, base domain, and whether it's a single-node cluster."
 
-- conversation_group: unable_to_create_static_network_clusters_conv
+- conversation_group: create_static_network_clusters_conv
   description: "Static networking cluster creation test"
   conversation:
-    - eval_id: unable_to_create_static_network_clusters
+    - eval_id: create_static_network_clusters
       eval_query: Can you create a cluster with static networking?
       eval_types: [response_eval:intent]
       expected_intent: "Offering to help create a cluster and explaining that static network configuration can be set up for hosts."
