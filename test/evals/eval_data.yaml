@@ -114,7 +114,7 @@
       eval_query: Give me details about cluster named 'abc123abc'
       description: Test handling for non-existent cluster name
       eval_types: [tool_eval, response_eval:intent]
-      expected_intent: An explanation indicating that a cluster with the name abc123abc does not exist
+      expected_intent: ​An explanation indicating that a cluster with the name abc123abc does not exist or could not be found
       expected_tool_calls:
         - - tool_name: list_clusters
             arguments: {}
