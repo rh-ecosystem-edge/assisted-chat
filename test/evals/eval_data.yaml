@@ -180,7 +180,7 @@
     - eval_id: supported_platforms_summary
       eval_query: Which platforms can you help me install on?
       eval_types: [response_eval:intent]
-      expected_intent: A helpful response listing the supported on-premise platforms including bare metal, vSphere, OCI, and nutanix, and mentioning that single node OpenShift (SNO) clusters are also supported
+      expected_intent: A helpful response listing the supported on-premise platforms including bare metal, vSphere, OCI, and nutanix
       description: Ensure the assistant concisely states supported on-prem baremetal/VM scope and references Assisted Installer
 
 - conversation_group: cluster_id_from_name
