@@ -16,7 +16,7 @@ providers:
   - provider_id: gemini
     provider_type: remote::gemini
     config:
-      api_key: ${env.GEMINI_API_KEY:=}
+      api_key: dummy-to-stop-llama-stack-from-complaining-even-though-we-use-vertex-and-not-gemini-directly
   vector_io: []
   files: []
   safety: []
@@ -26,25 +26,29 @@ providers:
     config:
       persistence_store:
         type: postgres
-        host: ${env.POSTGRES_HOST:=localhost}
-        port: ${env.POSTGRES_PORT:=5432}
-        db: ${env.POSTGRES_DB:=assisted-chat}
-        user: ${env.POSTGRES_USER:=assisted-chat}
-        password: ${env.POSTGRES_PASSWORD:=assisted-chat}
+        host: ${env.ASSISTED_CHAT_POSTGRES_HOST}
+        port: ${env.ASSISTED_CHAT_POSTGRES_PORT}
+        db: ${env.ASSISTED_CHAT_POSTGRES_NAME}
+        user: ${env.ASSISTED_CHAT_POSTGRES_USER}
+        password: ${env.ASSISTED_CHAT_POSTGRES_PASSWORD}
+        ssl_mode: disable
+        ca_cert_path: /etc/tls/ca-bundle.pem
       responses_store:
         type: postgres
-        host: ${env.POSTGRES_HOST:=localhost}
-        port: ${env.POSTGRES_PORT:=5432}
-        db: ${env.POSTGRES_DB:=assisted-chat}
-        user: ${env.POSTGRES_USER:=assisted-chat}
-        password: ${env.POSTGRES_PASSWORD:=assisted-chat}
+        host: ${env.ASSISTED_CHAT_POSTGRES_HOST}
+        port: ${env.ASSISTED_CHAT_POSTGRES_PORT}
+        db: ${env.ASSISTED_CHAT_POSTGRES_NAME}
+        user: ${env.ASSISTED_CHAT_POSTGRES_USER}
+        password: ${env.ASSISTED_CHAT_POSTGRES_PASSWORD}
+        ssl_mode: disable
+        ca_cert_path: /etc/tls/ca-bundle.pem
   telemetry:
   - provider_id: meta-reference
     provider_type: inline::meta-reference
     config:
-      service_name: "${env.OTEL_SERVICE_NAME:=\u200B}"
-      sinks: ${env.TELEMETRY_SINKS:=console,sqlite}
-      sqlite_db_path: ${env.SQLITE_STORE_DIR:=/tmp/.llama/distributions/starter}/trace_store.db
+      service_name: "assisted-chat"
+      sinks: console,sqlite
+      sqlite_db_path: ${STORAGE_MOUNT_PATH}/sqlite/trace_store.db
   eval: []
   datasetio: []
   scoring:
@@ -60,30 +64,17 @@ providers:
     config: {}
 metadata_store:
   type: sqlite
-  db_path: ${env.SQLITE_STORE_DIR:=/tmp/.llama/distributions/starter}/registry.db
+  db_path: ${STORAGE_MOUNT_PATH}/sqlite/registry.db
 inference_store:
   type: postgres
-  host: ${env.POSTGRES_HOST:=localhost}
-  port: ${env.POSTGRES_PORT:=5432}
-  db: ${env.POSTGRES_DB:=assisted-chat}
-  user: ${env.POSTGRES_USER:=assisted-chat}
-  password: ${env.POSTGRES_PASSWORD:=assisted-chat}
-models:
-- metadata: {}
-  model_id: gemini/gemini-2.0-flash
-  provider_id: gemini
-  provider_model_id: gemini/gemini-2.0-flash
-  model_type: llm
-- metadata: {}
-  model_id: gemini/gemini-2.5-pro
-  provider_id: gemini
-  provider_model_id: gemini/gemini-2.5-pro
-  model_type: llm
-- metadata: {}
-  model_id: gemini/gemini-2.5-flash
-  provider_id: gemini
-  provider_model_id: gemini/gemini-2.5-flash
-  model_type: llm
+  host: ${env.ASSISTED_CHAT_POSTGRES_HOST}
+  port: ${env.ASSISTED_CHAT_POSTGRES_PORT}
+  db: ${env.ASSISTED_CHAT_POSTGRES_NAME}
+  user: ${env.ASSISTED_CHAT_POSTGRES_USER}
+  password: ${env.ASSISTED_CHAT_POSTGRES_PASSWORD}
+  ssl_mode: disable
+  ca_cert_path: /etc/tls/ca-bundle.pem
+models: []
 shields: []
 vector_dbs: []
 datasets: []
@@ -93,6 +84,6 @@ tool_groups:
 - toolgroup_id: mcp::assisted
   provider_id: model-context-protocol
   mcp_endpoint:
-    uri: "http://assisted-service-mcp:8000/mcp"
+    uri: "http://localhost:8000/mcp"
 server:
   port: 8321
