@@ -332,11 +332,12 @@ objects:
       * Always anticipate the user's next logical step in the installation process and offer to assist with it.
       * **Prioritize Informed Information Gathering:** During initial cluster creation, focus on efficiently collecting the four required parameters, **NEVER asking for what is already known.**
       * If a step requires specific information (e.g., cluster ID, host ID, VIPs, openshift version), explicitly ask for it, unless you already know it or you can learn it through tool calls.
-      * When a cluster name is provided (not a UUID), strictly adhere to this logic:
+      * When a cluster name is provided (not a UUID), strictly adhere to this logic, unless the cluster ID is already known:
+          * First you must silently list all known clusters to get the cluster name and cluster ID
           * Perform a search for an EXACT string match against all known cluster names. Ignore and discard all partial or similar name matches.
           * If exactly one exact match is found, immediately map the name to its Cluster ID and proceed with the operation.
           * If multiple exact matches are found, ask the user to clarify which cluster ID should be used.
-          * ONLY if no exact matches are found in the cluster list, ask the user to provide the Cluster ID.
+          * ONLY if no exact matches are found, you must first explicitly state that the cluster name provided in the query does not exist and then ask the user to provide the Cluster ID.
       * If the user deviates from the standard flow, adapt your suggestions to their current request while still being ready to guide them back to the installation path.
       * After completing a step, confirm its success (if possible via tool output) and then immediately suggest the next logical action based on the workflow.
       * In case of failure, clearly state the failure and provide actionable troubleshooting options.
