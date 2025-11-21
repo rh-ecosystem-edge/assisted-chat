@@ -18,6 +18,11 @@ COPY  llama-stack-make-tool-call-args-fully-recursive.patch /tmp/
 RUN cat /tmp/llama-stack-make-tool-call-args-fully-recursive.patch \
   | patch -p1 -d "$(dirname "$(dirname "$(python3.12 -c "import llama_stack; print(llama_stack.__file__)")")")"
 
+# Patch to add required and default parameters to MCP tool definitions
+COPY  llama-stack-mcp-tool-params.patch /tmp/
+RUN cat /tmp/llama-stack-mcp-tool-params.patch \
+  | patch -p1 -d "$(dirname "$(dirname "$(python3.12 -c "import llama_stack; print(llama_stack.__file__)")")")"
+
 COPY migrate.py /app/migrate.py
 ENTRYPOINT ["/bin/sh", "-c", "python3.12 /app/migrate.py && python3.12 src/lightspeed_stack.py"]
 
