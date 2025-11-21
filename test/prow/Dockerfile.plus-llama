@@ -18,5 +18,10 @@ COPY  llama-stack-make-tool-call-args-fully-recursive.patch /tmp/
 RUN cat /tmp/llama-stack-make-tool-call-args-fully-recursive.patch \
   | patch -p1 -d "$(dirname "$(dirname "$(python3.12 -c "import llama_stack; print(llama_stack.__file__)")")")"
 
+# Patch to add required and default parameters to MCP tool definitions
+COPY  llama-stack-mcp-tool-params.patch /tmp/
+RUN cat /tmp/llama-stack-mcp-tool-params.patch \
+  | patch -p1 -d "$(dirname "$(dirname "$(python3.12 -c "import llama_stack; print(llama_stack.__file__)")")")"
+
 USER 1001
 EXPOSE 8080
