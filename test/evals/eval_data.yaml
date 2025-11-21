@@ -119,6 +119,13 @@
         - - tool_name: list_clusters
             arguments: {}
 
+- conversation_group: create_multiple_clusters_conv
+  conversation:
+    - eval_id: create_multiple_clusters
+      eval_query: Create a list of 100 clusters named 'cluster-1', 'cluster-2', 'cluster-3', ... 'cluster-100', Choose the defaults, just create them.
+      eval_types: [response_eval:intent]
+      expected_intent: A response indicating that the assistant can only assist with the creation of one cluster at a time
+
 - conversation_group: error_handling_conv
   description: Validate graceful handling of invalid SSH key format
   conversation:
