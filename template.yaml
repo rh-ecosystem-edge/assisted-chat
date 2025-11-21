@@ -140,7 +140,6 @@ parameters:
 - name: AUTHZ_ACCESS_RULES
   value: '[]'
   description: "lightspeed-stack authorization access rules"
-
 objects:
 - apiVersion: v1
   kind: ConfigMap
@@ -214,7 +213,7 @@ objects:
       **Capabilities and Scope:**
       - Supported Platforms: OpenShift installs via Assisted Installer on **Bare Metal**, **vSphere**, **Nutanix**, **Oracle Cloud Infrastructure (OCI)**, and **KVM/libvirt**.
       - Supported Topologies: Standard multi-node clusters and **Single Node OpenShift (SNO)**.
-      - Not supported: Public clouds (AWS, Azure, GCP) managed services or any non-Assisted platforms.
+      - Not supported: Other public clouds (AWS, Azure, GCP), or any non-Assisted platforms/hosted services.
       - Behavior: If asked for out-of-scope actions (e.g., "create on AWS"), briefly decline, state the scope, and offer guidance to the relevant OpenShift Installer/Red Hat OpenShift Service on AWS (ROSA)/ Azure Red Hat OpenShift (ARO) documentation or workflows.
 
       ---
@@ -234,6 +233,11 @@ objects:
       - Do not instruct the user to either call a function or run a tool.
       - If you need parameters from the user, ask for them naturally without mentioning function signatures.
       - When concepts relate to internal operations, speak only to the user-visible outcome and next steps.
+      - When a user query directly contains OCI related topic adhere to the following guidelines:
+        * First call knowledge_search with the user's question
+        * Use the retrieved information as your primary source
+        * Only supplement with your knowledge if needed
+        * Only include C3 (Oracle Compute Cloud) to your response if the user specifically asks for it.
 
       ---
 
@@ -332,11 +336,12 @@ objects:
       * Always anticipate the user's next logical step in the installation process and offer to assist with it.
       * **Prioritize Informed Information Gathering:** During initial cluster creation, focus on efficiently collecting the four required parameters, **NEVER asking for what is already known.**
       * If a step requires specific information (e.g., cluster ID, host ID, VIPs, openshift version), explicitly ask for it, unless you already know it or you can learn it through tool calls.
-      * When a cluster name is provided (not a UUID), strictly adhere to this logic:
+      * When a cluster name is provided (not a UUID), strictly adhere to this logic, unless the cluster ID is already known:
+          * First you must silently list all known clusters to get the cluster name and cluster ID
           * Perform a search for an EXACT string match against all known cluster names. Ignore and discard all partial or similar name matches.
           * If exactly one exact match is found, immediately map the name to its Cluster ID and proceed with the operation.
           * If multiple exact matches are found, ask the user to clarify which cluster ID should be used.
-          * ONLY if no exact matches are found in the cluster list, ask the user to provide the Cluster ID.
+          * ONLY if no exact matches are found, you must first explicitly state that the cluster name provided in the query does not exist and then ask the user to provide the Cluster ID.
       * If the user deviates from the standard flow, adapt your suggestions to their current request while still being ready to guide them back to the installation path.
       * After completing a step, confirm its success (if possible via tool output) and then immediately suggest the next logical action based on the workflow.
       * In case of failure, clearly state the failure and provide actionable troubleshooting options.
@@ -372,8 +377,25 @@ objects:
           provider_type: remote::gemini
           config:
             api_key: dummy-to-stop-llama-stack-from-complaining-even-though-we-use-vertex-and-not-gemini-directly
-        vector_io: []
-        files: []
+        - config: {}
+          provider_id: sentence-transformers
+          provider_type: inline::sentence-transformers
+        vector_io:
+        - config:
+            kvstore:
+              type: sqlite
+              namespace: null
+              db_path: /llama_stack_vector_db/faiss_store.db
+          provider_id: ocp-assisted-installer-4-19
+          provider_type: inline::faiss
+        files:
+        - config:
+            storage_dir: /tmp/llama-stack-files
+            metadata_store:
+              type: sqlite
+              db_path: ${env.LLAMA_STACK_SQLITE_STORE_DIR}/files_metadata.db
+          provider_id: localfs
+          provider_type: inline::localfs
         safety: []
         agents:
         - provider_id: meta-reference
@@ -417,6 +439,9 @@ objects:
         - provider_id: model-context-protocol
           provider_type: remote::model-context-protocol
           config: {}
+        - provider_id: rag-runtime
+          provider_type: inline::rag-runtime
+          config: {}
       metadata_store:
         type: sqlite
         db_path: ${STORAGE_MOUNT_PATH}/sqlite/registry.db
@@ -429,9 +454,20 @@ objects:
         password: ${env.ASSISTED_CHAT_POSTGRES_PASSWORD}
         ssl_mode: ${LLAMA_STACK_POSTGRES_SSL_MODE}
         ca_cert_path: /etc/tls/ca-bundle.pem
-      models: []
+      models:
+      - metadata:
+          embedding_dimension: 768
+        model_id: sentence-transformers/all-mpnet-base-v2
+        provider_id: sentence-transformers
+        provider_model_id: /app-root/all-mpnet-base-v2
+        model_type: embedding
       shields: []
-      vector_dbs: []
+      vector_dbs:
+        - vector_db_id: ocp-assisted-installer-4-19
+          embedding_model: sentence-transformers/all-mpnet-base-v2
+          embedding_dimension: 768
+          provider_id: ocp-assisted-installer-4-19
+          provider_vector_db_id: ocp-assisted-installer-4-19
       datasets: []
       scoring_fns: []
       benchmarks: []
@@ -440,6 +476,8 @@ objects:
         provider_id: model-context-protocol
         mcp_endpoint:
           uri: "${MCP_SERVER_URL}"
+      - toolgroup_id: builtin::rag
+        provider_id: rag-runtime
       server:
         port: ${LLAMA_STACK_SERVER_PORT}
 

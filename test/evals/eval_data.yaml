@@ -35,12 +35,46 @@
         - - tool_name: list_operator_bundles
             arguments: {}
 
+- conversation_group: OCI_manifest_conv
+  conversation:
+    - eval_id: manifest_location
+      eval_query: "Are there any mandatory manifests needed by Assisted Installer when deploying a cluster on OCI?"
+      eval_types: [response_eval:intent]
+      expected_intent: An explanation that indicates the dynamic_custom_manifest.yml from the Terraform stack in OCI has to be copied to Assisted Installer.
+
+- conversation_group: OCI_deployment_flow
+  conversation:
+    - eval_id: OCI_deployment_flow
+      eval_query: "What is the deployment flow when deploying to OCI?"
+      eval_types: [response_eval:intent]
+      expected_intent: An explanation that indicates the deployment flow when deploying to OCI is to configure the OCI account, set up a cluster in the Assisted Installer, create the infrastructure in OCI, and complete the cluster installation in the Assisted Installer.
+
+- conversation_group: OCI_assign_roles
+  conversation:
+    - eval_id: assign_roles
+      eval_query: How do I assign roles to nodes when deploying to OCI?
+      eval_types: [response_eval:accuracy]
+      expected_response: "When deploying OpenShift on Oracle Cloud Infrastructure (OCI), you'll need to manually assign roles to the discovered hosts."
+
 - conversation_group: sno_requirements_conv
   conversation:
     - eval_id: sno_requirements
       eval_query: What are the host requirements for a single node cluster?
       eval_types: [response_eval:accuracy]
       expected_response: "A single node cluster requires 8 CPU cores 16 GB of RAM and 100 GB of storage"
+
+- conversation_group: OCI_requirements_conv
+  conversation:
+    - eval_id: OCI_requirements
+      eval_query: "What volume performance units are recommended for installing an OpenShift cluster on OCI?"
+      eval_types: [response_eval:accuracy]
+      expected_response: |
+                         To ensure the best performance for your OpenShift Container Platform cluster workloads on Oracle Cloud Infrastructure (OCI), it's important to size your volume performance units (VPUs) appropriately.
+                         Here are some general guidelines:
+                         **Test or proof of concept environment:** 100 GB, and 20 to 30 VPUs.
+                         **Basic environment:** 500 GB, and 60 VPUs.
+                         **Heavy production environment:** More than 500 GB, and 100 or more VPUs.
+                         Consider reserving additional VPUs to provide sufficient capacity for updates and scaling activities.
 
 - conversation_group: multinode_requirements_conv
   conversation:
@@ -98,6 +132,26 @@
       eval_query: I booted the hosts for the cluster you just created
       eval_types: [response_eval:accuracy]
       expected_response: "hosts hasn't been discovered yet."
+
+- conversation_group: oci_cluster_creation_conv
+  description: Create cluster on Oracle Cloud Infrastructure with all the information provided
+  cleanup_script: ../scripts/delete_cluster.sh
+  conversation:
+    - eval_id: create_eval_test_OCI
+      eval_query: create a new multi node cluster with OCI platform integration, with the name eval-test-oci-uniq-cluster-name, running on version 4.19.7 with the x86_64 CPU architecture, configured under the base domain example.com.
+      eval_types: [response_eval:accuracy, action_eval]
+      eval_verify_script: ../scripts/verify_create_eval_test_oci.sh
+      expected_response: I have created a cluster with name eval-test-oci-uniq-cluster-name. Next, you'll need to download the Discovery ISO, then boot your hosts with it. Would you like me to get the Discovery ISO download URL?
+
+- conversation_group: oci_cluster_creation_conv_2
+  description: Create cluster on Oracle Cloud Infrastructure, the difference from oci_cluster_creation_conv/create_eval_test_OCI is that in the query instead of OCI the term is resolved to Oracle Cloud Infrastructure to see if it has the same effect
+  cleanup_script: ../scripts/delete_cluster.sh
+  conversation:
+    - eval_id: create_eval_test_oracle
+      eval_query: create a new multi node cluster with Oracle Cloud Infrastructure platform integration, with the name eval-test-oci-uniq-cluster-name, running on version 4.19.7 with the x86_64 CPU architecture, configured under the base domain example.com.
+      eval_types: [response_eval:accuracy, action_eval]
+      eval_verify_script: ../scripts/verify_create_eval_test_oci.sh
+      expected_response: I have created a cluster with name eval-test-oci-uniq-cluster-name. Next, you'll need to download the Discovery ISO, then boot your hosts with it. Would you like me to get the Discovery ISO download URL?
 
 - conversation_group: list_clusters_conv
   conversation:
@@ -180,7 +234,7 @@
     - eval_id: supported_platforms_summary
       eval_query: Which platforms can you help me install on?
       eval_types: [response_eval:intent]
-      expected_intent: A helpful response listing the supported on-premise platforms including bare metal, vSphere, OCI, and nutanix
+      expected_intent: A helpful response listing the supported on-premise platforms including bare metal, vSphere, OCI, and nutanix.
       description: Ensure the assistant concisely states supported on-prem baremetal/VM scope and references Assisted Installer
 
 - conversation_group: cluster_id_from_name

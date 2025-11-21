@@ -56,30 +56,53 @@ extract_cluster_properties() {
     ACTUAL_SINGLE_NODE=$(echo "$cluster_data" | jq -r '.high_availability_mode == "None"')
     ACTUAL_CPU_ARCH=$(echo "$cluster_data" | jq -r '.cpu_architecture')
     ACTUAL_SSH_KEY=$(echo "$cluster_data" | jq -r '.ssh_public_key')
+    ACTUAL_PLATFORM=$(echo "$cluster_data" | jq -r 'if .platform.type == "external" then .platform.external.platform_name else .platform.type end')
 }
 
+validate_expected_ssh_key() {
+    local expected_ssh_key="${1:-}"
+    if [[ -n "$expected_ssh_key" ]]; then
+        if [[ "$ACTUAL_SSH_KEY" == "$expected_ssh_key" ]]; then
+            return 0
+        else
+            return 1
+        fi
+    else
+        return 0
+    fi
+}
+
+validate_expected_platform() {
+    local expected_platform="${1:-}"
+    if [[ -n "$expected_platform" ]]; then
+        if [[ "$ACTUAL_PLATFORM" == "$expected_platform" ]]; then
+            return 0
+        else
+            return 1
+        fi
+    else
+        return 0
+    fi
+}
 # Validate cluster properties (version, domain, single_node, cpu_arch, ssh_key)
-# Usage: validate_cluster_properties <expected_version> <expected_domain> <expected_single_node> <expected_cpu_arch> [expected_ssh_key]
+# Usage: validate_cluster_properties <expected_version> <expected_domain> <expected_single_node> <expected_cpu_arch> [expected_ssh_key] [expected_platform]
 validate_cluster_properties() {
     local expected_version="$1"
     local expected_domain="$2"
     local expected_single_node="$3"
     local expected_cpu_arch="$4"
     local expected_ssh_key="${5:-}"
+    local expected_platform="${6:-}"
 
     if [[ "$ACTUAL_VERSION" == "$expected_version" && \
           "$ACTUAL_DOMAIN" == "$expected_domain" && \
           "$ACTUAL_SINGLE_NODE" == "$expected_single_node" && \
           "$ACTUAL_CPU_ARCH" == "$expected_cpu_arch" ]]; then
-        # If SSH key is provided, validate it too
-        if [[ -n "$expected_ssh_key" ]]; then
-            if [[ "$ACTUAL_SSH_KEY" == "$expected_ssh_key" ]]; then
-                return 0
-            else
-                return 1
-            fi
-        else
+        # If SSH key or platform is provided, validate them too
+        if validate_expected_ssh_key "$expected_ssh_key" && validate_expected_platform "$expected_platform"; then
             return 0
+        else
+            return 1
         fi
     else
         return 1
@@ -97,16 +120,15 @@ wait_and_validate_cluster() {
     local expected_cpu_arch="$5"
     local cluster_type="$6"
     local expected_ssh_key="${7:-}"
-
+    local expected_platform="${8:-}"
     local cluster_name="${cluster_name_prefix}-${UNIQUE_ID}"
 
     local counter=0
     while true; do
         local cluster_data=$(fetch_cluster_data "$cluster_name")
-
         if [[ -n "$cluster_data" && "$cluster_data" != "null" ]]; then
             extract_cluster_properties "$cluster_data"
-            if validate_cluster_properties "$expected_version" "$expected_domain" "$expected_single_node" "$expected_cpu_arch" "$expected_ssh_key"; then
+            if validate_cluster_properties "$expected_version" "$expected_domain" "$expected_single_node" "$expected_cpu_arch" "$expected_ssh_key" "$expected_platform"; then
                 echo_out "The ${cluster_type} cluster was successfully created with correct configuration:"
                 echo_out "  Name: ${cluster_name}"
                 echo_out "  Version: ${ACTUAL_VERSION}"
@@ -115,6 +137,9 @@ wait_and_validate_cluster() {
                 echo_out "  CPU Architecture: ${ACTUAL_CPU_ARCH}"
                 if [[ -n "$expected_ssh_key" ]]; then
                     echo_out "  SSH Key: ${ACTUAL_SSH_KEY}"
+                fi
+                if [[ -n "$expected_platform" ]]; then
+                    echo_out "  Platform: ${ACTUAL_PLATFORM}"
                 fi
                 exit 0
             else
@@ -125,6 +150,9 @@ wait_and_validate_cluster() {
                 echo_err "  Expected CPU architecture: ${expected_cpu_arch}, got: ${ACTUAL_CPU_ARCH}"
                 if [[ -n "$expected_ssh_key" ]]; then
                     echo_err "  Expected SSH key: ${expected_ssh_key}, got: ${ACTUAL_SSH_KEY}"
+                fi
+                if [[ -n "$expected_platform" ]]; then
+                    echo_err "  Expected platform: ${expected_platform}, got: ${ACTUAL_PLATFORM}"
                 fi
                 exit 1
             fi

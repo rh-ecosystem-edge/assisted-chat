@@ -1,3 +1,4 @@
+FROM quay.io/redhat-services-prod/assisted-installer-tenant/saas/assisted-chat-rag@sha256:39edcb0c36c3f0140acd2dfe5d0545dfbc3fb2e20e481b266aaf8dd962275af4 AS rag
 # vim: set filetype=dockerfile
 FROM localhost/local-ai-chat-lightspeed-stack:latest
 
@@ -23,7 +24,11 @@ COPY  llama-stack-mcp-tool-params.patch /tmp/
 RUN cat /tmp/llama-stack-mcp-tool-params.patch \
   | patch -p1 -d "$(dirname "$(dirname "$(python3.12 -c "import llama_stack; print(llama_stack.__file__)")")")"
 
+COPY --chown=1001:1001 --from=rag /all-mpnet-base-v2/ /app-root/all-mpnet-base-v2/
+COPY --chown=1001:1001 --chmod=666 --from=rag /llama_stack_vector_db/faiss_store.db /llama_stack_vector_db/faiss_store.db
+RUN chmod 777 /llama_stack_vector_db/
 COPY migrate.py /app/migrate.py
+
 ENTRYPOINT ["/bin/sh", "-c", "python3.12 /app/migrate.py && python3.12 src/lightspeed_stack.py"]
 
 USER 1001
