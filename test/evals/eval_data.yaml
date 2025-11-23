@@ -243,7 +243,6 @@
       eval_types: [action_eval]
       eval_verify_script: ../scripts/verify_static_net_apply_to_cluster.sh
 
-<<<<<<< HEAD
 - conversation_group: role_protection_direct_roleplaying_conv
   description: Verify rejection of direct role-playing requests
   conversation:
