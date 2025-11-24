@@ -22,3 +22,13 @@ ENTRYPOINT ["/bin/sh", "-c", "python3.12 /app/migrate.py && python3.12 src/light
 USER 1001
 
 EXPOSE 8080
+
+LABEL com.redhat.component="assisted-chat" \
+      name="assisted-chat" \
+      description="Chat application for OpenShift Assisted Installer" \
+      io.k8s.description="Chat application for OpenShift Assisted Installer" \
+      distribution-scope="public" \
+      release="main" \
+      version="latest" \
+      url="https://github.com/rh-ecosystem-edge/assisted-chat" \
+      vendor="Red Hat, Inc."
