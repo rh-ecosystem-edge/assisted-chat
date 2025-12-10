@@ -197,6 +197,34 @@ objects:
           ssl_mode: ${LIGHTSPEED_STACK_POSTGRES_SSL_MODE}
           ca_cert_path: /etc/tls/ca-bundle.pem
           namespace: lightspeed-stack
+      quota_handlers:
+        postgres:
+          host: ${env.ASSISTED_CHAT_POSTGRES_HOST}
+          port: ${env.ASSISTED_CHAT_POSTGRES_PORT}
+          db: ${env.ASSISTED_CHAT_POSTGRES_NAME}
+          user: ${env.ASSISTED_CHAT_POSTGRES_USER}
+          password: ${env.ASSISTED_CHAT_POSTGRES_PASSWORD}
+          ssl_mode: disable
+          ca_cert_path: /etc/tls/ca-bundle.pem
+          namespace: lightspeed-stack
+        limiters:
+          - name: user_daily_limits
+            type: user_limiter
+            # Start with 3M tokens/day (higher end)
+            initial_quota: 3000000
+            # Set the daily refill rate
+            quota_increase: 3000000
+            period: "1 day"
+          - name: user_monthly_limits # monthly limiter (safety-net)
+            type: user_limiter
+            # Set monthly quota to 60M
+            initial_quota: 60000000
+            # set to match the initial quota
+            quota_increase: 60000000
+            period: "1 month"
+        scheduler:
+          # scheduler run every 5 minute
+          period: 300
     system_prompt: |
       You are Red Hat OpenShift Lightspeed Intelligent Assistant - an intelligent virtual assistant and expert on all things related to OpenShift installation, configuration, and troubleshooting, specifically with the Assisted Installer.
 
