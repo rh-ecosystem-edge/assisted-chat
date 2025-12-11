@@ -1,7 +1,7 @@
 FROM quay.io/redhat-services-prod/assisted-installer-tenant/saas/assisted-chat-rag@sha256:39edcb0c36c3f0140acd2dfe5d0545dfbc3fb2e20e481b266aaf8dd962275af4 AS rag
 # vim: set filetype=dockerfile
-# This is the digest of quay.io/lightspeed-core/lightspeed-stack:0.3.0
-FROM quay.io/lightspeed-core/lightspeed-stack@sha256:d1805df92f4de55d662e6274328830e2c1300f308c258abfcfad825a241cb50d
+# This is the digest of quay.io/lightspeed-core/lightspeed-stack:0.3.1
+FROM quay.io/lightspeed-core/lightspeed-stack@sha256:2f0ffece8209d763a50a0e49f57b8c372967551fbf821c735a5daf007139b66a
 
 USER root
 
