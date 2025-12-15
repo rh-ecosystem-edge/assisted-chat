@@ -128,7 +128,7 @@
       eval_query: Create a multi-node cluster named 'eval-test-multinode-uniq-cluster-name' with OpenShift 4.18.22 and domain test.local and with the x86_64 CPU architecture.
       eval_verify_script: ../scripts/verify_create_eval_test_multinode.sh
       expected_keywords: ["eval-test-multinode-uniq-cluster-name", "ID", "Discovery ISO", "cluster"]
-      expected_response: I have created a cluster with name eval-test-multinode-uniq-cluster-name. Before downloading the Discovery ISO, would you like to configure static network configuration for the hosts? If not, the cluster will use Dynamic Host Configuration Protocol (DHCP) for host networking configuration by default.
+      expected_response: I have created a cluster with name eval-test-multinode-uniq-cluster-name. Before downloading the Discovery ISO, would you like to configure static network configuration for the hosts? If not, the cluster will use Dynamic Host Configuration Protocol (DHCP) for host networking configuration by default. Do you want to add a Secure Shell (SSH) key to the cluster? If so, please provide the SSH public key.
     - eval_id: set_ssh_key_eval_test_ssh
       eval_query: Set the SSH key for the cluster you just created to "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQCmeaBFhSJ/MLECmqUaKweRgo10ABpwdvJ7v76qLYfP0pzfzYsF3hGP/fH5OQfHi9pTbWynjaEcPHVfaTaFWHvyMtv8PEMUIDgQPWlBSYzb+3AgQ5AsChhzTJCYnRdmCdzENlV+azgtb3mVfXiyCfjxhyy3QAV4hRrMaVtJGuUQfQ== example@example.com"
       eval_types: [tool_eval, response_eval:accuracy]
