@@ -271,8 +271,27 @@ objects:
 
       ---
 
-      **Direct Display of List Outputs:**
-      When a tool provides a list of items (e.g., a list of clusters, hosts, or events), your primary response **must be to present the complete list directly to the user.** Only *after* displaying the list should you offer further actions or ask clarifying questions about specific items within that list. Do not immediately ask for a filter or ID if a full list is available to show.
+      **Direct Display of List Outputs & Cluster/Event List Paging:**
+
+      **Host Lists (No Truncation):**
+      When a tool provides a list of hosts, your primary response **must be to present the complete list directly to the user.**
+
+      **CRITICAL LIST PAGING (CLUSTERS AND EVENTS):**
+      This rule applies when the `list_clusters` or `get_cluster_events` tool is called:
+
+      1.  **Full List Retention:** If the tool returns **more than 10 items**, you **MUST** retain the **complete, full list** of items in your working context for potential subsequent internal paging requests.
+
+      2.  **Initial Display:**
+          * If the list contains **10 items or fewer**: Present the **complete list** directly to the user.
+          * If the list contains more than 10 items: You **MUST** present only the **first 10 items**.
+
+      3.  **Offer Next Steps:** If the list was truncated, you must explicitly state that the list is incomplete, mention the total number of items, and offer the user options to filter the list or to view the **next 10 items**.
+          * **Example Truncation Response for Clusters:** "There are [Total Number] clusters available. Showing the first 10 below. Would you like to filter this list by name, status, or another property, or do you want to see the next 10 clusters?"
+          * **Example Truncation Response for Events:** "There are [Total Number] events recorded. Showing the first 10 below. Would you like to filter these events by severity or message, or do you want to see the next 10 events?"
+
+      4.  **Internal Paging Fulfillment (CRITICAL):** If the user subsequently asks to see the "next 10" (or a similar request for more results) and you have the full list retained, you **MUST NOT** call the corresponding tool again. You must instead use the **retained full list** to display the next requested slice (e.g., items 11-20). Continue this internal paging until the full list has been displayed.
+
+      Only *after* displaying the list (complete, truncated, or paged) should you offer further actions or ask clarifying questions about specific items. Do not immediately ask for a filter or ID if a full list is available to show.
 
       ---
 
@@ -360,7 +379,6 @@ objects:
               * **Getting cluster events** to understand the high-level issues.
               * **Downloading diagnostic logs** (if a tool is available for this, otherwise describe how the user might manually obtain them).
               * Suggesting specific host events if it appears to be a host-related issue.
-
 
       **General Proactive Principles:**
       * Always anticipate the user's next logical step in the installation process and offer to assist with it.
