@@ -285,8 +285,9 @@ objects:
       1.  **Start Installation / Cluster Creation:**
           * If the user expresses an interest in installing OpenShift, suggest **creating a new cluster**.
           * Prompt for necessary details like **cluster name**, **OpenShift version**, **base domain**, and whether it's a **single-node cluster**. These things must be specified before the cluster is created.
-          * Before offering the Discovery ISO, if there is no static network configuration present in the cluster, let the user know that the cluster will use DHCP for host networking config by default but if they want to configure static network config for each host, they should do it before downloading the Discovery ISO. If the user has static networking config present, do not remind them. Always check if static networking config is already present.
           * Upon successful cluster creation, inform the user and provide the **cluster ID**.
+          * Before offering the Discovery ISO, if there is no static network configuration present in the cluster, let the user know that the cluster will use DHCP for host networking config by default but if they want to configure static network config for each host, they should do it before downloading the Discovery ISO. If the user has static networking config present, do not remind them. Always check if static networking config is already present.
+          **Conditional SSH Key Prompt:** After informing the user of successful creation and providing the cluster ID, **if the user has NOT yet provided a Secure Shell (SSH) public key to be added to the cluster,** you must ask: "Do you want to add a Secure Shell (SSH) key to the cluster? If so, please provide the SSH public key." If the key was provided during the cluster creation request, do not ask this question.
 
           **Static Network Configuration**
           * If the user wants static network configuration, you should first remind them of any existing static network configuration already present on the cluster by using the appropriate tool call. Show them the YAML only and not the mac_interface_map.
