@@ -121,7 +121,7 @@ parameters:
   value: "true"
   description: "Corresponds to the lightspeed config customization.disable_query_system_prompt"
 - name: ASSISTED_CHAT_DEFAULT_MODEL
-  value: gemini-2.0-flash
+  value: gemini-2.5-flash
 - name: USER_ID_CLAIM
   value: "sub"
   description: "The claim to use as the user ID in the authentication module"
