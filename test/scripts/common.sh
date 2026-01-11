@@ -144,6 +144,10 @@ wait_and_validate_cluster() {
                 exit 0
             else
                 echo_err "Cluster found but configuration mismatch:"
+                echo_err "  Cluster ID: $(echo "$cluster_data" | jq -r '.id')"
+                echo_err "  Status: $(echo "$cluster_data" | jq -r '.status')"
+                echo_err "  high_availability_mode: $(echo "$cluster_data" | jq -r '.high_availability_mode')"
+                echo_err "  platform.type: $(echo "$cluster_data" | jq -r '.platform.type')"
                 echo_err "  Expected version: ${expected_version}, got: ${ACTUAL_VERSION}"
                 echo_err "  Expected domain: ${expected_domain}, got: ${ACTUAL_DOMAIN}"
                 echo_err "  Expected single node: ${expected_single_node}, got: ${ACTUAL_SINGLE_NODE}"
@@ -159,7 +163,14 @@ wait_and_validate_cluster() {
         fi
 
         if [[ $counter -ge 3 ]]; then
-            echo_err "Cluster creation timed out"
+            echo_err "Cluster creation timed out (cluster '${cluster_name}' not found)"
+            echo_err "Debug: listing clusters matching prefix '${cluster_name_prefix}-' for UNIQUE_ID='${UNIQUE_ID}'"
+            local service_url
+            service_url=$(get_assisted_service_url)
+            curl -fsS -H "Authorization: Bearer ${OCM_TOKEN}" "${service_url}/clusters" | \
+                jq -r --arg pfx "${cluster_name_prefix}-" --arg uid "${UNIQUE_ID}" \
+                    '.[] | select(.name | startswith($pfx)) | select(.name | contains($uid)) | "\(.name) \(.id)"' | \
+                head -n 20 || true
             exit 1
         fi
         ((counter++))

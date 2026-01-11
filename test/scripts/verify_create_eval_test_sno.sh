@@ -14,6 +14,8 @@ EXPECTED_SINGLE_NODE="true"
 EXPECTED_CPU_ARCH="x86_64"
 EXPECTED_SSH_KEY="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQCmeaBFhSJ/MLECmqUaKweRgo10ABpwdvJ7v76qLYfP0pzfzYsF3hGP/fH5OQfHi9pTbWynjaEcPHVfaTaFWHvyMtv8PEMUIDgQPWlBSYzb+3AgQ5AsChhzTJCYnRdmCdzENlV+azgtb3mVfXiyCfjxhyy3QAV4hRrMaVtJGuUQfQ== example@example.com"
 
+echo "verify_create_eval_test_sno.sh: validating cluster 'eval-test-singlenode-${UNIQUE_ID}' (prints mismatch details on failure)"
+
 wait_and_validate_cluster \
     "eval-test-singlenode" \
     "${EXPECTED_VERSION}" \
