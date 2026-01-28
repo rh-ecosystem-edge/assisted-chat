@@ -45,12 +45,12 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--agent_provider", default="gemini", help="Agent provider (default: gemini)"
+        "--agent_provider", default=None, help="Agent provider (default: gemini)"
     )
 
     parser.add_argument(
         "--agent_model",
-        default="gemini-2.5-flash",
+        default=None,
         help="Agent model (default: gemini-2.5-flash)",
     )
 
@@ -101,6 +101,24 @@ def parse_args():
     return parser.parse_args()
 
 
+def preprocess_yaml(path):
+    """Replace placeholders in YAML with environment variables."""
+    unique_id = os.getenv('UNIQUE_ID')
+    if not unique_id:
+        return path
+    
+    with open(path) as f:
+        content = f.read()
+    
+    # Replace the placeholder with actual UNIQUE_ID
+    content = content.replace('uniq-cluster-name', unique_id)
+    
+    tmp = tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False)
+    tmp.write(content)
+    tmp.close()
+    return tmp.name
+
+
 def filter_by_tags(path, tags):
     """Filter YAML data by tags, return filtered path."""
     if not tags:
@@ -118,10 +136,15 @@ def filter_by_tags(path, tags):
 
 # Parse command line arguments
 args = parse_args()
+
+args.agent_provider = None
+args.agent_model = None
+
+
 if os.getenv('UNIQUE_ID') is None:
     print("The environmental varialbe 'UNIQUE_ID' has to be set so the cluster creation and removal can happen properly.")
     sys.exit(1)
-
+args.eval_data_yaml = preprocess_yaml(args.eval_data_yaml)
 args.eval_data_yaml = filter_by_tags(args.eval_data_yaml, args.tags)
 
 evaluator = AgentGoalEval(args)
