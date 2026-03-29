@@ -3,7 +3,8 @@ FROM registry.access.redhat.com/ubi9/python-311:latest
 USER 0
 RUN dnf -y install jq patch tar gzip gettext && dnf clean all
 RUN pip install yq
-RUN pip install git+https://github.com/lightspeed-core/lightspeed-evaluation.git#subdirectory=lsc_agent_eval
+RUN pip install --no-deps git+https://github.com/lightspeed-core/lightspeed-evaluation.git#subdirectory=lsc_agent_eval && \
+    pip install -r https://raw.githubusercontent.com/lightspeed-core/lightspeed-evaluation/main/lsc_agent_eval/requirements.txt
 
 RUN curl -fsSL -o /usr/local/bin/ocm \
     https://github.com/openshift-online/ocm-cli/releases/download/v0.1.76/ocm-linux-amd64 && \

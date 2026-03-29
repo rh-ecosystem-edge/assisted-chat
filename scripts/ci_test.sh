@@ -13,9 +13,8 @@ echo "${UNIQUE_ID}" > ${SHARED_DIR}/eval_test_unique_id
 if [[ -n $ASSISTED_CHAT_TEST ]]; then
     echo "The variable ASSISTED_CHAT_TEST was provided with the value ${ASSISTED_CHAT_TEST}, using it to create the IMAGE and TAG variables for the template"
 else
-    IMAGE="quay.io/redhat-user-workloads/assisted-installer-tenant/assisted-chat-test-image-saas-main/assisted-chat-test-image-saas-main"
-    echo "The variable ASSISTED_CHAT_TEST was not provided, downloading the latest image from ${IMAGE}"
-    ASSISTED_CHAT_TEST="${IMAGE}:latest"
+    echo "Error: The variable ASSISTED_CHAT_TEST must be provided"
+    exit 1
 fi
 
 if ! oc get secret -n "$NAMESPACE" assisted-chat-ssl-ci &>/dev/null; then
