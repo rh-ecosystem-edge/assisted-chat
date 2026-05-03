@@ -11,6 +11,8 @@ spec:
           value: ${GEMINI_API_KEY}
         - name: GOOGLE_APPLICATION_CREDENTIALS
           value: /tmp/vertex-credentials.json
+        - name: VERTEX_AI_PROJECT
+          value: ${VERTEX_AI_PROJECT}
         - name: ASSISTED_CHAT_POSTGRES_HOST
           value: localhost
         - name: ASSISTED_CHAT_POSTGRES_PORT
@@ -85,7 +87,7 @@ spec:
         - --config
         - /mcpconfig.json
         - --model
-        - "google:gemini-2.0-flash"
+        - "google:gemini-2.5-flash"
         - --system-prompt
         - /systemprompt.txt
       env:
