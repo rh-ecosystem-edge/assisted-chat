@@ -50,8 +50,8 @@ def parse_args():
 
     parser.add_argument(
         "--agent_model",
-        default="gemini-2.5-flash",
-        help="Agent model (default: gemini-2.5-flash)",
+        default="publishers/google/models/gemini-3.5-flash",
+        help="Agent model (default: publishers/google/models/gemini-3.5-flash)",
     )
 
     parser.add_argument(
@@ -62,8 +62,8 @@ def parse_args():
 
     parser.add_argument(
         "--judge_model",
-        default="gemini-2.5-flash",
-        help="Judge model for LLM evaluation (default: gemini-2.5-flash)",
+        default="publishers/google/models/gemini-3.5-flash",
+        help="Judge model for LLM evaluation (default: publishers/google/models/gemini-3.5-flash)",
     )
 
     parser.add_argument(

@@ -29,6 +29,13 @@ if ! oc get secret -n "$NAMESPACE" vertex-service-account &>/dev/null; then
     oc create secret generic -n "$NAMESPACE" vertex-service-account --from-file=service_account="$SECRETS_BASE_PATH/vertex/service_account"
 fi
 
+# Extract VERTEX_AI_PROJECT from the mounted secret
+VERTEX_AI_PROJECT=$(jq -r '.project_id // empty' "$SECRETS_BASE_PATH/vertex/service_account")
+if [[ -z "$VERTEX_AI_PROJECT" ]]; then
+    echo "ERROR: Failed to extract 'project_id' from $SECRETS_BASE_PATH/vertex/service_account"
+    exit 1
+fi
+
 # Optionally create Gemini API key secret if provided
 if ! oc get secret -n "$NAMESPACE" gemini &>/dev/null; then
     if [[ -n "${GEMINI_API_KEY:-}" ]]; then
@@ -111,6 +118,7 @@ echo "Processing template for validation..."
 PROCESSED_TEMPLATE=$(oc process \
     -p IMAGE="$IMAGE" \
     -p IMAGE_TAG="$TAG" \
+    -p VERTEX_AI_PROJECT="$VERTEX_AI_PROJECT" \
     -p VERTEX_API_SECRET_NAME=vertex-service-account \
     -p ASSISTED_CHAT_DB_SECRET_NAME=llama-stack-db \
     -p USER_ID_CLAIM="$CLAIM_USER_ID" \
