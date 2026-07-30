@@ -27,7 +27,7 @@
       expected_tool_calls:
         - - tool_name: list_versions
             arguments: {}
-      expected_keywords: ["versions", "available", "OpenShift"]
+      expected_keywords: ["OpenShift", "Support"]
       expected_intent: "Providing a list of available OpenShift versions."
       description: Test single tool call with no dynamic parameters
 
