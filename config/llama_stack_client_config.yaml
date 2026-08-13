@@ -1,93 +1,84 @@
 version: 2
 image_name: starter
+storage:
+  backends:
+    kv_default:
+      type: kv_sqlite
+      db_path: ${env.SQLITE_STORE_DIR:=/tmp/.llama/distributions/starter}/kvstore.db
+    sql_default:
+      type: sql_postgres
+      host: ${env.POSTGRES_HOST:=localhost}
+      port: ${env.POSTGRES_PORT:=5432}
+      db: ${env.POSTGRES_DB:=assisted-chat}
+      user: ${env.POSTGRES_USER:=assisted-chat}
+      password: ${env.POSTGRES_PASSWORD:=assisted-chat}
+  stores:
+    metadata:
+      backend: kv_default
+      namespace: registry
+    inference:
+      backend: sql_default
+      table_name: inference_store
+    conversations:
+      backend: sql_default
+      table_name: openai_conversations
+    prompts:
+      backend: sql_default
+      table_name: prompts
+    connectors:
+      backend: sql_default
+      table_name: connectors
 apis:
-- agents
-- datasetio
-- eval
+- responses
+- batches
 - files
 - inference
-- safety
-- scoring
-- telemetry
 - tool_runtime
+- conversations
 - vector_io
 providers:
   inference:
   - config:
-      api_key: ${env.GEMINI_API_KEY:=}
+      project: ${env.VERTEX_AI_PROJECT}
     provider_id: gemini
-    provider_type: remote::gemini
+    provider_type: remote::vertexai
   - config: {}
     provider_id: sentence-transformers
     provider_type: inline::sentence-transformers
   vector_io:
   - config:
-      kvstore:
-        type: sqlite
-        namespace: null
-        db_path: /llama_stack_vector_db/faiss_store.db
+      persistence:
+        backend: kv_default
+        namespace: ocp-assisted-installer-4-19
     provider_id: ocp-assisted-installer-4-19
     provider_type: inline::faiss
   files:
   - config:
       storage_dir: /tmp/llama-stack-files
       metadata_store:
-        type: sqlite
-        db_path: ${env.SQLITE_STORE_DIR:=/tmp/.llama/distributions/starter}/files_metadata.db
+        backend: sql_default
+        table_name: files_metadata
     provider_id: localfs
     provider_type: inline::localfs
-  safety: []
-  agents:
-  - provider_id: meta-reference
-    provider_type: inline::meta-reference
+  responses:
+  - provider_id: builtin
+    provider_type: inline::builtin
     config:
-      persistence_store:
-        type: postgres
-        host: ${env.POSTGRES_HOST:=localhost}
-        port: ${env.POSTGRES_PORT:=5432}
-        db: ${env.POSTGRES_DB:=assisted-chat}
-        user: ${env.POSTGRES_USER:=assisted-chat}
-        password: ${env.POSTGRES_PASSWORD:=assisted-chat}
-      responses_store:
-        type: postgres
-        host: ${env.POSTGRES_HOST:=localhost}
-        port: ${env.POSTGRES_PORT:=5432}
-        db: ${env.POSTGRES_DB:=assisted-chat}
-        user: ${env.POSTGRES_USER:=assisted-chat}
-        password: ${env.POSTGRES_PASSWORD:=assisted-chat}
-  telemetry:
-  - provider_id: meta-reference
-    provider_type: inline::meta-reference
+      persistence:
+        responses:
+          backend: sql_default
+          table_name: agents_responses
+  batches:
+  - provider_id: reference
+    provider_type: inline::reference
     config:
-      service_name: "${env.OTEL_SERVICE_NAME:=\u200B}"
-      sinks: ${env.TELEMETRY_SINKS:=console,sqlite}
-      sqlite_db_path: ${env.SQLITE_STORE_DIR:=/tmp/.llama/distributions/starter}/trace_store.db
-  eval: []
-  datasetio: []
-  scoring:
-  - provider_id: basic
-    provider_type: inline::basic
-    config: {}
-  - provider_id: llm-as-judge
-    provider_type: inline::llm-as-judge
-    config: {}
+      sqlstore:
+        backend: sql_default
+        table_name: batches
   tool_runtime:
   - provider_id: model-context-protocol
     provider_type: remote::model-context-protocol
     config: {}
-  - provider_id: rag-runtime
-    provider_type: inline::rag-runtime
-    config: {}
-metadata_store:
-  type: sqlite
-  db_path: ${env.SQLITE_STORE_DIR:=/tmp/.llama/distributions/starter}/registry.db
-inference_store:
-  type: postgres
-  host: ${env.POSTGRES_HOST:=localhost}
-  port: ${env.POSTGRES_PORT:=5432}
-  db: ${env.POSTGRES_DB:=assisted-chat}
-  user: ${env.POSTGRES_USER:=assisted-chat}
-  password: ${env.POSTGRES_PASSWORD:=assisted-chat}
 models:
 - metadata:
     embedding_dimension: 768
@@ -102,15 +93,10 @@ vector_dbs:
     embedding_dimension: 768
     provider_id: ocp-assisted-installer-4-19
     provider_vector_db_id: ocp-assisted-installer-4-19
-datasets: []
-scoring_fns: []
-benchmarks: []
 tool_groups:
 - toolgroup_id: mcp::assisted
   provider_id: model-context-protocol
   mcp_endpoint:
     uri: "http://assisted-service-mcp:8000/mcp"
-- toolgroup_id: builtin::rag
-  provider_id: rag-runtime
 server:
   port: 8321

@@ -45,25 +45,25 @@ def parse_args():
     )
 
     parser.add_argument(
-        "--agent_provider", default="gemini", help="Agent provider (default: gemini)"
+        "--agent_provider", default="gemini", help="Agent provider (default: vertex_ai)"
     )
 
     parser.add_argument(
         "--agent_model",
-        default="gemini-2.5-flash",
-        help="Agent model (default: gemini-2.5-flash)",
+        default="publishers/google/models/gemini-3.5-flash",
+        help="Agent model (default: publishers/google/models/gemini-3.5-flash)",
     )
 
     parser.add_argument(
         "--judge_provider",
-        default="gemini",
-        help="Judge provider for LLM evaluation (default: gemini)",
+        default="vertex_ai",
+        help="Judge provider for LLM evaluation (default: vertex)",
     )
 
     parser.add_argument(
         "--judge_model",
-        default="gemini-2.5-flash",
-        help="Judge model for LLM evaluation (default: gemini-2.5-flash)",
+        default="gemini-3.5-flash",
+        help="Judge model for LLM evaluation (default: vertex_ai/gemini-3.5-flash)",
     )
 
     parser.add_argument(
