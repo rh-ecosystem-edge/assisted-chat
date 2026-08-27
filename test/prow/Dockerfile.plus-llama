@@ -15,14 +15,17 @@ RUN cd /app-root/ && python3.12 -m pip install .
 RUN microdnf install -y patch
 
 # Patch created based on https://github.com/llamastack/llama-stack/pull/3957
-COPY  llama-stack-make-tool-call-args-fully-recursive.patch /tmp/
-RUN cat /tmp/llama-stack-make-tool-call-args-fully-recursive.patch \
-  | patch -p1 -d "$(dirname "$(dirname "$(python3.12 -c "import llama_stack; print(llama_stack.__file__)")")")"
+# COPY  llama-stack-make-tool-call-args-fully-recursive.patch /tmp/
+# RUN cat /tmp/llama-stack-make-tool-call-args-fully-recursive.patch \
+#   | patch -p1 -d "$(dirname "$(dirname "$(python3.12 -c "import llama_stack; print(llama_stack.__file__)")")")"
 
-# Patch to add required and default parameters to MCP tool definitions
-COPY  llama-stack-mcp-tool-params.patch /tmp/
-RUN cat /tmp/llama-stack-mcp-tool-params.patch \
-  | patch -p1 -d "$(dirname "$(dirname "$(python3.12 -c "import llama_stack; print(llama_stack.__file__)")")")"
+COPY ogx-service-tier-vertexai-fix.patch /tmp/
+RUN cat /tmp/ogx-service-tier-vertexai-fix.patch \
+  | patch -p1 -d "$(dirname "$(dirname "$(python3.12 -c "import ogx; print(ogx.__file__)")")")"
+
+COPY ogx-thought-signature-fix.patch /tmp/
+RUN cat /tmp/ogx-thought-signature-fix.patch \
+  | patch -p1 -d "$(dirname "$(dirname "$(python3.12 -c "import ogx; print(ogx.__file__)")")")"
 
 COPY --chown=1001:1001 --from=rag /all-mpnet-base-v2/ /app-root/all-mpnet-base-v2/
 COPY --chown=1001:1001 --chmod=666 --from=rag /llama_stack_vector_db/faiss_store.db /llama_stack_vector_db/faiss_store.db

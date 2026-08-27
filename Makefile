@@ -131,6 +131,9 @@ test-eval: ## Run agent evaluation tests
 	export TEMP_DIR=$(shell mktemp -d)
 	trap 'rm -rf "$$TEMP_DIR"' EXIT
 	export UNIQUE_ID=$(shell head /dev/urandom | tr -dc 0-9a-z | head -c 8)
+	export VERTEX_AI_PROJECT=$${VERTEX_AI_PROJECT}
+	export VERTEXAI_LOCATION="global"
+	export GOOGLE_APPLICATION_CREDENTIALS=$(CURDIR)/config/vertex-credentials.json
 	. utils/ocm-token.sh
 	get_ocm_token
 	echo "$$OCM_TOKEN" > test/evals/ocm_token.txt

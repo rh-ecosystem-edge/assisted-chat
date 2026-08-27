@@ -1,21 +1,24 @@
 FROM quay.io/redhat-services-prod/assisted-installer-tenant/saas/assisted-chat-rag@sha256:39edcb0c36c3f0140acd2dfe5d0545dfbc3fb2e20e481b266aaf8dd962275af4 AS rag
 # vim: set filetype=dockerfile
-# This is the digest of quay.io/lightspeed-core/lightspeed-stack:0.3.1
-FROM quay.io/lightspeed-core/lightspeed-stack@sha256:2f0ffece8209d763a50a0e49f57b8c372967551fbf821c735a5daf007139b66a
+# This is the digest of quay.io/lightspeed-core/lightspeed-stack:0.7.0rc1
+FROM quay.io/lightspeed-core/lightspeed-stack@sha256:d31fe4563637b753293713aabd5d45654622c02df826d1b4b5902f24cecd035d
 
 USER root
 
 RUN microdnf install -y patch
 
 # Patch created based on https://github.com/llamastack/llama-stack/pull/3957
-COPY  llama-stack-make-tool-call-args-fully-recursive.patch /tmp/
-RUN cat /tmp/llama-stack-make-tool-call-args-fully-recursive.patch \
-  | patch -p1 -d "$(dirname "$(dirname "$(python3.12 -c "import llama_stack; print(llama_stack.__file__)")")")"
+# COPY  llama-stack-make-tool-call-args-fully-recursive.patch /tmp/
+# RUN cat /tmp/llama-stack-make-tool-call-args-fully-recursive.patch \
+#   | patch -p1 -d "$(dirname "$(dirname "$(python3.12 -c "import llama_stack; print(llama_stack.__file__)")")")"
 
-# Patch to add required and default parameters to MCP tool definitions
-COPY  llama-stack-mcp-tool-params.patch /tmp/
-RUN cat /tmp/llama-stack-mcp-tool-params.patch \
-  | patch -p1 -d "$(dirname "$(dirname "$(python3.12 -c "import llama_stack; print(llama_stack.__file__)")")")"
+COPY ogx-service-tier-vertexai-fix.patch /tmp/
+RUN cat /tmp/ogx-service-tier-vertexai-fix.patch \
+  | patch -p1 -d "$(dirname "$(dirname "$(python3.12 -c "import ogx; print(ogx.__file__)")")")"
+
+COPY ogx-thought-signature-fix.patch /tmp/
+RUN cat /tmp/ogx-thought-signature-fix.patch \
+  | patch -p1 -d "$(dirname "$(dirname "$(python3.12 -c "import ogx; print(ogx.__file__)")")")"
 
 COPY migrate.py /app/migrate.py
 COPY --chown=1001:1001 --from=rag /all-mpnet-base-v2/ /app-root/all-mpnet-base-v2/

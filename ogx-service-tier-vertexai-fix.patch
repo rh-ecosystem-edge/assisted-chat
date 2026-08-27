@@ -1,0 +1,20 @@
+--- a/ogx/providers/inline/responses/builtin/responses/streaming.py
++++ b/ogx/providers/inline/responses/builtin/responses/streaming.py
+@@ -329,5 +329,5 @@
+             truncation=self.truncation or "disabled",
+             max_output_tokens=self.max_output_tokens,
+-            service_tier=self.service_tier or "default",
++            service_tier=self.service_tier,
+             metadata=self.metadata,
+             presence_penalty=self.presence_penalty if self.presence_penalty is not None else 0.0,
+@@ -384,4 +384,4 @@
+             max_output_tokens=self.max_output_tokens,
+-            service_tier=self.service_tier or "default",
++            service_tier=self.service_tier,
+             metadata=self.metadata,
+             truncation=self.truncation or "disabled",
+@@ -591,3 +591,3 @@
+                     # when service_tier is not supported.
+-                    self.service_tier = "default"
++                    self.service_tier = None
+                 else:
