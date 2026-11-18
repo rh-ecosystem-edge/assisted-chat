@@ -19,11 +19,6 @@ COPY  llama-stack-make-tool-call-args-fully-recursive.patch /tmp/
 RUN cat /tmp/llama-stack-make-tool-call-args-fully-recursive.patch \
   | patch -p1 -d "$(dirname "$(dirname "$(python3.12 -c "import llama_stack; print(llama_stack.__file__)")")")"
 
-# Patch to add required and default parameters to MCP tool definitions
-COPY  llama-stack-mcp-tool-params.patch /tmp/
-RUN cat /tmp/llama-stack-mcp-tool-params.patch \
-  | patch -p1 -d "$(dirname "$(dirname "$(python3.12 -c "import llama_stack; print(llama_stack.__file__)")")")"
-
 COPY --chown=1001:1001 --from=rag /all-mpnet-base-v2/ /app-root/all-mpnet-base-v2/
 COPY --chown=1001:1001 --chmod=666 --from=rag /llama_stack_vector_db/faiss_store.db /llama_stack_vector_db/faiss_store.db
 RUN chmod 777 /llama_stack_vector_db/

@@ -85,7 +85,7 @@ function build_lightspeed_stack() {
     # instead
     sed -i '/^[^#].*llama-stack[[:space:]]*[>=|==]/ s/^/# /' pyproject.toml
     uv lock
-    podman build -f Containerfile . --tag localhost/local-ai-chat-lightspeed-stack:latest
+    podman build -f deploy/lightspeed-stack/Containerfile . --tag localhost/local-ai-chat-lightspeed-stack:latest
     # Undo it
     sed -i 's/^# \(.*llama-stack[[:space:]]*[>=|==].*\)$/\1/' pyproject.toml
     # uv.lock is guaranteed to change, and it's annoying to have it as a dirty file, so let's restore it

@@ -1,5 +1,27 @@
 version: 2
 image_name: starter
+storage:
+  backends:
+    kv_default:
+      type: kv_sqlite
+      db_path: ${env.SQLITE_STORE_DIR:=/tmp/.llama/distributions/starter}/kvstore.db
+    sql_default:
+      type: sql_postgres
+      host: ${env.POSTGRES_HOST:=localhost}
+      port: ${env.POSTGRES_PORT:=5432}
+      db: ${env.POSTGRES_DB:=assisted-chat}
+      user: ${env.POSTGRES_USER:=assisted-chat}
+      password: ${env.POSTGRES_PASSWORD:=assisted-chat}
+  stores:
+    metadata:
+      backend: kv_default
+      namespace: registry
+    inference:
+      backend: sql_default
+      table_name: inference_store
+    conversations:
+      backend: sql_default
+      table_name: openai_conversations
 apis:
 - agents
 - datasetio
@@ -8,32 +30,30 @@ apis:
 - inference
 - safety
 - scoring
-- telemetry
 - tool_runtime
 - vector_io
 providers:
   inference:
   - config:
-      api_key: ${env.GEMINI_API_KEY:=}
+      project: ${env.VERTEX_AI_PROJECT}
     provider_id: gemini
-    provider_type: remote::gemini
+    provider_type: remote::vertexai
   - config: {}
     provider_id: sentence-transformers
     provider_type: inline::sentence-transformers
   vector_io:
   - config:
-      kvstore:
-        type: sqlite
-        namespace: null
-        db_path: /llama_stack_vector_db/faiss_store.db
+      persistence:
+        backend: kv_default
+        namespace: ocp-assisted-installer-4-19
     provider_id: ocp-assisted-installer-4-19
     provider_type: inline::faiss
   files:
   - config:
       storage_dir: /tmp/llama-stack-files
       metadata_store:
-        type: sqlite
-        db_path: ${env.SQLITE_STORE_DIR:=/tmp/.llama/distributions/starter}/files_metadata.db
+        backend: sql_default
+        table_name: files_metadata
     provider_id: localfs
     provider_type: inline::localfs
   safety: []
@@ -41,27 +61,13 @@ providers:
   - provider_id: meta-reference
     provider_type: inline::meta-reference
     config:
-      persistence_store:
-        type: postgres
-        host: ${env.POSTGRES_HOST:=localhost}
-        port: ${env.POSTGRES_PORT:=5432}
-        db: ${env.POSTGRES_DB:=assisted-chat}
-        user: ${env.POSTGRES_USER:=assisted-chat}
-        password: ${env.POSTGRES_PASSWORD:=assisted-chat}
-      responses_store:
-        type: postgres
-        host: ${env.POSTGRES_HOST:=localhost}
-        port: ${env.POSTGRES_PORT:=5432}
-        db: ${env.POSTGRES_DB:=assisted-chat}
-        user: ${env.POSTGRES_USER:=assisted-chat}
-        password: ${env.POSTGRES_PASSWORD:=assisted-chat}
-  telemetry:
-  - provider_id: meta-reference
-    provider_type: inline::meta-reference
-    config:
-      service_name: "${env.OTEL_SERVICE_NAME:=\u200B}"
-      sinks: ${env.TELEMETRY_SINKS:=console,sqlite}
-      sqlite_db_path: ${env.SQLITE_STORE_DIR:=/tmp/.llama/distributions/starter}/trace_store.db
+      persistence:
+        agent_state:
+          backend: kv_default
+          namespace: agents
+        responses:
+          backend: sql_default
+          table_name: agent_responses
   eval: []
   datasetio: []
   scoring:
@@ -78,16 +84,6 @@ providers:
   - provider_id: rag-runtime
     provider_type: inline::rag-runtime
     config: {}
-metadata_store:
-  type: sqlite
-  db_path: ${env.SQLITE_STORE_DIR:=/tmp/.llama/distributions/starter}/registry.db
-inference_store:
-  type: postgres
-  host: ${env.POSTGRES_HOST:=localhost}
-  port: ${env.POSTGRES_PORT:=5432}
-  db: ${env.POSTGRES_DB:=assisted-chat}
-  user: ${env.POSTGRES_USER:=assisted-chat}
-  password: ${env.POSTGRES_PASSWORD:=assisted-chat}
 models:
 - metadata:
     embedding_dimension: 768
